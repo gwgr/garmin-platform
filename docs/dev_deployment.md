@@ -11,6 +11,22 @@ Primary approach:
 - Use Docker Compose for consistency
 - Keep PostgreSQL data and raw FIT files on persistent VPS storage
 
+Current repo status as of 2026-03-16:
+- local Python tooling is set up with `uv`, `.venv`, `.python-version`, `pyproject.toml`, and `uv.lock`
+- local and production Docker Compose files are present
+- backend and frontend Dockerfiles are present
+- `.env.example` exists for local database configuration
+- dev tooling includes `pytest`, `ruff`, and `httpx` for backend verification
+- backend FastAPI project structure is scaffolded
+- backend Docker container is configured to run the FastAPI app with `uvicorn`
+- backend environment settings are read from environment variables
+- SQLAlchemy engine and session management are scaffolded
+- Alembic migration scaffolding is present
+- initial backend health endpoint is implemented at `GET /api/v1/health`
+- the initial schema models and migrations for `activities`, `activity_laps`, `activity_records`, `daily_metrics`, `sleep_sessions`, and `devices` are present and applied locally
+- query indexes are applied locally for activity start time, sport, distance, and record timestamp
+- frontend app code has not been scaffolded yet
+
 ---
 
 ## 1. Recommended Workflow
@@ -75,7 +91,32 @@ Recommended VPS setup:
 
 ## 3. Repository Structure
 
-Recommended structure:
+Current repository state:
+
+```text
+garmin-platform/
+  docs/
+    dev_deployment.md
+    imac_setup.md
+    implementation.md
+    prd.md
+    tasks.md
+  backend/
+    alembic/
+    app/
+    tests/
+    Dockerfile
+  frontend/
+    Dockerfile
+  docker-compose.yml
+  docker-compose.prod.yml
+  .env.example
+  README.md
+  pyproject.toml
+  uv.lock
+```
+
+Target structure:
 
 ```text
 garmin-platform/
@@ -108,7 +149,7 @@ garmin-platform/
 
 ## 4. Docker Recommendation
 
-Use Docker from the start.
+Use Docker where it adds consistency, but keep local Python tooling available for fast iteration.
 
 Benefits:
 - same runtime on iMac and VPS
@@ -116,7 +157,12 @@ Benefits:
 - reproducible deploys
 - easier rollback
 
-Recommended services:
+Current services:
+- backend FastAPI container
+- frontend placeholder container
+- postgres
+
+Target services:
 - backend
 - frontend
 - postgres
@@ -175,9 +221,12 @@ Example:
 cd /opt/garmin-platform
 git pull origin main
 docker compose -f docker-compose.prod.yml up -d --build
-docker compose -f docker-compose.prod.yml exec backend alembic upgrade head
 docker compose -f docker-compose.prod.yml logs --tail=100
 ```
+
+Note:
+- the current backend container is a placeholder and does not yet run migrations
+- add the Alembic command back once the real backend app is scaffolded
 
 Wrap this later in:
 ```bash
@@ -193,13 +242,13 @@ Use persistent storage on the VPS for:
 ### PostgreSQL data
 Suggested path:
 ```text
-/opt/garmin-platform/data/postgres
+./data/postgres
 ```
 
 ### Raw Garmin files
 Suggested path:
 ```text
-/opt/garmin-platform/data/raw
+./data/raw
 ```
 
 Requirements:
@@ -215,6 +264,10 @@ Keep:
 - `.env.example` in the repo
 - `.env` out of the repo
 - production env file on the VPS
+
+Container networking note:
+- host-based local tooling can use `localhost` in `DATABASE_URL`
+- containerized services should use the Compose service name `postgres` instead
 
 Likely variables:
 - `GARMIN_EMAIL`
@@ -320,29 +373,25 @@ Do not:
 1. Create GitHub repo
 2. Clone repo to iMac
 3. Add docs
-4. Scaffold backend and frontend
-5. Add Dockerfiles
-6. Add `docker-compose.yml`
-7. Add `docker-compose.prod.yml`
-8. Create VPS project directory
-9. Clone repo to VPS
-10. Configure `.env`
-11. Start containers
-12. Run migrations
-13. Verify app and database
-14. Add backup script
-15. Add deploy script
+4. Standardize local Python tooling with `uv`
+5. Add local PostgreSQL via `docker-compose.yml`
+6. Scaffold backend and frontend
+7. Add Dockerfiles
+8. Add `docker-compose.prod.yml`
+9. Create VPS project directory
+10. Clone repo to VPS
+11. Configure `.env`
+12. Start containers
+13. Run migrations
+14. Verify app and database
+15. Add backup script
+16. Add deploy script
 
 ---
 
 ## 16. Initial Files Codex Should Generate
 
 Strongly recommended next files:
-- `backend/Dockerfile`
-- `frontend/Dockerfile`
-- `docker-compose.yml`
-- `docker-compose.prod.yml`
-- `.env.example`
 - `infra/scripts/deploy.sh`
 - `infra/scripts/backup.sh`
 - `README.md`

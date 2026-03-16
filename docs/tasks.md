@@ -10,11 +10,21 @@ Execution rules:
 - after each task, ensure code builds and tests pass where applicable
 - prefer maintainable code over clever shortcuts
 
+Status legend:
+- `[done]` completed in the repository
+- `[partial]` started but not finished
+- `[next]` recommended next task
+- `[todo]` not started
+
+Already completed outside the numbered plan:
+- local Python setup with `.python-version`, `pyproject.toml`, `uv.lock`, and `.venv`
+- Docker Desktop install and local PostgreSQL wiring
+
 ---
 
 ## Phase 1 — Repository and Tooling
 
-### Task 1
+### Task 1 `[partial]`
 Initialize repository structure:
 - `docs/`
 - `backend/`
@@ -22,76 +32,95 @@ Initialize repository structure:
 - `infra/`
 - `docker/`
 
-### Task 2
+Current state:
+- `docs/`, `backend/`, and `frontend/` exist
+- `infra/` and `docker/` do not exist yet
+- this task remains partial until `infra/` and `docker/` are created
+
+### Task 2 `[done]`
 Create root `README.md` that references:
 - `docs/prd.md`
 - `docs/implementation.md`
 - `docs/dev_deployment.md`
 - `docs/tasks.md`
+- `docs/imac_setup.md`
 
-### Task 3
+### Task 3 `[done]`
 Create `.env.example` with placeholders for:
 - Garmin credentials
 - database settings
 - backend settings
 - frontend API URL
 
-### Task 4
+### Task 4 `[done]`
 Create `backend/Dockerfile`.
 
-### Task 5
+### Task 5 `[done]`
 Create `frontend/Dockerfile`.
 
-### Task 6
+### Task 6 `[done]`
 Create `docker-compose.yml` for local development.
 
-### Task 7
+Current state:
+- backend, frontend, and PostgreSQL services are defined
+- backend and frontend currently serve placeholder content until app scaffolding is implemented
+
+### Task 7 `[done]`
 Create `docker-compose.prod.yml` for VPS deployment.
 
 ---
 
 ## Phase 2 — Backend Foundation
 
-### Task 8
+### Task 8 `[done]`
 Initialize FastAPI backend project structure.
 
-### Task 9
+### Task 9 `[done]`
 Add backend configuration management for environment variables.
 
-### Task 10
+### Task 10 `[done]`
 Set up SQLAlchemy models and database session management.
 
-### Task 11
+### Task 11 `[done]`
 Set up Alembic migrations.
 
-### Task 12
+### Task 12 `[done]`
 Create initial health endpoint:
 - `GET /api/v1/health`
+
+### Task 12A `[done]`
+Switch the backend container from the placeholder server to the real FastAPI app runtime and verify the backend starts with `uvicorn`.
 
 ---
 
 ## Phase 3 — Database Schema
 
-### Task 13
-Create migration for `activities` table.
+Execution note for every Phase 3 task:
+- create or update the SQLAlchemy model as needed
+- create or update the Alembic migration
+- apply the migration locally with `PYTHONPATH=backend ./.venv/bin/alembic -c alembic.ini upgrade head`
+- verify the expected schema change exists in the local development database
 
-### Task 14
-Create migration for `activity_laps` table.
+### Task 13 `[done]`
+Create migration for `activities` table and apply it locally.
 
-### Task 15
-Create migration for `activity_records` table.
+### Task 14 `[done]`
+Create migration for `activity_laps` table and apply it locally.
 
-### Task 16
-Create migration for `daily_metrics` table.
+### Task 15 `[done]`
+Create migration for `activity_records` table and apply it locally.
 
-### Task 17
-Create migration for `sleep_sessions` table.
+### Task 16 `[done]`
+Create migration for `daily_metrics` table and apply it locally.
 
-### Task 18
-Create migration for `devices` table.
+### Task 17 `[done]`
+Create migration for `sleep_sessions` table and apply it locally.
 
-### Task 19
-Add indexes for:
+### Task 18 `[done]`
+Create migration for `devices` table and apply it locally.
+
+### Task 19 `[done]`
+Add indexes and apply them locally for:
 - activity start time
 - sport
 - distance
