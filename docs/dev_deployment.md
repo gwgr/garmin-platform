@@ -23,9 +23,29 @@ Current repo status as of 2026-03-16:
 - SQLAlchemy engine and session management are scaffolded
 - Alembic migration scaffolding is present
 - initial backend health endpoint is implemented at `GET /api/v1/health`
+- activity listing endpoint is implemented at `GET /api/v1/activities` and has been verified locally against the Postgres-backed app
+- activity detail endpoint is implemented at `GET /api/v1/activities/{id}` and has been verified locally with summary, lap, and record data
+- daily metrics endpoint is implemented at `GET /api/v1/metrics/daily`
+- analytics trends endpoint is implemented at `GET /api/v1/analytics/trends`
 - the initial schema models and migrations for `activities`, `activity_laps`, `activity_records`, `daily_metrics`, `sleep_sessions`, and `devices` are present and applied locally
 - query indexes are applied locally for activity start time, sport, distance, and record timestamp
-- frontend app code has not been scaffolded yet
+- Garmin client access is implemented through a `garth`-backed backend service
+- sync checkpoint storage is implemented in the database and backend service layer
+- Garmin activity list fetching is implemented as a checkpoint-aware backend service
+- new activity detection and `source_activity_id`-based deduplication are implemented in the backend service layer
+- FIT download and raw file storage are implemented with `garth` and local raw-data persistence, and have been validated locally
+- FIT parsing and activity-summary persistence are implemented in the backend service layer
+- FIT lap parsing and `activity_laps` persistence are implemented in the backend service layer
+- FIT per-record stream parsing and `activity_records` persistence are implemented in the backend service layer
+- FIT record coordinates are normalized to degrees for frontend route-map rendering
+- structured JSON logging is implemented for sync runs and parser failures
+- frontend Next.js scaffold is present and the frontend container is ready to run the app
+- frontend shared API client utilities are implemented for the current backend endpoints
+- initial frontend dashboard page is implemented and consumes the current backend APIs
+- frontend activity list page is implemented and uses the backend activity list endpoint
+- frontend activity detail page is implemented and uses the backend activity detail endpoint
+- frontend activity detail charts are implemented for pace, heart rate, and elevation
+- frontend activity detail route map is implemented with Leaflet
 
 ---
 

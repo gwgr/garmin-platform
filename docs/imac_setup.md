@@ -58,6 +58,8 @@ Project Python requirement:
 
 Installed project dependencies:
 - `fastapi>=0.135.1`
+- `fitparse>=1.2.0`
+- `garth>=0.6.3`
 - `psycopg[binary]>=3.3.3`
 - `sqlalchemy>=2.0.48`
 - `alembic>=1.18.4`
@@ -70,6 +72,8 @@ Installed development dependencies:
 
 Verified versions at time of setup:
 - FastAPI `0.135.1`
+- Fitparse `1.2.0`
+- Garth `0.6.3`
 - Psycopg `3.3.3`
 - SQLAlchemy `2.0.48`
 - Alembic `1.18.4`
@@ -97,7 +101,7 @@ uv add <package-name>
 Current starter set:
 
 ```bash
-uv add fastapi psycopg sqlalchemy alembic uvicorn
+uv add fastapi fitparse garth psycopg sqlalchemy alembic uvicorn
 uv add --dev httpx pytest ruff
 ```
 
@@ -113,7 +117,29 @@ To run tools inside the project environment:
 uv run pytest
 uv run ruff check .
 PYTHONPATH=backend ./.venv/bin/python -c "from fastapi.testclient import TestClient; from app.main import app; client = TestClient(app); print(client.get('/api/v1/health').json())"
+set -a && source .env && set +a
 ```
+
+Frontend workflow is also available locally:
+
+```bash
+cd /Users/gregrowntree/Documents/Dev/garmin-platform/frontend
+npm install
+npm run dev
+```
+
+Verified locally:
+- `npm install`
+- `npm run build`
+- `npm audit`
+- browser checks for `/`, `/activities`, and `/activities/1`
+- chart checks on the activity detail page at `/activities/1`
+- route map check on the activity detail page after record-coordinate normalization
+
+Observed frontend package status:
+- `next@15.5.13`
+- build passes locally
+- audit is clean after upgrading from the initially scaffolded vulnerable Next.js version
 
 ### Docker Desktop
 
@@ -146,6 +172,20 @@ Note:
 - `docker info` could not be fully verified from the Codex sandbox because the sandbox cannot access the local Docker socket
 - if `docker info` works in your own terminal, Docker Desktop is fully ready to use
 
+### Frontend Tooling
+
+Installed and verified:
+- Homebrew `node`
+- `npm`
+
+Observed versions:
+- Node `25.8.1`
+- npm `11.11.0`
+
+Why this matters:
+- enables running the Next.js frontend locally without depending only on Docker
+- supports `npm install`, `next dev`, and future frontend linting/type-checking tasks
+
 ### Local Postgres via Docker Compose
 
 Created for this repository:
@@ -165,11 +205,23 @@ Configured local development values:
 - `POSTGRES_USER=garmin`
 - `POSTGRES_PASSWORD=garmin_local_dev_password`
 - `DATABASE_URL=postgresql+psycopg://garmin:garmin_local_dev_password@localhost:5432/garmin_platform`
+- `GARTH_HOME=./data/garth`
+- `LOG_LEVEL=INFO`
+
+Garmin integration notes:
+- Garmin credentials are kept only in local `.env`
+- `garth` stores local session files under `GARTH_HOME`
+- first-time Garmin auth may prompt for MFA in the terminal
+- raw FIT files are saved under `data/raw/activities/YYYY/MM/<activity_id>.fit`
+- downloaded Garmin FIT files can now be parsed locally for summary, lap, and record stream data
+- backend sync and parser logs now emit structured JSON lines locally
 
 Current status at time of setup:
 - container started successfully
 - Postgres healthcheck is passing
 - database is accepting connections
+- Garmin activity listing is working locally through `garth`
+- FIT download and raw file persistence have been verified locally
 
 Useful commands:
 
@@ -194,4 +246,5 @@ This project is a better fit for a simple repository-local virtual environment t
 - The local virtual environment includes `pip`, available at `.venv/bin/pip`.
 - The system Python at `/usr/bin/python3` still exists on macOS, but it is no longer the default developer Python in the shell.
 - Docker Desktop client tooling is installed and available in the shell.
+- Node.js and npm are installed and available for local frontend development.
 - Local Postgres now runs through Docker Compose for development.

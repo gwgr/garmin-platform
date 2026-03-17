@@ -63,7 +63,8 @@ Create `docker-compose.yml` for local development.
 
 Current state:
 - backend, frontend, and PostgreSQL services are defined
-- backend and frontend currently serve placeholder content until app scaffolding is implemented
+- the backend runs the real FastAPI app
+- the frontend now runs a Next.js scaffold, with the real dashboard and data pages still pending
 
 ### Task 7 `[done]`
 Create `docker-compose.prod.yml` for VPS deployment.
@@ -130,41 +131,63 @@ Add indexes and apply them locally for:
 
 ## Phase 4 — Garmin Sync and Parsing
 
-### Task 20
+### Task 20 `[done]`
 Create backend service abstraction for Garmin client access.
 
-### Task 21
+### Task 21 `[done]`
 Implement sync checkpoint storage.
 
-### Task 22
+### Task 22 `[done]`
 Implement Garmin activity list fetcher.
 
-### Task 23
+### Task 23 `[done]`
 Implement new activity detection and deduplication by source activity ID.
 
-### Task 24
+### Task 24 `[done]`
 Implement FIT file download and raw file storage.
 
-### Task 25
+Current state:
+- Garmin activity listing and FIT download have been validated locally
+- raw files are saved idempotently under `data/raw/activities/YYYY/MM/`
+
+### Task 25 `[done]`
 Implement FIT parser service.
 
-### Task 26
+### Task 26 `[done]`
 Parse and store activity summary data.
 
-### Task 27
+Current state:
+- FIT summary parsing is implemented with `fitparse`
+- parsed activity summaries can now be persisted into the `activities` table from downloaded FIT files
+- this flow has been validated locally against a downloaded Garmin activity FIT file
+
+### Task 27 `[done]`
 Parse and store lap data.
 
-### Task 28
+Current state:
+- FIT lap parsing is implemented with `fitparse`
+- parsed lap summaries can now be persisted into `activity_laps` for a stored activity
+
+### Task 28 `[done]`
 Parse and store per-record stream data.
 
-### Task 29
+Current state:
+- FIT record stream parsing is implemented with `fitparse`
+- parsed record streams can now be persisted into `activity_records` for a stored activity
+
+### Task 29 `[done]`
 Add structured logging for sync runs and parser failures.
+
+Current state:
+- backend startup now configures one-line JSON logs via the standard library logger
+- Garmin fetch, dedupe, download, and ingest paths now emit structured sync events
+- FIT parser failures are logged with structured metadata and stack traces
 
 ---
 
 ## Phase 5 — API Endpoints
 
-### Task 30
+### Task 30 `[done]`
 Implement:
 - `GET /api/v1/activities`
 
@@ -174,7 +197,13 @@ Support:
 - sport filtering
 - sort by start time descending
 
-### Task 31
+Current state:
+- `GET /api/v1/activities` now returns paginated activity summaries from Postgres
+- supports `page`, `page_size`, `start_date`, `end_date`, and `sport` query params
+- results are sorted by `start_time` descending
+- verified locally against the Postgres-backed app using the current imported activity data
+
+### Task 31 `[done]`
 Implement:
 - `GET /api/v1/activities/{id}`
 
@@ -184,46 +213,102 @@ Return:
 - stream data
 - basic metadata
 
-### Task 32
+Current state:
+- `GET /api/v1/activities/{id}` now returns the persisted activity summary plus its laps and record stream rows
+- missing activities return a `404` with a stable JSON error response
+- verified locally against the Postgres-backed app, including the populated lap and record data for activity `1`
+
+### Task 32 `[done]`
 Implement:
 - `GET /api/v1/metrics/daily`
 
-### Task 33
+Current state:
+- `GET /api/v1/metrics/daily` now returns paginated daily metric rows from Postgres
+- supports `page`, `page_size`, `start_date`, and `end_date` query params
+- results are sorted by `metric_date` descending
+
+### Task 33 `[done]`
 Implement:
 - `GET /api/v1/analytics/trends`
 
 Include:
-- weekly distance
+- weekly distance & time
+- monthly distance & time
+- last 6 months distance & time
+- last 1 year distance & time
 - recent activity counts
 - resting HR trend if data exists
+
+Current state:
+- `GET /api/v1/analytics/trends` now returns current week, current month, last 6 months, and last 1 year activity summaries
+- includes recent activity counts for the last 7, 30, and 90 days
+- includes a resting heart rate trend series when `daily_metrics` data exists
 
 ---
 
 ## Phase 6 — Frontend Foundation
 
-### Task 34
+### Task 34 `[done]`
 Initialize Next.js frontend structure.
 
-### Task 35
+Current state:
+- the frontend now has a real Next.js scaffold under `frontend/app`
+- the frontend Docker image now runs the Next.js dev server instead of the old static placeholder page
+- verified locally via `docker compose up --build frontend` and the page loaded at `http://localhost:3000`
+
+### Task 35 `[done]`
 Create shared API client utilities.
 
-### Task 36
+Current state:
+- the frontend now has a shared typed API client in `frontend/lib/api.ts`
+- activity list/detail, daily metrics, and analytics trend helpers all use the same base URL and fetch wrapper
+- verified locally with `npm install` and `npm run build`
+
+### Task 36 `[done]`
 Create dashboard page.
 
-### Task 37
+Current state:
+- the frontend home page now acts as the initial dashboard
+- it uses the shared API client to load analytics trends, recent activities, and daily metrics
+- the dashboard is designed to degrade gracefully when backend data is sparse or temporarily unavailable
+
+### Task 37 `[done]`
 Create activity list page.
 
-### Task 38
+Current state:
+- the frontend now has a dedicated `/activities` page
+- the activity list page uses the shared API client with URL-driven sport/date filters and pagination
+- the page is server-rendered and designed to stay aligned with the backend list endpoint
+- verified locally with a clean `npm run build` and browser checks at `/activities`
+
+### Task 38 `[done]`
 Create activity detail page.
 
-### Task 39
+Current state:
+- the frontend now has a dedicated `/activities/[id]` page
+- the activity detail page loads summary, lap data, and record stream samples from the backend detail endpoint
+- dashboard and activity list entries now link into the activity detail flow
+- verified locally with a clean `npm run build` and browser checks at `/activities/1`
+
+### Task 39 `[done]`
 Add chart components for:
 - pace
 - heart rate
 - elevation
 
-### Task 40
+Current state:
+- the frontend now includes reusable SVG-based chart components for pace, heart rate, and elevation
+- the activity detail page renders those charts from stored record stream data without requiring an external charting library
+- verified locally with a clean `npm run build` and browser checks on `/activities/1`
+
+### Task 40 `[done]`
 Add route map component using Leaflet or MapLibre.
+
+Current state:
+- the frontend now includes a Leaflet-based route map component on the activity detail page
+- the map renders when usable latitude/longitude samples exist and otherwise shows a clear empty-state message
+- FIT record coordinates are now normalized to degrees so stored Garmin routes can render correctly
+- verified locally with a clean `npm run build` and browser checks on `/activities/1`
 
 ---
 
@@ -292,13 +377,76 @@ Add retry logic with exponential backoff for sync failures.
 ### Task 55
 Add validation to avoid duplicate activity insertion.
 
+---
+
+## Version 2 — Health Metrics Expansion
+
+These tasks are intentionally deferred until after the MVP is complete.
+The MVP should continue to preserve raw data, keep ingestion separate from analytics,
+and avoid overloading `daily_metrics` so these additions remain straightforward later.
+
 ### Task 56
-Add downsampling or capped payload strategy for large activity stream responses.
+Implement device identification for activities.
+
+Scope:
+- parse device metadata from FIT files or Garmin source data
+- populate the `devices` table
+- link activities to the recording device
+- expose device information in activity APIs
 
 ### Task 57
-Verify that raw FIT files are never modified after download.
+Add optional weather enrichment for activities and analytics.
+
+Scope:
+- decide whether to fetch historical weather from a provider or derive it from exported Garmin data if available
+- store weather as separate enrichment data rather than mixing it into core activity ingestion
+- support future weather correlation views and analytics
 
 ### Task 58
+Research Garmin retrieval options for additional health and physiology data:
+- HRV
+- VO2 max
+- lactate threshold
+- endurance-related metrics
+- richer sleep metrics
+
+### Task 59
+Design Version 2 schema additions for specialized health data.
+
+Recommended direction:
+- keep `daily_metrics` for lightweight daily rollups
+- add focused tables for physiology/performance and richer sleep data
+- include source timestamps and ingestion provenance
+
+### Task 60
+Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
+
+### Task 61
+Implement ingestion for daily health metrics beyond the MVP set.
+
+Candidate metrics:
+- HRV
+- richer sleep summary/detail
+- VO2 max
+
+### Task 62
+Implement ingestion for performance metrics.
+
+Candidate metrics:
+- lactate threshold
+- endurance score
+- related training-readiness style metrics if reliable
+
+### Task 63
+Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
+
+### Task 64
+Add downsampling or capped payload strategy for large activity stream responses.
+
+### Task 65
+Verify that raw FIT files are never modified after download.
+
+### Task 66
 Review all MVP acceptance criteria against `docs/prd.md`.
 
 ---

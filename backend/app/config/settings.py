@@ -11,9 +11,11 @@ class Settings:
     app_env: str
     app_host: str
     app_port: int
+    log_level: str
     app_secret_key: str
     database_url: str
     raw_data_dir: Path
+    garth_home: Path
     garmin_email: str | None
     garmin_password: str | None
 
@@ -34,11 +36,13 @@ def _get_env(name: str, default: str | None = None) -> str | None:
 def get_settings() -> Settings:
     """Build and cache backend settings from environment variables."""
     raw_data_dir = Path(_get_env("RAW_DATA_DIR", "./data/raw") or "./data/raw")
+    garth_home = Path(_get_env("GARTH_HOME", "./data/garth") or "./data/garth")
 
     return Settings(
         app_env=_get_env("APP_ENV", "development") or "development",
         app_host=_get_env("APP_HOST", "0.0.0.0") or "0.0.0.0",
         app_port=int(_get_env("APP_PORT", "8000") or "8000"),
+        log_level=_get_env("LOG_LEVEL", "INFO") or "INFO",
         app_secret_key=_get_env("APP_SECRET_KEY", "replace-with-a-long-random-secret")
         or "replace-with-a-long-random-secret",
         database_url=_get_env(
@@ -47,6 +51,7 @@ def get_settings() -> Settings:
         )
         or "postgresql+psycopg://garmin:garmin_local_dev_password@localhost:5432/garmin_platform",
         raw_data_dir=raw_data_dir,
+        garth_home=garth_home,
         garmin_email=_get_env("GARMIN_EMAIL"),
         garmin_password=_get_env("GARMIN_PASSWORD"),
     )

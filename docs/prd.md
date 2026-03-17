@@ -26,6 +26,8 @@ data preservation - Fast visualization
 -   Mobile app
 -   Device‑level integration
 -   Workout planning
+-   Comprehensive Garmin health/physiology ingestion such as HRV, VO2 max,
+    lactate threshold, endurance metrics, and richer sleep detail
 
 ## 4. Success Metrics
 
@@ -57,11 +59,23 @@ Processed storage: PostgreSQL tables storing normalized metrics.
 activities activity_laps activity_records daily_metrics sleep_sessions
 devices
 
+Note for future expansion:
+- keep `daily_metrics` focused on lightweight daily rollups
+- add specialized tables later for richer physiology/performance and sleep data
+- retain provenance fields and raw-source references for reprocessing
+- treat `devices` as captured device metadata for now, not as full gear tracking
+- handle future gear tracking as a separate Version 2+ concern with its own schema and UX
+
 ## 9. Data Pipeline
 
 Step 1: Sync Garmin activities and download FIT files. Step 2: Parse FIT
 files to extract summary, laps, and records. Step 3: Normalize units and
 insert into database.
+
+Version 2 extension:
+- fetch Garmin health/physiology endpoints separately from activity FIT ingestion
+- preserve raw JSON snapshots for future health-metric reprocessing
+- keep ingestion, normalization, and analytics as separate layers
 
 Units: distance = meters speed = m/s time = seconds temperature =
 Celsius
@@ -110,6 +124,23 @@ Phase 1: - Activity sync - FIT storage - Activity viewer - Dashboard
 charts
 
 Phase 2: - Health metrics - Gear tracking - Advanced analytics
+
+Version 2 health metrics focus:
+- HRV history
+- VO2 max history
+- richer sleep metrics and summaries
+- lactate threshold
+- endurance-related metrics
+- expanded health trend visualizations
+
+Version 2 gear/device note:
+- distinguish device identification from gear tracking
+- device identification covers which Garmin device recorded an activity
+- gear tracking covers owned gear, usage history, and lifecycle tracking
+
+Version 2+ enrichment ideas:
+- weather correlation for activities and trend analysis
+- additional external-context enrichment should remain separate from core ingestion
 
 Phase 3: - AI insights - Custom dashboards
 
