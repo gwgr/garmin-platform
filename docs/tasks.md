@@ -380,6 +380,7 @@ Create `infra/scripts/deploy.sh`.
 Current state:
 - `infra/scripts/deploy.sh` now exists and targets the agreed VPS layout under `/opt/garmin-platform`
 - it validates the protected env file, ensures persistent data directories exist, fast-forwards `main`, validates Compose config, builds images, starts Postgres, bootstraps Garmin auth, runs Alembic migrations, starts `frontend` and `backend`, and checks backend health when `curl` is available
+- it now supports `SKIP_GARMIN_BOOTSTRAP=1` plus clearer failure guidance when Garmin login is rate-limited or session files should be seeded first
 - verified locally with `bash -n` plus `docker compose -f docker-compose.prod.yml --env-file .env config`
 
 ### Task 48

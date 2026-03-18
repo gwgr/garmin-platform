@@ -106,6 +106,12 @@ cp .env.example /opt/garmin-platform/.env
 APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data ./infra/scripts/deploy.sh
 ```
 
+If the VPS already has valid Garmin session files under `/opt/garmin-platform/data/garth`, you can skip the bootstrap login step during deploy:
+
+```bash
+APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data SKIP_GARMIN_BOOTSTRAP=1 ./infra/scripts/deploy.sh
+```
+
 ## Local Development
 
 From the repository root:

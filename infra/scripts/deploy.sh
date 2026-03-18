@@ -10,6 +10,7 @@ APP_ENV_FILE="${APP_ENV_FILE:-${APP_BASE_DIR}/.env}"
 APP_DATA_DIR="${APP_DATA_DIR:-${APP_BASE_DIR}/data}"
 COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
 COMPOSE_PROJECT_DIR="${COMPOSE_PROJECT_DIR:-${REPO_ROOT}}"
+SKIP_GARMIN_BOOTSTRAP="${SKIP_GARMIN_BOOTSTRAP:-0}"
 
 log() {
   printf '[deploy] %s\n' "$*"
@@ -68,8 +69,22 @@ run_compose build backend frontend
 log "Starting PostgreSQL"
 run_compose up -d postgres
 
-log "Running Garmin auth bootstrap"
-run_compose run --rm backend python -m app.bootstrap_garmin_auth
+if [[ "${SKIP_GARMIN_BOOTSTRAP}" == "1" ]]; then
+  log "Skipping Garmin auth bootstrap because SKIP_GARMIN_BOOTSTRAP=1"
+else
+  log "Running Garmin auth bootstrap"
+  if ! run_compose run --rm backend python -m app.bootstrap_garmin_auth; then
+    cat >&2 <<EOF
+Garmin auth bootstrap failed.
+
+If this VPS already has valid session files under ${APP_DATA_DIR}/garth, rerun with:
+  SKIP_GARMIN_BOOTSTRAP=1 APP_BASE_DIR=${APP_BASE_DIR} APP_ENV_FILE=${APP_ENV_FILE} APP_DATA_DIR=${APP_DATA_DIR} ./infra/scripts/deploy.sh
+
+If this is a first-time login, Garmin may have rate-limited or challenged the MFA flow. Wait a bit and try again, or seed ${APP_DATA_DIR}/garth from a machine with a valid session.
+EOF
+    exit 1
+  fi
+fi
 
 log "Applying database migrations"
 run_compose run --rm backend alembic -c alembic.ini upgrade head

@@ -265,6 +265,7 @@ Current repo state:
 - a separate first-time VPS bootstrap script is planned so machine provisioning stays distinct from normal deploys
 - the VPS bootstrap wrapper now exists at `infra/scripts/bootstrap_vps.sh`
 - it installs Docker packages, prepares `/opt/garmin-platform`, configures Docker group access, and clones or updates the repo into the target app path
+- the deploy wrapper now also supports `SKIP_GARMIN_BOOTSTRAP=1` for VPSes where valid `GARTH_HOME` session files are already seeded
 
 ---
 
