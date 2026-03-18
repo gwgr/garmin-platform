@@ -7,14 +7,19 @@ from functools import lru_cache
 import io
 import logging
 from pathlib import Path
+import time
 from typing import Protocol
 from zipfile import ZipFile, is_zipfile
+
+from requests import HTTPError, RequestException
 
 from app.config import get_settings
 from app.observability import log_event
 
 
 logger = logging.getLogger(__name__)
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+GARMIN_RETRY_DELAYS_SECONDS = (15, 30, 60)
 
 
 @dataclass(frozen=True)
@@ -97,6 +102,52 @@ class GarthGarminClient:
                 os.environ["GARTH_HOME"] = original_garth_home
         return garth
 
+    def _extract_status_code(self, exc: Exception) -> int | None:
+        if isinstance(exc, HTTPError) and exc.response is not None:
+            return exc.response.status_code
+        return None
+
+    def _should_retry(self, exc: Exception) -> bool:
+        status_code = self._extract_status_code(exc)
+        if status_code in RETRYABLE_STATUS_CODES:
+            return True
+        return isinstance(exc, RequestException)
+
+    def _perform_with_backoff(self, operation_name: str, func, **context):
+        total_attempts = len(GARMIN_RETRY_DELAYS_SECONDS) + 1
+        for attempt in range(1, total_attempts + 1):
+            try:
+                return func()
+            except Exception as exc:
+                should_retry = self._should_retry(exc)
+                status_code = self._extract_status_code(exc)
+                if not should_retry or attempt >= total_attempts:
+                    log_event(
+                        logger,
+                        logging.ERROR,
+                        f"{operation_name}.failed",
+                        attempt=attempt,
+                        max_attempts=total_attempts,
+                        error_type=type(exc).__name__,
+                        status_code=status_code,
+                        **context,
+                    )
+                    raise
+
+                sleep_seconds = GARMIN_RETRY_DELAYS_SECONDS[attempt - 1]
+                log_event(
+                    logger,
+                    logging.WARNING,
+                    f"{operation_name}.retrying",
+                    attempt=attempt,
+                    max_attempts=total_attempts,
+                    sleep_seconds=sleep_seconds,
+                    error_type=type(exc).__name__,
+                    status_code=status_code,
+                    **context,
+                )
+                time.sleep(sleep_seconds)
+
     def _has_saved_session(self) -> bool:
         return all(
             (self._garth_home / filename).exists()
@@ -135,7 +186,11 @@ class GarthGarminClient:
                 "Garmin bootstrap requires either a saved GARTH_HOME session or both GARMIN_EMAIL and GARMIN_PASSWORD."
             )
 
-        garth.login(self._email, self._password)
+        self._perform_with_backoff(
+            "garmin.auth.bootstrap.login",
+            lambda: garth.login(self._email, self._password),
+            garth_home=token_dir,
+        )
         garth.save(token_dir)
         log_event(
             logger,
@@ -158,7 +213,6 @@ class GarthGarminClient:
         return garth
 
     def list_activities(self, since: datetime | None = None) -> list[GarminActivitySummary]:
-        garth = self._login()
         params: dict[str, str | int] = {"start": 0, "limit": 100}
         if since is not None:
             params["startDate"] = since.date().isoformat()
@@ -170,7 +224,15 @@ class GarthGarminClient:
             since=since.isoformat() if since else None,
             limit=params["limit"],
         )
-        response = garth.connectapi("/activitylist-service/activities/search/activities", params=params)
+        response = self._perform_with_backoff(
+            "garmin.list_activities",
+            lambda: self._login().connectapi(
+                "/activitylist-service/activities/search/activities",
+                params=params,
+            ),
+            since=since.isoformat() if since else None,
+            limit=params["limit"],
+        )
         activities: list[GarminActivitySummary] = []
         for item in response:
             source_activity_id = str(item["activityId"])
@@ -196,7 +258,6 @@ class GarthGarminClient:
         return activities
 
     def download_activity_fit(self, source_activity_id: str) -> bytes:
-        garth = self._login()
         log_event(
             logger,
             logging.INFO,
@@ -204,9 +265,13 @@ class GarthGarminClient:
             source_activity_id=source_activity_id,
         )
         try:
-            payload = garth.download(
-                f"/download-service/files/activity/{source_activity_id}",
-                params={"format": "original"},
+            payload = self._perform_with_backoff(
+                "garmin.download_activity_fit",
+                lambda: self._login().download(
+                    f"/download-service/files/activity/{source_activity_id}",
+                    params={"format": "original"},
+                ),
+                source_activity_id=source_activity_id,
             )
         except Exception as exc:
             log_event(

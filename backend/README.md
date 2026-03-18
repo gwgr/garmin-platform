@@ -34,6 +34,7 @@ Current schema notes:
 Development notes:
 - `httpx` is installed as a dev dependency so `fastapi.testclient` works for local endpoint verification
 - `get_garmin_client()` now always uses the `garth`-backed implementation and can resume from saved `GARTH_HOME` session state without requiring `GARMIN_PASSWORD`
+- Garmin auth/login, activity listing, and FIT download calls now use conservative retry/backoff for HTTP `429` and transient request failures
 - backend logs now emit one-line JSON records, and `LOG_LEVEL` can be set from the environment
 - the sync worker can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers`
 - the scheduled sync loop can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`

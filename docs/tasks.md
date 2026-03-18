@@ -449,16 +449,23 @@ Add integration test for full ingestion of a sample FIT file.
 
 ## Phase 10 — MVP Hardening
 
-### Task 53
+### Task 58 `[partial]`
 Add error handling for:
 - Garmin API failures
 - corrupted FIT files
 - partial downloads
 
-### Task 54
+Current state:
+- Garmin auth/login, activity listing, and FIT download paths now log clearer failures and distinguish retryable request errors from terminal failures
+
+### Task 59 `[partial]`
 Add retry logic with exponential backoff for sync failures.
 
-### Task 55
+Current state:
+- the `garth` client now retries Garmin auth/login, activity listing, and FIT download calls when it sees HTTP `429` or transient request failures
+- current conservative backoff schedule is `15s`, `30s`, then `60s`
+
+### Task 60
 Add validation to avoid duplicate activity insertion.
 
 ---
@@ -469,7 +476,7 @@ These tasks are intentionally deferred until after the MVP is complete.
 The MVP should continue to preserve raw data, keep ingestion separate from analytics,
 and avoid overloading `daily_metrics` so these additions remain straightforward later.
 
-### Task 56
+### Task 61
 Implement device identification for activities.
 
 Scope:
@@ -478,7 +485,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 57
+### Task 62
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -486,7 +493,7 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 58
+### Task 63
 Add HTTPS-friendly private access for the VPS deployment.
 
 Scope:
@@ -494,7 +501,7 @@ Scope:
 - support private HTTPS access to the frontend and backend over the tailnet
 - keep the setup compatible with the existing Docker Compose deployment model
 
-### Task 59
+### Task 64
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -502,7 +509,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 60
+### Task 65
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -510,10 +517,10 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 61
+### Task 66
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 62
+### Task 67
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -521,7 +528,7 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 63
+### Task 68
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -529,16 +536,16 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 64
+### Task 69
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
-### Task 65
+### Task 70
 Add downsampling or capped payload strategy for large activity stream responses.
 
-### Task 66
+### Task 71
 Verify that raw FIT files are never modified after download.
 
-### Task 67
+### Task 72
 Review all MVP acceptance criteria against `docs/prd.md`.
 
 ---
