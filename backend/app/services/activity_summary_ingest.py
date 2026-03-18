@@ -61,6 +61,6 @@ class ActivitySummaryIngestService:
             source_activity_id=activity.source_activity_id,
             activity_id=record.id,
             fit_path=str(fit_path),
-            created=existing is None,
+            created_activity=existing is None,
         )
         return record

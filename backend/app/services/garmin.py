@@ -97,30 +97,42 @@ class GarthGarminClient:
                 os.environ["GARTH_HOME"] = original_garth_home
         return garth
 
+    def _has_saved_session(self) -> bool:
+        return all(
+            (self._garth_home / filename).exists()
+            for filename in ("oauth1_token.json", "oauth2_token.json")
+        )
+
     @property
     def is_configured(self) -> bool:
-        return bool(self._email and self._password)
+        return self._has_saved_session() or bool(self._email and self._password)
 
-    def _login(self) -> None:
+    def bootstrap_session(self, force_login: bool = False) -> bool:
+        """Ensure a persisted Garmin session exists.
+
+        Returns True when an existing session was reused and False when a fresh
+        login was required to create or refresh the session files.
+        """
         garth = self._get_garth_module()
         self._garth_home.mkdir(parents=True, exist_ok=True)
         token_dir = str(self._garth_home)
 
-        try:
-            garth.resume(token_dir)
-            log_event(
-                logger,
-                logging.INFO,
-                "garmin.auth.resumed",
-                garth_home=token_dir,
-            )
-            return garth
-        except Exception:
-            pass
+        if not force_login:
+            try:
+                garth.resume(token_dir)
+                log_event(
+                    logger,
+                    logging.INFO,
+                    "garmin.auth.bootstrap.resumed",
+                    garth_home=token_dir,
+                )
+                return True
+            except Exception:
+                pass
 
-        if not self.is_configured:
+        if not (self._email and self._password):
             raise GarminClientNotConfiguredError(
-                "Garmin credentials are not configured. Set GARMIN_EMAIL and GARMIN_PASSWORD."
+                "Garmin bootstrap requires either a saved GARTH_HOME session or both GARMIN_EMAIL and GARMIN_PASSWORD."
             )
 
         garth.login(self._email, self._password)
@@ -128,8 +140,20 @@ class GarthGarminClient:
         log_event(
             logger,
             logging.INFO,
-            "garmin.auth.logged_in",
+            "garmin.auth.bootstrap.logged_in",
             garth_home=token_dir,
+            force_login=force_login,
+        )
+        return False
+
+    def _login(self) -> None:
+        resumed_existing_session = self.bootstrap_session()
+        garth = self._get_garth_module()
+        log_event(
+            logger,
+            logging.INFO,
+            "garmin.auth.resumed" if resumed_existing_session else "garmin.auth.logged_in",
+            garth_home=str(self._garth_home),
         )
         return garth
 
@@ -225,13 +249,8 @@ class GarthGarminClient:
 def get_garmin_client() -> GarminClient:
     """Build and cache the Garmin client abstraction."""
     settings = get_settings()
-    if settings.garmin_email and settings.garmin_password:
-        return GarthGarminClient(
-            email=settings.garmin_email,
-            password=settings.garmin_password,
-            garth_home=settings.garth_home,
-        )
-    return PlaceholderGarminClient(
+    return GarthGarminClient(
         email=settings.garmin_email,
         password=settings.garmin_password,
+        garth_home=settings.garth_home,
     )

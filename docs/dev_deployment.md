@@ -39,6 +39,7 @@ Current repo status as of 2026-03-16:
 - FIT per-record stream parsing and `activity_records` persistence are implemented in the backend service layer
 - FIT record coordinates are normalized to degrees for frontend route-map rendering
 - structured JSON logging is implemented for sync runs and parser failures
+- backend sync worker entrypoint is implemented for running the Garmin pipeline outside the API server
 - frontend Next.js scaffold is present and the frontend container is ready to run the app
 - frontend shared API client utilities are implemented for the current backend endpoints
 - initial frontend dashboard page is implemented and consumes the current backend APIs
@@ -238,20 +239,32 @@ Recommended deploy pattern:
 
 Example:
 ```bash
-cd /opt/garmin-platform
+cd /opt/garmin-platform/app
 git pull origin main
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d --build frontend backend postgres
+docker compose -f docker-compose.prod.yml run --rm backend python -m app.bootstrap_garmin_auth
+docker compose -f docker-compose.prod.yml run --rm backend alembic -c alembic.ini upgrade head
 docker compose -f docker-compose.prod.yml logs --tail=100
 ```
 
 Note:
-- the current backend container is a placeholder and does not yet run migrations
-- add the Alembic command back once the real backend app is scaffolded
+- the backend image now runs the real FastAPI app and can execute Alembic and Garmin bootstrap commands inside the container
+- production app services should live under `/opt/garmin-platform/app`
+- protect the production env file at `/opt/garmin-platform/.env`
 
 Wrap this later in:
 ```bash
 ./deploy.sh
 ```
+
+Current repo state:
+- the deploy wrapper now exists at `infra/scripts/deploy.sh`
+- it expects the repo checkout at `/opt/garmin-platform/app`
+- it reads production settings from `/opt/garmin-platform/.env`
+- it uses `/opt/garmin-platform/data` for persistent PostgreSQL, raw FIT, and Garmin session storage
+- a separate first-time VPS bootstrap script is planned so machine provisioning stays distinct from normal deploys
+- the VPS bootstrap wrapper now exists at `infra/scripts/bootstrap_vps.sh`
+- it installs Docker packages, prepares `/opt/garmin-platform`, configures Docker group access, and clones or updates the repo into the target app path
 
 ---
 
@@ -262,19 +275,26 @@ Use persistent storage on the VPS for:
 ### PostgreSQL data
 Suggested path:
 ```text
-./data/postgres
+/opt/garmin-platform/data/postgres
 ```
 
 ### Raw Garmin files
 Suggested path:
 ```text
-./data/raw
+/opt/garmin-platform/data/raw
+```
+
+### Garmin session state
+Suggested path:
+```text
+/opt/garmin-platform/data/garth
 ```
 
 Requirements:
 - do not store important data only inside containers
 - raw FIT files must persist across redeploys
 - database must persist across container rebuilds
+- Garmin session state must persist across redeploys so steady-state syncs do not require `GARMIN_PASSWORD`
 
 ---
 
@@ -304,6 +324,13 @@ Production env location suggestion:
 /opt/garmin-platform/.env
 ```
 
+Current VPS findings:
+- target host is Ubuntu `24.04`
+- `systemd` is available for timers/services
+- `git` is already installed
+- Docker still needs to be installed
+- current example deploy user is `claw`, but the bootstrap flow supports any existing VPS user
+
 ---
 
 ## 10. Reverse Proxy and Access
@@ -329,6 +356,26 @@ Recommended approach:
 - separate worker container using the same backend image
 - scheduler via cron or internal scheduler
 - sync every 6 hours
+
+Current local state:
+- the backend now includes a scheduled sync loop at `backend/app/workers/scheduled_sync.py`
+- it reuses the existing sync worker entrypoint and sleeps for 6 hours between runs
+- local runtime command: `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`
+- both Compose files now model this as a separate `worker` service using the same backend image, `.env`, database settings, and `/app/data` mount as the API service
+
+Agreed production direction:
+- use Docker Compose for the long-running `frontend`, `backend`, and `postgres` services
+- run sync jobs from the host on a timer using the one-shot worker command `python -m app.workers`
+- keep the long-running `worker` container as a development convenience and optional fallback, not the primary production scheduler
+- install `docker.io` and `docker-compose-v2` from Ubuntu apt packages during VPS setup
+- run normal deploys as the chosen VPS app user after one-time system setup
+
+Agreed production secret direction:
+- store production secrets in a protected host env file such as `/opt/garmin-platform/.env`
+- do not commit real runtime secrets into the repository
+- use persisted `GARTH_HOME` session state for steady-state Garmin syncs
+- treat `GARMIN_PASSWORD` as bootstrap/recovery-only rather than a normal always-present runtime secret
+- bootstrap or recover the Garmin session with `PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth`
 
 Worker responsibilities:
 - fetch new Garmin activities

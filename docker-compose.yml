@@ -1,21 +1,29 @@
+x-backend-common: &backend-common
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+  restart: unless-stopped
+  env_file:
+    - .env
+  environment:
+    DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+  volumes:
+    - ./data:/app/data
+  depends_on:
+    postgres:
+      condition: service_healthy
+
 services:
   backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    <<: *backend-common
     container_name: garmin-platform-backend
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
     ports:
       - "${APP_PORT:-8000}:8000"
-    volumes:
-      - ./data/raw:/app/data/raw
-    depends_on:
-      postgres:
-        condition: service_healthy
+
+  worker:
+    <<: *backend-common
+    container_name: garmin-platform-worker
+    command: ["python", "-m", "app.workers.scheduled_sync"]
 
   frontend:
     build:

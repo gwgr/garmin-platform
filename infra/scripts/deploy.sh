@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+APP_BASE_DIR="${APP_BASE_DIR:-/opt/garmin-platform}"
+APP_ENV_FILE="${APP_ENV_FILE:-${APP_BASE_DIR}/.env}"
+APP_DATA_DIR="${APP_DATA_DIR:-${APP_BASE_DIR}/data}"
+COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.prod.yml}"
+COMPOSE_PROJECT_DIR="${COMPOSE_PROJECT_DIR:-${REPO_ROOT}}"
+
+log() {
+  printf '[deploy] %s\n' "$*"
+}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    printf 'Required command not found: %s\n' "$1" >&2
+    exit 1
+  fi
+}
+
+run_compose() {
+  docker compose \
+    --project-directory "${COMPOSE_PROJECT_DIR}" \
+    -f "${COMPOSE_PROJECT_DIR}/${COMPOSE_FILE}" \
+    --env-file "${APP_ENV_FILE}" \
+    "$@"
+}
+
+require_command git
+require_command docker
+
+if [[ ! -f "${APP_ENV_FILE}" ]]; then
+  printf 'Expected env file not found: %s\n' "${APP_ENV_FILE}" >&2
+  exit 1
+fi
+
+if ! git -C "${REPO_ROOT}" diff --quiet || ! git -C "${REPO_ROOT}" diff --cached --quiet; then
+  printf 'Refusing to deploy with uncommitted changes in %s\n' "${REPO_ROOT}" >&2
+  exit 1
+fi
+
+CURRENT_BRANCH="$(git -C "${REPO_ROOT}" rev-parse --abbrev-ref HEAD)"
+if [[ "${CURRENT_BRANCH}" != "main" ]]; then
+  printf 'Deploy script must be run from the main branch. Current branch: %s\n' "${CURRENT_BRANCH}" >&2
+  exit 1
+fi
+
+log "Preparing persistent directories in ${APP_DATA_DIR}"
+mkdir -p \
+  "${APP_DATA_DIR}/postgres" \
+  "${APP_DATA_DIR}/raw" \
+  "${APP_DATA_DIR}/garth"
+
+log "Refreshing git checkout"
+git -C "${REPO_ROOT}" fetch origin main
+git -C "${REPO_ROOT}" pull --ff-only origin main
+
+log "Validating Docker Compose configuration"
+run_compose config >/dev/null
+
+log "Building application images"
+run_compose build backend frontend
+
+log "Starting PostgreSQL"
+run_compose up -d postgres
+
+log "Running Garmin auth bootstrap"
+run_compose run --rm backend python -m app.bootstrap_garmin_auth
+
+log "Applying database migrations"
+run_compose run --rm backend alembic -c alembic.ini upgrade head
+
+log "Starting application services"
+run_compose up -d frontend backend
+
+log "Current service status"
+run_compose ps
+
+if command -v curl >/dev/null 2>&1; then
+  log "Checking backend health endpoint"
+  curl -sf "http://localhost:8000/api/v1/health" >/dev/null
+fi
+
+log "Recent backend logs"
+run_compose logs --tail=50 backend
+
+log "Deploy complete"

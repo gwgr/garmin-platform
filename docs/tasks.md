@@ -314,51 +314,103 @@ Current state:
 
 ## Phase 7 — Worker and Scheduling
 
-### Task 41
+### Task 41 `[done]`
 Create worker entrypoint for sync jobs.
 
-### Task 42
+Current state:
+- the backend now has a real Garmin sync worker entrypoint in `backend/app/workers/sync_worker.py`
+- the worker reuses the existing fetch, dedupe, download, parse, ingest, and checkpoint services
+- progress is committed incrementally so processed activities are preserved even if a later item fails
+- verified locally against the real Postgres/Garmin setup, and a partial historical sync imported additional activities before the run was stopped
+
+### Task 42 `[done]`
 Create scheduled sync command to run every 6 hours.
 
-### Task 43
+Current state:
+- the backend now includes a repeating scheduled sync loop in `backend/app/workers/scheduled_sync.py`
+- the loop reuses the real Garmin sync worker entrypoint and sleeps for `21600` seconds between runs
+- it emits structured logs for scheduler start, each tick, completion/failure, sleep, and shutdown
+- verified at import level locally; the runtime command is `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`
+
+### Task 43 `[done]`
 Ensure worker and backend can share the same application config and codebase.
+
+Current state:
+- the local and production Compose files now define a dedicated `worker` service using the same backend Docker image as the API service
+- both `backend` and `worker` now share the same `.env` configuration, PostgreSQL connection override, and `./data` mount for raw FIT files plus Garmin session state
+- the worker runtime is now a command override on the shared backend image: `python -m app.workers.scheduled_sync`
 
 ---
 
 ## Phase 8 — Deployment and Operations
 
-### Task 44
+### Task 44 `[done]`
+Capture and document the agreed VPS runtime shape.
+
+Current state:
+- agreed production approach: run `frontend`, `backend`, and `postgres` as long-running services
+- agreed production sync approach: trigger the one-shot worker command `python -m app.workers` from a host-side scheduler such as `systemd` timer or cron
+- keep the long-running `worker` container available for local development and as an optional fallback, but do not treat it as the primary production scheduler
+- discovered VPS baseline: Ubuntu 24.04, `systemd` available, `git` installed, Docker not yet installed, and about `40G` free on `/`
+- agreed VPS ownership/layout: deploy as the chosen VPS app user under `/opt/garmin-platform/app`, with `/opt/garmin-platform/.env` for protected secrets and `/opt/garmin-platform/data` for persistent runtime storage
+
+### Task 45 `[done]`
+Implement production secret handling and Garmin auth bootstrap flow.
+
+Current state:
+- agreed production secret location: a protected host env file such as `/opt/garmin-platform/.env`, not committed config
+- agreed steady-state Garmin auth approach: rely on persisted `GARTH_HOME` session data for scheduled syncs
+- agreed password handling approach: treat `GARMIN_PASSWORD` as bootstrap/recovery-only and avoid requiring it in normal runtime config
+- the Garmin client now treats a saved `GARTH_HOME` session as sufficient configuration for steady-state syncs
+- a dedicated bootstrap command is now available at `PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth`
+- verified locally by removing `GARMIN_PASSWORD` from the local `.env` and confirming the saved `GARTH_HOME` session still reports the Garmin client as configured
+
+### Task 46 `[done]`
+Create `infra/scripts/bootstrap_vps.sh` for first-time server setup.
+
+Current state:
+- `infra/scripts/bootstrap_vps.sh` now exists and stays separate from `deploy.sh`
+- it installs `docker.io` and `docker-compose-v2`, prepares `/opt/garmin-platform`, creates persistent data directories, adds the target user to the `docker` group, and clones or updates the repo into `/opt/garmin-platform/app`
+- the repo README now includes simple VPS-side bootstrap and first-deploy commands
+- verified locally with `bash -n`
+
+### Task 47 `[done]`
 Create `infra/scripts/deploy.sh`.
 
-### Task 45
-Create `infra/scripts/backup.sh`.
-
-### Task 46
-Document local setup in `README.md`.
-
-### Task 47
-Document production deploy steps in `README.md`.
+Current state:
+- `infra/scripts/deploy.sh` now exists and targets the agreed VPS layout under `/opt/garmin-platform`
+- it validates the protected env file, ensures persistent data directories exist, fast-forwards `main`, validates Compose config, builds images, starts Postgres, bootstraps Garmin auth, runs Alembic migrations, starts `frontend` and `backend`, and checks backend health when `curl` is available
+- verified locally with `bash -n` plus `docker compose -f docker-compose.prod.yml --env-file .env config`
 
 ### Task 48
+Create `infra/scripts/backup.sh`.
+
+### Task 49
+Document local setup in `README.md`.
+
+### Task 50
+Document production deploy steps in `README.md`.
+
+### Task 51
 Add startup checks for database connectivity and required storage paths.
 
 ---
 
 ## Phase 9 — Testing
 
-### Task 49
+### Task 52
 Add unit tests for FIT parsing.
 
-### Task 50
+### Task 53
 Add unit tests for analytics calculations.
 
-### Task 51
+### Task 54
 Add API tests for:
 - health endpoint
 - activities endpoint
 - activity detail endpoint
 
-### Task 52
+### Task 55
 Add integration test for full ingestion of a sample FIT file.
 
 ---

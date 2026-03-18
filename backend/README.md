@@ -22,6 +22,7 @@ This directory now contains the initial FastAPI backend project structure:
 - `app/services/activity_record_ingest.py` for FIT record-stream parsing and `activity_records` persistence
 - `app/services/sync_checkpoint.py` for reading and updating sync checkpoints
 - `app/observability.py` for JSON-formatted structured application logging
+- `app/workers/sync_worker.py` for the Garmin sync worker entrypoint
 - `alembic/` for database migration configuration and revisions
 - placeholder packages for services, parsers, workers, and analytics
 - `tests/` for backend test modules
@@ -32,9 +33,15 @@ Current schema notes:
 
 Development notes:
 - `httpx` is installed as a dev dependency so `fastapi.testclient` works for local endpoint verification
-- when Garmin credentials are present, `get_garmin_client()` returns the `garth`-backed implementation instead of the placeholder client
+- `get_garmin_client()` now always uses the `garth`-backed implementation and can resume from saved `GARTH_HOME` session state without requiring `GARMIN_PASSWORD`
 - backend logs now emit one-line JSON records, and `LOG_LEVEL` can be set from the environment
+- the sync worker can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers`
+- the scheduled sync loop can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`
+- first-time or recovery Garmin auth bootstrap can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth`
+- a real local worker run has already been verified against the Postgres/Garmin setup and confirmed to import additional historical activities
 
 Container runtime:
 - the backend Docker image now runs the FastAPI app with `uvicorn`
 - `GET /api/v1/health` should be available from the backend container on port `8000`
+- the same backend image is now also used for the scheduled worker service, with only the container command overridden to `python -m app.workers.scheduled_sync`
+- both services share the same `.env`-driven settings and `/app/data` mount so raw FIT files and `GARTH_HOME` session state stay consistent

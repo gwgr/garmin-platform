@@ -209,9 +209,10 @@ Configured local development values:
 - `LOG_LEVEL=INFO`
 
 Garmin integration notes:
-- Garmin credentials are kept only in local `.env`
+- Garmin email may be kept in local `.env`, but steady-state local sync now resumes from saved `GARTH_HOME` session files without requiring `GARMIN_PASSWORD`
 - `garth` stores local session files under `GARTH_HOME`
 - first-time Garmin auth may prompt for MFA in the terminal
+- local `GARMIN_PASSWORD` has been removed after session bootstrap and the saved session still verifies correctly
 - raw FIT files are saved under `data/raw/activities/YYYY/MM/<activity_id>.fit`
 - downloaded Garmin FIT files can now be parsed locally for summary, lap, and record stream data
 - backend sync and parser logs now emit structured JSON lines locally
@@ -222,6 +223,7 @@ Current status at time of setup:
 - database is accepting connections
 - Garmin activity listing is working locally through `garth`
 - FIT download and raw file persistence have been verified locally
+- the worker entrypoint has been run locally and confirmed to import additional historical Garmin activities into Postgres
 
 Useful commands:
 
