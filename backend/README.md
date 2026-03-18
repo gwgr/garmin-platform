@@ -36,6 +36,7 @@ Development notes:
 - `get_garmin_client()` now always uses the `garth`-backed implementation and can resume from saved `GARTH_HOME` session state without requiring `GARMIN_PASSWORD`
 - Garmin auth/login, activity listing, and FIT download calls now use conservative retry/backoff for HTTP `429` and transient request failures
 - backend logs now emit one-line JSON records, and `LOG_LEVEL` can be set from the environment
+- backend startup now validates database connectivity plus required storage paths for `RAW_DATA_DIR` and `GARTH_HOME`
 - the sync worker can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers`
 - `GARMIN_SYNC_LIMIT` can be set to a smaller value such as `5` for cautious test batches during an initial backfill
 - the scheduled sync loop can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`

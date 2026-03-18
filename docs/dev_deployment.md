@@ -258,6 +258,7 @@ Note:
 - production app services should live under `/opt/garmin-platform/app`
 - protect the production env file at `/opt/garmin-platform/.env`
 - current VPS shell convenience setup includes `~/.bashrc` helpers such as `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, and `gp-timer-status`
+- backend startup now checks database connectivity plus required `RAW_DATA_DIR` and `GARTH_HOME` paths before reporting healthy
 
 Wrap this later in:
 ```bash

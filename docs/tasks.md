@@ -24,18 +24,17 @@ Already completed outside the numbered plan:
 
 ## Phase 1 — Repository and Tooling
 
-### Task 1 `[partial]`
+### Task 1 `[done]`
 Initialize repository structure:
 - `docs/`
 - `backend/`
 - `frontend/`
 - `infra/`
-- `docker/`
+- Docker-related files at the repo root (`docker-compose*.yml`, service `Dockerfile`s)
 
 Current state:
-- `docs/`, `backend/`, and `frontend/` exist
-- `infra/` and `docker/` do not exist yet
-- this task remains partial until `infra/` and `docker/` are created
+- `docs/`, `backend/`, `frontend/`, and `infra/` all exist
+- Docker-related files now live at the repo root and within service directories rather than under a dedicated top-level `docker/` folder
 
 ### Task 2 `[done]`
 Create root `README.md` that references:
@@ -418,14 +417,25 @@ Current state:
 ### Task 50
 Create `infra/scripts/backup.sh`.
 
-### Task 51
+### Task 51 `[done]`
 Document local setup in `README.md`.
 
-### Task 52
+Current state:
+- the root `README.md` now documents the local development workflow, key commands, and the current backend/frontend/dev-container shape
+
+### Task 52 `[done]`
 Document production deploy steps in `README.md`.
 
-### Task 53
+Current state:
+- the root `README.md` now documents VPS bootstrap, protected env file placement, deploy flow, manual backfill, sync-timer installation, and current Tailscale access examples
+
+### Task 53 `[done]`
 Add startup checks for database connectivity and required storage paths.
+
+Current state:
+- backend startup now validates `RAW_DATA_DIR` and `GARTH_HOME`, creating them when needed and failing clearly if they are unusable
+- backend startup now also verifies database connectivity with a simple `SELECT 1` before the app reports itself initialized
+- structured logs now show which startup validations passed or failed
 
 ---
 

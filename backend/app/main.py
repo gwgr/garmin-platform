@@ -7,6 +7,7 @@ from app.config import get_settings
 from app.db import get_engine, get_session_factory
 from app.observability import configure_logging, log_event
 from app.services import get_garmin_client
+from app.startup_checks import validate_startup
 
 
 def create_app() -> FastAPI:
@@ -19,9 +20,12 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description="Backend API for the local-first Garmin data platform.",
     )
+    engine = get_engine()
+    session_factory = get_session_factory()
+    validate_startup(settings, engine)
     app.state.settings = settings
-    app.state.engine = get_engine()
-    app.state.session_factory = get_session_factory()
+    app.state.engine = engine
+    app.state.session_factory = session_factory
     app.state.garmin_client = get_garmin_client()
     app.include_router(api_router, prefix="/api")
     log_event(

@@ -54,6 +54,8 @@ Per-record FIT stream parsing and `activity_records` persistence are now wired i
 
 Structured JSON logging is now in place for Garmin sync runs, FIT downloads, and parser failures, with log verbosity controlled by `LOG_LEVEL`.
 
+Backend startup now also validates database connectivity and required runtime directories before the API reports itself initialized.
+
 ## Key Documents
 
 - Product requirements: `docs/prd.md`
