@@ -28,9 +28,12 @@ class GarminActivityFetcher:
         self,
         garmin_client: GarminClient,
         checkpoint_service: SyncCheckpointService,
+        *,
+        limit: int = 100,
     ) -> None:
         self._garmin_client = garmin_client
         self._checkpoint_service = checkpoint_service
+        self._limit = limit
 
     def fetch_activities(self) -> GarminActivityFetchResult:
         checkpoint = self._checkpoint_service.get_checkpoint(GARMIN_ACTIVITY_SYNC_KEY)
@@ -41,8 +44,9 @@ class GarminActivityFetcher:
             "sync.fetch_activities.started",
             sync_key=GARMIN_ACTIVITY_SYNC_KEY,
             since=since.isoformat() if since else None,
+            limit=self._limit,
         )
-        activities = self._garmin_client.list_activities(since=since)
+        activities = self._garmin_client.list_activities(since=since, limit=self._limit)
         ordered_activities = sorted(activities, key=lambda activity: activity.start_time)
         log_event(
             logger,
@@ -52,6 +56,7 @@ class GarminActivityFetcher:
             fetched_count=len(ordered_activities),
             since=since.isoformat() if since else None,
             checkpoint_found=checkpoint is not None,
+            limit=self._limit,
         )
 
         return GarminActivityFetchResult(

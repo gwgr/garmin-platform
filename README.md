@@ -125,6 +125,10 @@ cd /opt/garmin-platform/app
 APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env ps
 ```
 
+Current VPS convenience setup:
+- helper functions have been added to `~/.bashrc` for `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, and `gp-timer-status`
+- those helpers assume the standard `/opt/garmin-platform` layout
+
 ## Production Sync Timer
 
 The production scheduler uses the one-shot worker command, not the long-running local loop.
@@ -139,6 +143,13 @@ APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DAT
 ```
 
 Repeat that command until the backlog is mostly caught up. Then enable the timer for steady-state syncs.
+
+For a smaller test batch first, override the default limit of `100`:
+
+```bash
+cd /opt/garmin-platform/app
+APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data GARMIN_SYNC_LIMIT=5 SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers
+```
 
 Install it on the VPS with:
 

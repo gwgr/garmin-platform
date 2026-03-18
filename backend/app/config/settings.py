@@ -16,6 +16,7 @@ class Settings:
     database_url: str
     raw_data_dir: Path
     garth_home: Path
+    garmin_sync_limit: int
     garmin_email: str | None
     garmin_password: str | None
 
@@ -52,6 +53,7 @@ def get_settings() -> Settings:
         or "postgresql+psycopg://garmin:garmin_local_dev_password@localhost:5432/garmin_platform",
         raw_data_dir=raw_data_dir,
         garth_home=garth_home,
+        garmin_sync_limit=int(_get_env("GARMIN_SYNC_LIMIT", "100") or "100"),
         garmin_email=_get_env("GARMIN_EMAIL"),
         garmin_password=_get_env("GARMIN_PASSWORD"),
     )

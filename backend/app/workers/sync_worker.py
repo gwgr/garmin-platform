@@ -64,6 +64,7 @@ class GarminSyncWorker:
             fetch_result = GarminActivityFetcher(
                 self._garmin_client,
                 checkpoint_service,
+                limit=self._settings.garmin_sync_limit,
             ).fetch_activities()
             fetched_count = len(fetch_result.activities)
 
@@ -78,6 +79,7 @@ class GarminSyncWorker:
                 fetched_count=fetched_count,
                 new_count=new_count,
                 sync_key=fetch_result.sync_key,
+                sync_limit=self._settings.garmin_sync_limit,
             )
 
             downloader = ActivityFitDownloader(self._garmin_client, self._raw_file_storage)
@@ -129,6 +131,7 @@ class GarminSyncWorker:
                 new_count=new_count,
                 downloaded_count=downloaded_count,
                 ingested_count=ingested_count,
+                sync_limit=self._settings.garmin_sync_limit,
                 checkpoint_updated_to=checkpoint_updated_to.isoformat()
                 if checkpoint_updated_to
                 else None,
@@ -150,6 +153,7 @@ class GarminSyncWorker:
                 new_count=new_count,
                 downloaded_count=downloaded_count,
                 ingested_count=ingested_count,
+                sync_limit=self._settings.garmin_sync_limit,
             )
             raise
         finally:

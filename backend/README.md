@@ -37,6 +37,7 @@ Development notes:
 - Garmin auth/login, activity listing, and FIT download calls now use conservative retry/backoff for HTTP `429` and transient request failures
 - backend logs now emit one-line JSON records, and `LOG_LEVEL` can be set from the environment
 - the sync worker can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers`
+- `GARMIN_SYNC_LIMIT` can be set to a smaller value such as `5` for cautious test batches during an initial backfill
 - the scheduled sync loop can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`
 - first-time or recovery Garmin auth bootstrap can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth`
 - a real local worker run has already been verified against the Postgres/Garmin setup and confirmed to import additional historical activities

@@ -412,6 +412,7 @@ Scope:
 Current state:
 - the recommended initial backfill path is now documented as repeated manual one-shot worker runs via Docker Compose on the VPS
 - the runbook explicitly keeps `garmin-sync.timer` disabled at first
+- `GARMIN_SYNC_LIMIT` can now be overridden for smaller test batches such as `5`
 - enable the timer only after manual runs show the backlog is under control and steady-state sync behavior looks safe
 
 ### Task 50

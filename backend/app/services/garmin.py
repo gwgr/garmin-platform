@@ -34,7 +34,11 @@ class GarminActivitySummary:
 
 
 class GarminClient(Protocol):
-    def list_activities(self, since: datetime | None = None) -> list[GarminActivitySummary]:
+    def list_activities(
+        self,
+        since: datetime | None = None,
+        limit: int = 100,
+    ) -> list[GarminActivitySummary]:
         """Return Garmin activities, optionally filtered by a checkpoint."""
 
     def download_activity_fit(self, source_activity_id: str) -> bytes:
@@ -66,7 +70,11 @@ class PlaceholderGarminClient:
                 "Garmin credentials are not configured. Set GARMIN_EMAIL and GARMIN_PASSWORD."
             )
 
-    def list_activities(self, since: datetime | None = None) -> list[GarminActivitySummary]:
+    def list_activities(
+        self,
+        since: datetime | None = None,
+        limit: int = 100,
+    ) -> list[GarminActivitySummary]:
         self._require_credentials()
         raise NotImplementedError(
             "Garmin activity fetching is not implemented yet. Complete the Phase 4 sync tasks first."
@@ -212,8 +220,12 @@ class GarthGarminClient:
         )
         return garth
 
-    def list_activities(self, since: datetime | None = None) -> list[GarminActivitySummary]:
-        params: dict[str, str | int] = {"start": 0, "limit": 100}
+    def list_activities(
+        self,
+        since: datetime | None = None,
+        limit: int = 100,
+    ) -> list[GarminActivitySummary]:
+        params: dict[str, str | int] = {"start": 0, "limit": limit}
         if since is not None:
             params["startDate"] = since.date().isoformat()
 
