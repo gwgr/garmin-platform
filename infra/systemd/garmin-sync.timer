@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Garmin Platform sync every 6 hours
+
+[Timer]
+OnBootSec=10m
+OnUnitActiveSec=6h
+Unit=garmin-sync.service
+Persistent=true
+
+[Install]
+WantedBy=timers.target

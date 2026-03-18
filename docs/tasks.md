@@ -383,35 +383,52 @@ Current state:
 - it now supports `SKIP_GARMIN_BOOTSTRAP=1` plus clearer failure guidance when Garmin login is rate-limited or session files should be seeded first
 - verified locally with `bash -n` plus `docker compose -f docker-compose.prod.yml --env-file .env config`
 
-### Task 48
-Create `infra/scripts/backup.sh`.
+### Task 48 `[done]`
+Create production scheduler setup for Garmin sync jobs.
+
+Scope:
+- add versioned `systemd` unit files under `infra/systemd/` for the one-shot worker command `python -m app.workers`
+- add an install/setup script under `infra/scripts/` to place the unit files, reload `systemd`, enable the timer, and start it
+- keep this separate from the long-running `app.workers.scheduled_sync` loop used for local/dev convenience
+- use the protected env file and persistent data paths under `/opt/garmin-platform`
+- document install, enable, and verification steps on the VPS
+
+Current state:
+- the versioned unit files now exist at `infra/systemd/garmin-sync.service` and `infra/systemd/garmin-sync.timer`
+- `infra/scripts/install_sync_timer.sh` now installs the units under `/etc/systemd/system`, reloads `systemd`, enables the timer, and starts it
+- the service runs the one-shot worker through Docker Compose with `SKIP_GARMIN_BOOTSTRAP=1` so scheduled syncs rely on seeded `GARTH_HOME` session state
+- README and deployment docs now include the VPS install command and verification commands
+- verified locally with `bash -n` on the new install script
 
 ### Task 49
-Document local setup in `README.md`.
+Create `infra/scripts/backup.sh`.
 
 ### Task 50
-Document production deploy steps in `README.md`.
+Document local setup in `README.md`.
 
 ### Task 51
+Document production deploy steps in `README.md`.
+
+### Task 52
 Add startup checks for database connectivity and required storage paths.
 
 ---
 
 ## Phase 9 — Testing
 
-### Task 52
+### Task 53
 Add unit tests for FIT parsing.
 
-### Task 53
+### Task 54
 Add unit tests for analytics calculations.
 
-### Task 54
+### Task 55
 Add API tests for:
 - health endpoint
 - activities endpoint
 - activity detail endpoint
 
-### Task 55
+### Task 56
 Add integration test for full ingestion of a sample FIT file.
 
 ---
@@ -456,6 +473,14 @@ Scope:
 - support future weather correlation views and analytics
 
 ### Task 58
+Add HTTPS-friendly private access for the VPS deployment.
+
+Scope:
+- choose between Tailscale Serve and a reverse proxy such as Caddy for TLS termination
+- support private HTTPS access to the frontend and backend over the tailnet
+- keep the setup compatible with the existing Docker Compose deployment model
+
+### Task 59
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -463,7 +488,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 59
+### Task 60
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -471,10 +496,10 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 60
+### Task 61
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 61
+### Task 62
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -482,7 +507,7 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 62
+### Task 63
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -490,16 +515,16 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 63
+### Task 64
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
-### Task 64
+### Task 65
 Add downsampling or capped payload strategy for large activity stream responses.
 
-### Task 65
+### Task 66
 Verify that raw FIT files are never modified after download.
 
-### Task 66
+### Task 67
 Review all MVP acceptance criteria against `docs/prd.md`.
 
 ---

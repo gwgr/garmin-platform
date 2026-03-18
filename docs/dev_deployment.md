@@ -341,6 +341,10 @@ Recommended initial access model:
 - keep app private initially
 - avoid broad public exposure until auth is in place
 
+Current private-access example:
+- frontend via `http://prod-vps:3000`
+- backend health via `http://prod-vps:8000/api/v1/health`
+
 If public exposure is needed:
 - use HTTPS
 - put app behind Caddy or Nginx
@@ -370,6 +374,11 @@ Agreed production direction:
 - keep the long-running `worker` container as a development convenience and optional fallback, not the primary production scheduler
 - install `docker.io` and `docker-compose-v2` from Ubuntu apt packages during VPS setup
 - run normal deploys as the chosen VPS app user after one-time system setup
+
+Current repo state:
+- `infra/systemd/garmin-sync.service` runs the one-shot worker via Docker Compose with `SKIP_GARMIN_BOOTSTRAP=1`
+- `infra/systemd/garmin-sync.timer` triggers that service every 6 hours
+- `infra/scripts/install_sync_timer.sh` installs the unit files, reloads `systemd`, enables the timer, and starts it
 
 Agreed production secret direction:
 - store production secrets in a protected host env file such as `/opt/garmin-platform/.env`

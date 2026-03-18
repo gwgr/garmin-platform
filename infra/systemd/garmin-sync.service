@@ -1,0 +1,18 @@
+[Unit]
+Description=Garmin Platform one-shot sync worker
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=__APP_USER__
+WorkingDirectory=__APP_DIR__
+Environment=APP_BASE_DIR=__APP_BASE_DIR__
+Environment=APP_ENV_FILE=__APP_ENV_FILE__
+Environment=APP_DATA_DIR=__APP_DATA_DIR__
+Environment=SKIP_GARMIN_BOOTSTRAP=1
+ExecStart=/bin/bash -lc 'cd "__APP_DIR__" && APP_BASE_DIR="__APP_BASE_DIR__" APP_ENV_FILE="__APP_ENV_FILE__" APP_DATA_DIR="__APP_DATA_DIR__" SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file "__APP_ENV_FILE__" run --rm backend python -m app.workers'
+
+[Install]
+WantedBy=multi-user.target

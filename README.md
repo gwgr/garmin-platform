@@ -112,6 +112,41 @@ If the VPS already has valid Garmin session files under `/opt/garmin-platform/da
 APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data SKIP_GARMIN_BOOTSTRAP=1 ./infra/scripts/deploy.sh
 ```
 
+Production note:
+- the protected production env file lives at `/opt/garmin-platform/.env`
+- after Garmin session state has been seeded successfully under `/opt/garmin-platform/data/garth`, remove `GARMIN_PASSWORD` from `/opt/garmin-platform/.env`
+- from then on, use `SKIP_GARMIN_BOOTSTRAP=1` for steady-state deploys
+- current private Tailscale access example: `http://prod-vps:3000` for the frontend and `http://prod-vps:8000/api/v1/health` for backend health
+
+If you want to run Docker Compose commands manually on the VPS, include the external env/data paths explicitly:
+
+```bash
+cd /opt/garmin-platform/app
+APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env ps
+```
+
+## Production Sync Timer
+
+The production scheduler uses the one-shot worker command, not the long-running local loop.
+
+Install it on the VPS with:
+
+```bash
+sudo APP_USER="$(whoami)" APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_sync_timer.sh
+```
+
+This installs:
+- `infra/systemd/garmin-sync.service`
+- `infra/systemd/garmin-sync.timer`
+
+Useful checks:
+
+```bash
+systemctl status garmin-sync.timer --no-pager
+systemctl list-timers garmin-sync.timer --no-pager
+journalctl -u garmin-sync.service -n 100 --no-pager
+```
+
 ## Local Development
 
 From the repository root:
