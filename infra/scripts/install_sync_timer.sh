@@ -11,6 +11,7 @@ APP_DIR="${APP_DIR:-${APP_BASE_DIR}/app}"
 APP_DATA_DIR="${APP_DATA_DIR:-${APP_BASE_DIR}/data}"
 APP_ENV_FILE="${APP_ENV_FILE:-${APP_BASE_DIR}/.env}"
 APP_USER="${APP_USER:-${SUDO_USER:-}}"
+ENABLE_SYNC_TIMER="${ENABLE_SYNC_TIMER:-0}"
 
 SERVICE_NAME="garmin-sync.service"
 TIMER_NAME="garmin-sync.timer"
@@ -76,14 +77,20 @@ render_template "${SYSTEMD_DIR}/${TIMER_NAME}" > "${TIMER_DEST}"
 log "Reloading systemd"
 systemctl daemon-reload
 
-log "Enabling timer"
-systemctl enable "${TIMER_NAME}"
+if [[ "${ENABLE_SYNC_TIMER}" == "1" ]]; then
+  log "Enabling timer"
+  systemctl enable "${TIMER_NAME}"
 
-log "Starting timer"
-systemctl restart "${TIMER_NAME}"
+  log "Starting timer"
+  systemctl restart "${TIMER_NAME}"
+else
+  log "Timer installed but not enabled"
+  log "Enable it later with: sudo systemctl enable --now ${TIMER_NAME}"
+  log "Or rerun this script with ENABLE_SYNC_TIMER=1"
+fi
 
 log "Timer status"
-systemctl status "${TIMER_NAME}" --no-pager
+systemctl status "${TIMER_NAME}" --no-pager || true
 
 log "Next trigger"
-systemctl list-timers "${TIMER_NAME}" --no-pager
+systemctl list-timers "${TIMER_NAME}" --no-pager || true

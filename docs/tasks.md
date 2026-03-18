@@ -388,47 +388,61 @@ Create production scheduler setup for Garmin sync jobs.
 
 Scope:
 - add versioned `systemd` unit files under `infra/systemd/` for the one-shot worker command `python -m app.workers`
-- add an install/setup script under `infra/scripts/` to place the unit files, reload `systemd`, enable the timer, and start it
+- add an install/setup script under `infra/scripts/` to place the unit files and reload `systemd`, with enable/start kept explicit
 - keep this separate from the long-running `app.workers.scheduled_sync` loop used for local/dev convenience
 - use the protected env file and persistent data paths under `/opt/garmin-platform`
 - document install, enable, and verification steps on the VPS
 
 Current state:
 - the versioned unit files now exist at `infra/systemd/garmin-sync.service` and `infra/systemd/garmin-sync.timer`
-- `infra/scripts/install_sync_timer.sh` now installs the units under `/etc/systemd/system`, reloads `systemd`, enables the timer, and starts it
+- `infra/scripts/install_sync_timer.sh` now installs the units under `/etc/systemd/system` and reloads `systemd`
+- timer enable/start is now explicit via `ENABLE_SYNC_TIMER=1` or a later `systemctl enable --now garmin-sync.timer`
 - the service runs the one-shot worker through Docker Compose with `SKIP_GARMIN_BOOTSTRAP=1` so scheduled syncs rely on seeded `GARTH_HOME` session state
 - README and deployment docs now include the VPS install command and verification commands
 - verified locally with `bash -n` on the new install script
 
-### Task 49
-Create `infra/scripts/backup.sh`.
+### Task 49 `[done]`
+Perform and document the initial historical Garmin backfill strategy.
+
+Scope:
+- use manual one-shot worker runs for the first large import instead of enabling the production timer immediately
+- watch for Garmin rate limiting, auth challenges, and long-running sync overlap risks
+- document when it is safe to enable the scheduled timer for steady-state syncs
+
+Current state:
+- the recommended initial backfill path is now documented as repeated manual one-shot worker runs via Docker Compose on the VPS
+- the runbook explicitly keeps `garmin-sync.timer` disabled at first
+- enable the timer only after manual runs show the backlog is under control and steady-state sync behavior looks safe
 
 ### Task 50
-Document local setup in `README.md`.
+Create `infra/scripts/backup.sh`.
 
 ### Task 51
-Document production deploy steps in `README.md`.
+Document local setup in `README.md`.
 
 ### Task 52
+Document production deploy steps in `README.md`.
+
+### Task 53
 Add startup checks for database connectivity and required storage paths.
 
 ---
 
 ## Phase 9 — Testing
 
-### Task 53
+### Task 54
 Add unit tests for FIT parsing.
 
-### Task 54
+### Task 55
 Add unit tests for analytics calculations.
 
-### Task 55
+### Task 56
 Add API tests for:
 - health endpoint
 - activities endpoint
 - activity detail endpoint
 
-### Task 56
+### Task 57
 Add integration test for full ingestion of a sample FIT file.
 
 ---

@@ -230,21 +230,27 @@ Suggested policy:
 ## 7. VPS Deployment Workflow
 
 Recommended deploy pattern:
-1. SSH into VPS
-2. Pull latest code
-3. Rebuild containers
-4. Run migrations
-5. Verify health
-6. Check logs
+1. Bootstrap a fresh VPS if needed
+2. Create and protect `/opt/garmin-platform/.env`
+3. Run the deploy wrapper from `/opt/garmin-platform/app`
+4. Perform the initial historical backfill with manual one-shot worker runs
+5. Install the `systemd` timer files
+6. Enable the timer only after the backlog is under control
+7. Verify health and logs
 
 Example:
 ```bash
+cd ~/garmin-platform-bootstrap
+sudo TARGET_USER="$(whoami)" ./infra/scripts/bootstrap_vps.sh
+logout
+
 cd /opt/garmin-platform/app
-git pull origin main
-docker compose -f docker-compose.prod.yml up -d --build frontend backend postgres
-docker compose -f docker-compose.prod.yml run --rm backend python -m app.bootstrap_garmin_auth
-docker compose -f docker-compose.prod.yml run --rm backend alembic -c alembic.ini upgrade head
-docker compose -f docker-compose.prod.yml logs --tail=100
+cp .env.example /opt/garmin-platform/.env
+# edit /opt/garmin-platform/.env with real values
+APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data ./infra/scripts/deploy.sh
+APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers
+sudo APP_USER="$(whoami)" APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_sync_timer.sh
+sudo systemctl enable --now garmin-sync.timer
 ```
 
 Note:
@@ -258,12 +264,11 @@ Wrap this later in:
 ```
 
 Current repo state:
+- the VPS bootstrap wrapper now exists at `infra/scripts/bootstrap_vps.sh`
 - the deploy wrapper now exists at `infra/scripts/deploy.sh`
 - it expects the repo checkout at `/opt/garmin-platform/app`
 - it reads production settings from `/opt/garmin-platform/.env`
 - it uses `/opt/garmin-platform/data` for persistent PostgreSQL, raw FIT, and Garmin session storage
-- a separate first-time VPS bootstrap script is planned so machine provisioning stays distinct from normal deploys
-- the VPS bootstrap wrapper now exists at `infra/scripts/bootstrap_vps.sh`
 - it installs Docker packages, prepares `/opt/garmin-platform`, configures Docker group access, and clones or updates the repo into the target app path
 - the deploy wrapper now also supports `SKIP_GARMIN_BOOTSTRAP=1` for VPSes where valid `GARTH_HOME` session files are already seeded
 
@@ -312,7 +317,7 @@ Container networking note:
 
 Likely variables:
 - `GARMIN_EMAIL`
-- `GARMIN_PASSWORD` or token variables
+- `GARMIN_PASSWORD` for bootstrap/recovery only
 - `DATABASE_URL`
 - `POSTGRES_DB`
 - `POSTGRES_USER`
@@ -378,7 +383,11 @@ Agreed production direction:
 Current repo state:
 - `infra/systemd/garmin-sync.service` runs the one-shot worker via Docker Compose with `SKIP_GARMIN_BOOTSTRAP=1`
 - `infra/systemd/garmin-sync.timer` triggers that service every 6 hours
-- `infra/scripts/install_sync_timer.sh` installs the unit files, reloads `systemd`, enables the timer, and starts it
+- `infra/scripts/install_sync_timer.sh` installs the unit files and reloads `systemd`
+- enable/start is now explicit via `ENABLE_SYNC_TIMER=1` or `systemctl enable --now garmin-sync.timer`
+- for the initial large historical import, prefer manual one-shot worker runs before enabling the timer so Garmin rate limits and long-running backfill behavior can be observed directly
+- recommended manual backfill command: `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers`
+- current recommended order is: install timer files first, keep them disabled during backfill, then enable `garmin-sync.timer` for steady-state syncs
 
 Agreed production secret direction:
 - store production secrets in a protected host env file such as `/opt/garmin-platform/.env`

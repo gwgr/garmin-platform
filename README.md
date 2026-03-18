@@ -129,10 +129,34 @@ APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data do
 
 The production scheduler uses the one-shot worker command, not the long-running local loop.
 
+For the initial large historical import, do not enable the timer immediately. Run the one-shot worker manually first so you can watch for Garmin rate limits, MFA/auth issues, and long-running backfill behavior.
+
+Recommended manual backfill command:
+
+```bash
+cd /opt/garmin-platform/app
+APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers
+```
+
+Repeat that command until the backlog is mostly caught up. Then enable the timer for steady-state syncs.
+
 Install it on the VPS with:
 
 ```bash
 sudo APP_USER="$(whoami)" APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_sync_timer.sh
+```
+
+That installs the timer files but does not enable them yet.
+When the initial backfill is under control, enable the timer with:
+
+```bash
+sudo systemctl enable --now garmin-sync.timer
+```
+
+Or install and enable in one step:
+
+```bash
+sudo ENABLE_SYNC_TIMER=1 APP_USER="$(whoami)" APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_sync_timer.sh
 ```
 
 This installs:
