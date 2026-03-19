@@ -528,13 +528,21 @@ Current state:
 - `infra/scripts/dependency_audit.sh` now runs both checks together from the repo root
 - README and deployment docs now describe the local command shape and note that the combined script is intended for reuse in CI
 
-### Task 63
+### Task 63 `[done]`
 Add Trivy scanning for filesystem, secrets, and built container images.
 
 Scope:
 - scan the repository filesystem for vulnerabilities and leaked secrets
 - scan built backend and frontend images
 - include Docker/config misconfiguration checks where useful
+
+Current state:
+- `infra/scripts/trivy_scan.sh` now scans the repository filesystem with Trivy using the `vuln`, `secret`, and `misconfig` scanners
+- the same script now scans the built backend and frontend images after the filesystem scan
+- the script supports either a local `trivy` binary or fallback execution through the official Trivy Docker image
+- image references can be overridden when needed, while local defaults target `garmin-platform-backend:latest` and `garmin-platform-frontend:latest`
+- README, local setup, backend notes, and deployment docs now describe how to run the scan locally and reuse it later in CI
+- the backend and frontend Dockerfiles now run as non-root users and include image `HEALTHCHECK` instructions in response to the first high-signal Trivy misconfiguration findings
 
 ### Task 64
 Enable repository-level dependency monitoring and code scanning.
@@ -595,6 +603,15 @@ Scope:
 - support quick diagnosis when scheduled syncs stall or fail repeatedly
 - keep the MVP solution lightweight, such as an API endpoint, status card, or structured health summary
 
+### Task 71
+Clean up the remaining frontend Trivy findings after the first Docker hardening pass.
+
+Scope:
+- reduce or eliminate avoidable frontend image vulnerability noise where practical
+- review the current frontend base image and runtime shape for safer defaults
+- decide which findings are true remediation targets versus accepted temporary MVP risk
+- document any remaining accepted frontend security findings clearly
+
 ---
 
 ## Version 2 — Health Metrics Expansion
@@ -603,7 +620,7 @@ These tasks are intentionally deferred until after the MVP is complete.
 The MVP should continue to preserve raw data, keep ingestion separate from analytics,
 and avoid overloading `daily_metrics` so these additions remain straightforward later.
 
-### Task 71
+### Task 72
 Implement device identification for activities.
 
 Scope:
@@ -612,7 +629,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 72
+### Task 73
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -620,7 +637,7 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 73
+### Task 74
 Add HTTPS-friendly private access for the VPS deployment.
 
 Scope:
@@ -628,7 +645,7 @@ Scope:
 - support private HTTPS access to the frontend and backend over the tailnet
 - keep the setup compatible with the existing Docker Compose deployment model
 
-### Task 74
+### Task 75
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -636,7 +653,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 75
+### Task 76
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -644,10 +661,10 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 76
+### Task 77
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 77
+### Task 78
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -655,7 +672,7 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 78
+### Task 79
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -663,10 +680,10 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 79
+### Task 80
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
-### Task 80
+### Task 81
 Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.
 
 Scope:
@@ -674,7 +691,7 @@ Scope:
 - keep the existing visual direction while reducing ad hoc global CSS
 - standardize spacing, typography, and responsive breakpoints across pages
 
-### Task 81
+### Task 82
 Adopt `shadcn/ui` components for core dashboard UI primitives.
 
 Scope:

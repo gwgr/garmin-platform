@@ -34,6 +34,8 @@ The backend also now includes a scheduled sync loop that can rerun that worker e
 
 The Docker setup now also models that separation directly: `backend` and `worker` share the same backend image, environment, and `/app/data` mount, with the worker only overriding the container command.
 
+The backend and frontend Docker images now also run as non-root users and include image-level `HEALTHCHECK` instructions as part of the MVP hardening pass.
+
 The initial database schema now includes `activities`, `activity_laps`, `activity_records`, `daily_metrics`, `sleep_sessions`, and `devices`, with Alembic migrations applied to the local development database. Query indexes are in place for activity start time, sport, distance, and activity record timestamp.
 
 The backend now also includes a typed Garmin client abstraction with a placeholder implementation, ready for the upcoming sync tasks.
@@ -195,7 +197,7 @@ docker compose up --build
 By default, local Compose now starts `postgres`, `backend`, and `frontend` only. The scheduled `worker` is opt-in so local UI work does not immediately begin Garmin sync activity.
 
 Current local shell convenience setup:
-- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, and `gp-local-audit`
+- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-audit`, and `gp-local-trivy`
 - those helpers assume the standard local repo path at `/Users/gregrowntree/Documents/Dev/garmin-platform`
 
 Useful commands:
@@ -216,6 +218,7 @@ docker compose --profile sync up --build worker
 docker compose ps
 docker compose -f docker-compose.prod.yml config
 ./infra/scripts/dependency_audit.sh
+./infra/scripts/trivy_scan.sh
 ```
 
 Note:
@@ -225,6 +228,10 @@ Note:
 - set `GARTH_HOME` to a local-only directory such as `./data/garth` so Garmin session state stays out of git
 - set `LOG_LEVEL` in `.env` if you want quieter or more verbose backend logs
 - dependency vulnerability checks now use `uv run pip-audit` for Python and `cd frontend && npm run audit` for the frontend, with `./infra/scripts/dependency_audit.sh` as the combined command that future CI can reuse
+- Trivy scanning now uses `./infra/scripts/trivy_scan.sh`, which scans the repository filesystem for vulnerabilities, leaked secrets, and misconfiguration, then scans the built backend and frontend images
+- if `trivy` is not installed locally, `./infra/scripts/trivy_scan.sh` falls back to the official `aquasec/trivy` Docker image
+- the Trivy script now suppresses progress noise and focuses on `MEDIUM`, `HIGH`, and `CRITICAL` findings by default; override with `TRIVY_SEVERITIES=LOW,MEDIUM,HIGH,CRITICAL` if you want a broader report
+- the Trivy filesystem scan skips `data/garth` by default so known local Garmin session tokens do not dominate the secret scan; override with `TRIVY_SKIP_DIRS=` if you want to include that path
 - the current `npm audit` output includes one moderate Next.js advisory tied to `next/image` disk-cache growth; this is an accepted temporary MVP risk because the app is private and does not currently use `next/image`, but it should be revisited before broader exposure
 - the backend test suite now covers FIT parsing, analytics queries, health/activity API responses, and end-to-end ingestion of a sample FIT file via `PYTHONPATH=backend ./.venv/bin/pytest backend/tests`
 - the dashboard now includes a sync-status card backed by `GET /api/v1/sync/status`, and `/status/sync` provides a more detailed operator view

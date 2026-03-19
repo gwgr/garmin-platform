@@ -34,6 +34,7 @@ Current schema notes:
 Development notes:
 - `httpx` is installed as a dev dependency so `fastapi.testclient` works for local endpoint verification
 - `pip-audit` is installed as a dev dependency so backend dependency vulnerability checks can run with `uv run pip-audit`
+- Trivy repository and image scanning can be run from the repo root with `./infra/scripts/trivy_scan.sh`
 - `get_garmin_client()` now always uses the `garth`-backed implementation and can resume from saved `GARTH_HOME` session state without requiring `GARMIN_PASSWORD`
 - Garmin auth/login, activity listing, and FIT download calls now use configurable retry/backoff for HTTP `429` and transient request failures via `GARMIN_RETRY_DELAYS_SECONDS`
 - backend logs now emit one-line JSON records, and `LOG_LEVEL` can be set from the environment
@@ -47,10 +48,12 @@ Development notes:
 - invalid or empty FIT downloads are now quarantined before normal storage, and corrupt FIT files that fail parsing are skipped cleanly after quarantine instead of aborting the whole batch
 - the backend now exposes `GET /api/v1/sync/status` for frontend/operator visibility into recent sync health
 - combined dependency vulnerability checks can be run from the repo root with `./infra/scripts/dependency_audit.sh`, which runs both `uv run pip-audit` and `cd frontend && npm run audit`
+- Trivy checks now cover repo filesystem scanning plus the built backend/frontend images, using a local `trivy` binary when available or the official Trivy Docker image as fallback
 - backend tests now cover FIT parsing, analytics calculations, `/api/v1/health`, activity list/detail endpoints, full ingestion of a sample FIT file, Garmin retry behavior, invalid-download quarantine behavior, sync-status responses, and sync-worker duplicate/corrupt-file skip behavior
 
 Container runtime:
 - the backend Docker image now runs the FastAPI app with `uvicorn`
+- the backend Docker image now runs as a non-root user and includes a container `HEALTHCHECK`
 - `GET /api/v1/health` should be available from the backend container on port `8000`
 - the same backend image is now also used for the scheduled worker service, with only the container command overridden to `python -m app.workers.scheduled_sync`
 - both services share the same `.env`-driven settings and `/app/data` mount so raw FIT files and `GARTH_HOME` session state stay consistent

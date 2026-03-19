@@ -462,6 +462,20 @@ Current dependency-audit workflow:
 - run `cd frontend && npm run audit` for frontend npm dependencies
 - use `./infra/scripts/dependency_audit.sh` as the combined command locally and as the intended command to reuse in future CI
 
+Current Trivy workflow:
+- run `./infra/scripts/trivy_scan.sh` from the repo root
+- that script scans the repository filesystem for vulnerabilities, secrets, and configuration issues
+- it then scans the built backend and frontend images
+- by default it scans `garmin-platform-backend:latest` and `garmin-platform-frontend:latest`, but image references can be overridden with `TRIVY_BACKEND_IMAGE_REF` and `TRIVY_FRONTEND_IMAGE_REF`
+- it uses a local `trivy` binary when present and otherwise falls back to the official Trivy Docker image
+- it suppresses progress noise and focuses on `MEDIUM`, `HIGH`, and `CRITICAL` findings unless `TRIVY_SEVERITIES` is overridden
+- it skips the known local runtime session directory at `data/garth` by default so expected Garmin session tokens do not dominate repo secret scans; override with `TRIVY_SKIP_DIRS=` if needed
+
+Current Docker hardening baseline:
+- the backend and frontend Dockerfiles now run their application processes as non-root users
+- both Dockerfiles now include container-level `HEALTHCHECK` instructions
+- remaining image vulnerability findings should be assessed separately from these Dockerfile-level hardening wins
+
 Current accepted risk:
 - `npm audit` currently reports one moderate Next.js advisory affecting `next/image` disk-cache growth
 - the current MVP accepts that risk temporarily because the app is privately accessed and does not currently use `next/image`

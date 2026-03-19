@@ -121,6 +121,13 @@ PYTHONPATH=backend ./.venv/bin/python -c "from fastapi.testclient import TestCli
 set -a && source .env && set +a
 ```
 
+Security scan helpers:
+
+```bash
+./infra/scripts/dependency_audit.sh
+./infra/scripts/trivy_scan.sh
+```
+
 Frontend workflow is also available locally:
 
 ```bash
@@ -135,9 +142,10 @@ Containerized local app workflow:
 - to run the worker locally through Docker, use `docker compose --profile sync up --build worker`
 
 Local shell convenience setup:
-- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, and `gp-local-audit`
+- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-audit`, and `gp-local-trivy`
 - these helpers make it easier to start, stop, inspect, migrate, and health-check the local stack without retyping the repo path each time
 - `gp-local-audit` is the convenience wrapper for the combined dependency audit script at `./infra/scripts/dependency_audit.sh`
+- `gp-local-trivy` is the convenience wrapper for the Trivy scan script at `./infra/scripts/trivy_scan.sh`
 
 Verified locally:
 - `npm install`
@@ -153,6 +161,12 @@ Observed frontend package status:
 - `npm audit` currently reports one moderate Next.js advisory related to `next/image` disk-cache growth
 - current decision: accept that risk for the private MVP for now rather than force a breaking upgrade to Next.js 16
 - revisit this before public exposure or if the app begins using `next/image`
+
+Trivy note:
+- `./infra/scripts/trivy_scan.sh` can use either a local `trivy` install or the official Trivy Docker image
+- build the local backend and frontend images before running image scans if you want the default image names to exist locally
+- the script suppresses progress noise and focuses on `MEDIUM`, `HIGH`, and `CRITICAL` findings by default; set `TRIVY_SEVERITIES=LOW,MEDIUM,HIGH,CRITICAL` if you want a broader report
+- the filesystem scan skips `data/garth` by default so known local Garmin session tokens do not dominate the secret scan; set `TRIVY_SKIP_DIRS=` if you want to include that path
 
 ### Docker Desktop
 
