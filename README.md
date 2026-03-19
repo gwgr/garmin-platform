@@ -239,3 +239,28 @@ Note:
 - GitHub-native alerts and automatic security update PRs may still require the repository's security settings to be enabled in the GitHub UI after these files are pushed
 - the backend test suite now covers FIT parsing, analytics queries, health/activity API responses, and end-to-end ingestion of a sample FIT file via `PYTHONPATH=backend ./.venv/bin/pytest backend/tests`
 - the dashboard now includes a sync-status card backed by `GET /api/v1/sync/status`, and `/status/sync` provides a more detailed operator view
+
+## Security Checklist
+
+Before a production deploy, the current expected security-verification pass is:
+
+- run dependency checks:
+  - `./infra/scripts/dependency_audit.sh`
+- run container and repository scans:
+  - `./infra/scripts/trivy_scan.sh`
+- confirm the automated repository checks are not showing fresh security failures:
+  - CodeQL workflow status in GitHub Actions
+  - Dependabot/alert status in the GitHub Security tab
+- review any open Dependabot PRs and decide whether they should be merged, deferred, or explicitly accepted as risk
+- verify there are no unexpected secrets in the repository scan output
+- verify any remaining findings are understood and acceptable for the current deployment scope
+
+For the current private MVP, a deploy is generally acceptable when:
+- there are no unresolved `CRITICAL` findings
+- there are no unresolved unexpected `HIGH` findings in repo/config/container setup
+- known accepted risks are documented
+- the app test/build checks are green
+
+Current known accepted limitation:
+- these checks reduce risk, but they do not prove the codebase or images are vulnerability-free
+- some findings may reflect base-image packages, optional tooling, or private-MVP tradeoffs rather than immediately exploitable app defects

@@ -558,13 +558,21 @@ Current state:
 - README and deployment docs now describe the repo-level security automation baseline
 - repository security settings in the GitHub UI may still need to be enabled so Dependabot alerts and automatic security update PRs are active
 
-### Task 65
+### Task 65 `[done]`
 Document the security verification checklist for releases and production deploys.
 
 Scope:
 - include dependency scanning, container scanning, and secret scanning steps
 - define what must be green before production deploys
 - capture known limitations such as “best effort” detection rather than absolute guarantees
+
+Current state:
+- README now includes a concrete security checklist covering dependency scans, Trivy scans, CodeQL/Dependabot review, secret review, and acceptance of documented residual risk
+- deployment docs now define the current production release gate:
+  - no unresolved `CRITICAL` findings
+  - no unresolved unexpected `HIGH` findings in repo/config/container setup
+  - accepted temporary risks must be documented
+- the docs now explicitly state that these checks are best-effort risk reduction rather than proof of zero vulnerabilities
 
 ### Task 66
 Add CI automation to run backend and frontend verification on GitHub.
@@ -618,6 +626,15 @@ Scope:
 - decide which findings are true remediation targets versus accepted temporary MVP risk
 - document any remaining accepted frontend security findings clearly
 
+### Task 72
+Review and triage the initial Dependabot pull requests created by the new security automation.
+
+Scope:
+- group the current Dependabot PRs into low-risk merges, cautious upgrades, and deferred major-version changes
+- merge or close straightforward low-risk updates where appropriate
+- document why riskier updates such as major framework or Garmin-library jumps are deferred or accepted
+- keep the repo-level automation useful without creating alert fatigue or unreviewed upgrade churn
+
 ---
 
 ## Version 2 — Health Metrics Expansion
@@ -626,7 +643,7 @@ These tasks are intentionally deferred until after the MVP is complete.
 The MVP should continue to preserve raw data, keep ingestion separate from analytics,
 and avoid overloading `daily_metrics` so these additions remain straightforward later.
 
-### Task 72
+### Task 73
 Implement device identification for activities.
 
 Scope:
@@ -635,7 +652,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 73
+### Task 74
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -643,7 +660,7 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 74
+### Task 75
 Add HTTPS-friendly private access for the VPS deployment.
 
 Scope:
@@ -651,7 +668,7 @@ Scope:
 - support private HTTPS access to the frontend and backend over the tailnet
 - keep the setup compatible with the existing Docker Compose deployment model
 
-### Task 75
+### Task 76
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -659,7 +676,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 76
+### Task 77
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -667,10 +684,10 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 77
+### Task 78
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 78
+### Task 79
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -678,7 +695,7 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 79
+### Task 80
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -686,7 +703,7 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 80
+### Task 81
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
 ### Task 81

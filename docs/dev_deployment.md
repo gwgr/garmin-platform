@@ -486,6 +486,23 @@ Current repository-level security automation:
 - `.github/workflows/codeql.yml` now runs CodeQL for Python and JavaScript/TypeScript on pushes, pull requests, and a weekly schedule
 - GitHub-native alerts and automatic security update pull requests may still require repository security settings to be enabled in the GitHub UI
 
+Security verification checklist before production deploy:
+- run `./infra/scripts/dependency_audit.sh`
+- run `./infra/scripts/trivy_scan.sh`
+- confirm the backend/frontend verification checks are green
+- confirm CodeQL is not reporting fresh blocking findings
+- review current Dependabot PRs and security alerts before deciding what to merge or defer
+- verify no unexpected secrets are present in scan output
+- verify any remaining findings are understood, documented, and acceptable for the current private deployment scope
+
+Current release-gate expectation:
+- no unresolved `CRITICAL` findings
+- no unresolved unexpected `HIGH` findings in repository/config/container setup
+- accepted temporary risks must be explicitly documented
+
+Known limitation:
+- these checks are best-effort risk reduction, not proof that the deployed code or images contain zero vulnerabilities
+
 ---
 
 ## 14. What to Avoid
