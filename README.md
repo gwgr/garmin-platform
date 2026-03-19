@@ -120,7 +120,9 @@ Production note:
 - the protected production env file lives at `/opt/garmin-platform/.env`
 - after Garmin session state has been seeded successfully under `/opt/garmin-platform/data/garth`, remove `GARMIN_PASSWORD` from `/opt/garmin-platform/.env`
 - from then on, use `SKIP_GARMIN_BOOTSTRAP=1` for steady-state deploys
-- current private Tailscale access example: `http://prod-vps:3000` for the frontend and `http://prod-vps:8000/api/v1/health` for backend health
+- current private Tailscale access example: `http://prod-vps:3000` for the frontend
+- the production backend API is no longer published on a host port; it is only reachable on the private Compose network by the frontend and operational `docker compose exec` commands
+- production backend health checks should now use an in-stack command such as `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env exec -T backend python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5).read().decode())"`
 
 If you want to run Docker Compose commands manually on the VPS, include the external env/data paths explicitly:
 
@@ -132,7 +134,7 @@ APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data do
 Current VPS convenience setup:
 - helper functions can now be installed into `~/.bashrc` with:
   - `APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_vps_helpers.sh`
-- that installer adds documented helpers for `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, and `gp-timer-status`
+- that installer adds documented helpers for `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
 - the installed helpers assume the standard `/opt/garmin-platform` layout
 - if you source the installer instead of executing it, it also reloads the updated profile immediately
 

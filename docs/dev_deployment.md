@@ -353,7 +353,8 @@ Recommended initial access model:
 
 Current private-access example:
 - frontend via `http://prod-vps:3000`
-- backend health via `http://prod-vps:8000/api/v1/health`
+- backend API kept off the host network and reachable only on the private Compose network
+- backend health checked from inside the stack with `docker compose exec` rather than through a public host port
 
 If public exposure is needed:
 - use HTTPS
@@ -385,6 +386,7 @@ Agreed production direction:
 - install `docker.io` and `docker-compose-v2` from Ubuntu apt packages during VPS setup
 - run normal deploys as the chosen VPS app user after one-time system setup
 - keep the MVP API privately accessible rather than broadly public, with Tailscale-first access as the current baseline
+- enforce that private API boundary in production by not publishing the backend container port on the host at all; the frontend uses the internal Docker network instead
 
 Current repo state:
 - `infra/systemd/garmin-sync.service` runs the one-shot worker via Docker Compose with `SKIP_GARMIN_BOOTSTRAP=1`
@@ -395,6 +397,7 @@ Current repo state:
 - recommended manual backfill command: `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers`
 - current recommended order is: install timer files first, keep them disabled during backfill, then enable `garmin-sync.timer` for steady-state syncs
 - the backend now exposes `GET /api/v1/sync/status`, and the frontend dashboard links through to `/status/sync` for a lightweight operator-facing sync view
+- `docker-compose.prod.yml` now exposes only the frontend on the host; backend and Postgres stay private to the Compose network in the default production topology
 
 Agreed production secret direction:
 - store production secrets in a protected host env file such as `/opt/garmin-platform/.env`

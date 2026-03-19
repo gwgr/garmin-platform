@@ -590,13 +590,19 @@ Status:
 - the workflow also runs dependency-audit and Trivy checks in a separate advisory security job
 - the security job is intentionally non-blocking for now because the accepted Next.js audit finding and the remaining frontend Trivy cleanup are still being tracked separately in Tasks 71 and 72
 
-### Task 67
+### Task 67 `[done]`
 Implement private API access enforcement for the MVP deployment.
 
 Scope:
 - choose and implement a concrete access-control boundary for the private MVP deployment
 - align the choice with the current Tailscale-first deployment model and future HTTPS options
 - document how API access is restricted in practice, not just recommended
+
+Current state:
+- the production Compose topology no longer publishes the backend API port on the host, so the backend is private to the Docker network by default
+- the frontend now uses the backend over the internal Compose network in production, which preserves the existing server-side page fetches without exposing the API directly
+- the deploy script and VPS helpers now use in-stack backend health checks instead of relying on `http://localhost:8000`
+- docs now describe the concrete MVP access boundary as frontend-on-Tailscale with backend/private-network-only access, while leaving room for a future authenticated HTTPS layer
 
 ### Task 68
 Add a raw FIT reprocessing workflow to rebuild normalized activity data.
@@ -640,7 +646,16 @@ Scope:
 - document why riskier updates such as major framework or Garmin-library jumps are deferred or accepted
 - keep the repo-level automation useful without creating alert fatigue or unreviewed upgrade churn
 
-### Task 73 `[done]`
+### Task 73
+Review and address GitHub Actions runtime deprecation warnings from CI and repository automation.
+
+Scope:
+- identify warnings related to GitHub-hosted action runtime deprecations such as the Node.js 20 to Node.js 24 transition
+- distinguish between upstream GitHub-managed warnings and warnings caused by action versions pinned in this repo
+- update repo-owned workflow actions where compatible newer versions are available
+- document any warnings that are upstream-only and do not require immediate repo changes
+
+### Task 74 `[done]`
 Add versioned scripts to install documented helper functions into local and VPS shell profiles.
 
 Scope:
@@ -726,7 +741,7 @@ Candidate metrics:
 ### Task 82
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
-### Task 81
+### Task 83
 Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.
 
 Scope:
@@ -734,7 +749,7 @@ Scope:
 - keep the existing visual direction while reducing ad hoc global CSS
 - standardize spacing, typography, and responsive breakpoints across pages
 
-### Task 82
+### Task 84
 Adopt `shadcn/ui` components for core dashboard UI primitives.
 
 Scope:
@@ -742,7 +757,7 @@ Scope:
 - keep the component set intentionally small and aligned with the product’s visual language
 - avoid over-customized one-off components where standard primitives are a better fit
 
-### Task 82
+### Task 85
 Create a responsive dashboard shell and shared frontend page layout system.
 
 Scope:
@@ -750,7 +765,7 @@ Scope:
 - support desktop and mobile layouts cleanly
 - make dashboard, activities list, and activity detail pages share the same structural system
 
-### Task 83
+### Task 86
 Standardize frontend typography and spacing across all pages.
 
 Scope:
@@ -758,7 +773,7 @@ Scope:
 - remove inconsistent sizing/layout patterns across dashboard and activity pages
 - ensure charts, cards, filters, and tables align to the same rhythm
 
-### Task 84
+### Task 87
 Standardize frontend loading, empty, error, and partial-data states.
 
 Scope:
@@ -766,7 +781,7 @@ Scope:
 - apply them consistently across dashboard, activities list, and activity detail pages
 - make frontend behavior clearer when backend data is missing, delayed, or partially populated
 
-### Task 85
+### Task 88
 Add Playwright screenshot coverage for the main dashboard and activity pages.
 
 Scope:
@@ -774,7 +789,7 @@ Scope:
 - use stable fixture data or deterministic local test setup
 - make the screenshots useful for catching layout regressions during frontend refactors
 
-### Task 86
+### Task 89
 Create a deterministic fixture dataset for frontend development and screenshot testing.
 
 Scope:
@@ -782,13 +797,13 @@ Scope:
 - decouple UI regression testing from live Garmin sync state
 - support repeatable Playwright screenshot baselines
 
-### Task 87
+### Task 90
 Add downsampling or capped payload strategy for large activity stream responses.
 
-### Task 88
+### Task 91
 Verify that raw FIT files are never modified after download.
 
-### Task 89
+### Task 92
 Review database performance strategy for long-term `activity_records` growth.
 
 Scope:
@@ -796,5 +811,5 @@ Scope:
 - revisit the implementation-spec note about month-based partitioning
 - keep the solution aligned with expected single-user growth and query patterns
 
-### Task 90
+### Task 93
 Review all MVP acceptance criteria against `docs/prd.md`.

@@ -95,10 +95,8 @@ run_compose up -d frontend backend
 log "Current service status"
 run_compose ps
 
-if command -v curl >/dev/null 2>&1; then
-  log "Checking backend health endpoint"
-  curl -sf "http://localhost:8000/api/v1/health" >/dev/null
-fi
+log "Checking backend health endpoint"
+run_compose exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)"
 
 log "Recent backend logs"
 run_compose logs --tail=50 backend

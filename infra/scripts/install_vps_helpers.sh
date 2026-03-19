@@ -50,6 +50,12 @@ gp-logs() {
   cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" logs --tail=100 backend
 }
 
+# Check backend health from inside the production Compose network.
+gp-backend-health() {
+  gp-env
+  cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" exec -T backend python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5).read().decode())"
+}
+
 # Show the current Garmin sync timer status.
 gp-timer-status() {
   systemctl status garmin-sync.timer --no-pager
