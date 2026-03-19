@@ -16,6 +16,10 @@ log() {
   printf '[deploy] %s\n' "$*"
 }
 
+check_backend_health() {
+  run_compose exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)"
+}
+
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
     printf 'Required command not found: %s\n' "$1" >&2
@@ -96,7 +100,21 @@ log "Current service status"
 run_compose ps
 
 log "Checking backend health endpoint"
-run_compose exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)"
+for attempt in {1..15}; do
+  if check_backend_health >/dev/null 2>&1; then
+    log "Backend health check passed"
+    break
+  fi
+
+  if [[ "${attempt}" -eq 15 ]]; then
+    log "Backend health check did not pass in time"
+    run_compose logs --tail=50 backend
+    exit 1
+  fi
+
+  log "Backend not ready yet; retrying (${attempt}/15)"
+  sleep 2
+done
 
 log "Recent backend logs"
 run_compose logs --tail=50 backend
