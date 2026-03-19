@@ -199,6 +199,7 @@ By default, local Compose now starts `postgres`, `backend`, and `frontend` only.
 Current local shell convenience setup:
 - helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-audit`, and `gp-local-trivy`
 - those helpers assume the standard local repo path at `/Users/gregrowntree/Documents/Dev/garmin-platform`
+- `gp-local-trivy` can be defined to both display output and save it with `./infra/scripts/trivy_scan.sh | tee trivy.log`
 
 Useful commands:
 
@@ -232,6 +233,9 @@ Note:
 - if `trivy` is not installed locally, `./infra/scripts/trivy_scan.sh` falls back to the official `aquasec/trivy` Docker image
 - the Trivy script now suppresses progress noise and focuses on `MEDIUM`, `HIGH`, and `CRITICAL` findings by default; override with `TRIVY_SEVERITIES=LOW,MEDIUM,HIGH,CRITICAL` if you want a broader report
 - the Trivy filesystem scan skips `data/garth` by default so known local Garmin session tokens do not dominate the secret scan; override with `TRIVY_SKIP_DIRS=` if you want to include that path
+- `trivy.log` is ignored by git so local scan captures can be kept in the repo root without accidental commits
 - the current `npm audit` output includes one moderate Next.js advisory tied to `next/image` disk-cache growth; this is an accepted temporary MVP risk because the app is private and does not currently use `next/image`, but it should be revisited before broader exposure
+- repository-level security automation now includes `.github/dependabot.yml` for weekly dependency update checks and `.github/workflows/codeql.yml` for CodeQL scanning on push, pull request, and a weekly schedule
+- GitHub-native alerts and automatic security update PRs may still require the repository's security settings to be enabled in the GitHub UI after these files are pushed
 - the backend test suite now covers FIT parsing, analytics queries, health/activity API responses, and end-to-end ingestion of a sample FIT file via `PYTHONPATH=backend ./.venv/bin/pytest backend/tests`
 - the dashboard now includes a sync-status card backed by `GET /api/v1/sync/status`, and `/status/sync` provides a more detailed operator view

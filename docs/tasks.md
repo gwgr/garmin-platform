@@ -544,13 +544,19 @@ Current state:
 - README, local setup, backend notes, and deployment docs now describe how to run the scan locally and reuse it later in CI
 - the backend and frontend Dockerfiles now run as non-root users and include image `HEALTHCHECK` instructions in response to the first high-signal Trivy misconfiguration findings
 
-### Task 64
+### Task 64 `[done]`
 Enable repository-level dependency monitoring and code scanning.
 
 Scope:
 - enable GitHub Dependabot alerts and security updates
 - enable GitHub CodeQL or equivalent code scanning for Python and TypeScript
 - document the expected baseline security workflow
+
+Current state:
+- `.github/dependabot.yml` now configures weekly Dependabot version-update checks for `uv`, frontend `npm`, and GitHub Actions dependencies
+- `.github/workflows/codeql.yml` now runs CodeQL scanning for Python and JavaScript/TypeScript on push, pull request, and a weekly schedule
+- README and deployment docs now describe the repo-level security automation baseline
+- repository security settings in the GitHub UI may still need to be enabled so Dependabot alerts and automatic security update PRs are active
 
 ### Task 65
 Document the security verification checklist for releases and production deploys.

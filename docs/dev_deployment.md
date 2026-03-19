@@ -481,6 +481,11 @@ Current accepted risk:
 - the current MVP accepts that risk temporarily because the app is privately accessed and does not currently use `next/image`
 - do not hide this finding; revisit it before public exposure or a major frontend upgrade cycle
 
+Current repository-level security automation:
+- `.github/dependabot.yml` now configures weekly Dependabot version-update checks for Python/`uv`, frontend `npm`, and GitHub Actions dependencies
+- `.github/workflows/codeql.yml` now runs CodeQL for Python and JavaScript/TypeScript on pushes, pull requests, and a weekly schedule
+- GitHub-native alerts and automatic security update pull requests may still require repository security settings to be enabled in the GitHub UI
+
 ---
 
 ## 14. What to Avoid

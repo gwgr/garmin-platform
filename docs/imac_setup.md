@@ -146,6 +146,7 @@ Local shell convenience setup:
 - these helpers make it easier to start, stop, inspect, migrate, and health-check the local stack without retyping the repo path each time
 - `gp-local-audit` is the convenience wrapper for the combined dependency audit script at `./infra/scripts/dependency_audit.sh`
 - `gp-local-trivy` is the convenience wrapper for the Trivy scan script at `./infra/scripts/trivy_scan.sh`
+- `gp-local-trivy` can also be defined to save a log while still showing output by using `./infra/scripts/trivy_scan.sh | tee trivy.log`
 
 Verified locally:
 - `npm install`
@@ -167,6 +168,7 @@ Trivy note:
 - build the local backend and frontend images before running image scans if you want the default image names to exist locally
 - the script suppresses progress noise and focuses on `MEDIUM`, `HIGH`, and `CRITICAL` findings by default; set `TRIVY_SEVERITIES=LOW,MEDIUM,HIGH,CRITICAL` if you want a broader report
 - the filesystem scan skips `data/garth` by default so known local Garmin session tokens do not dominate the secret scan; set `TRIVY_SKIP_DIRS=` if you want to include that path
+- `trivy.log` is now ignored by git so local scan captures can be kept in the repo root without accidental commits
 
 ### Docker Desktop
 

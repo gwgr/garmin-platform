@@ -7,4 +7,5 @@ node_modules/
 dist/
 data/
 postgres-data/
+trivy.log
 .DS_Store
