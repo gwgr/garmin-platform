@@ -6,7 +6,7 @@ from app.parsers import FitParserService
 
 
 FIXTURE_FIT_PATH = (
-    Path(__file__).resolve().parents[2] / "data" / "raw" / "activities" / "2026" / "03" / "22198027348.fit"
+    Path(__file__).resolve().parent / "fixtures" / "22198027348.fit"
 )
 
 
