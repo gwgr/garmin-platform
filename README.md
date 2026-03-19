@@ -202,9 +202,10 @@ By default, local Compose now starts `postgres`, `backend`, and `frontend` only.
 Current local shell convenience setup:
 - helper functions can now be installed into `~/.zshrc` with:
   - `./infra/scripts/install_local_helpers.sh`
-- that installer adds documented helpers for `gp-local-root`, `gp-local-git-pull`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-audit`, and `gp-local-trivy`
+- that installer adds documented helpers for `gp-local-root`, `gp-local-git-pull`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-ci-check`, `gp-local-audit`, and `gp-local-trivy`
 - the installed helpers assume the standard local repo path at `/Users/gregrowntree/Documents/Dev/garmin-platform`
 - if you source the installer instead of executing it, it also reloads the updated profile immediately
+- `gp-local-ci-check` runs the same required checks as GitHub CI: backend tests plus frontend build
 
 Useful commands:
 
@@ -241,6 +242,7 @@ Note:
 - `trivy.log` is ignored by git so local scan captures can be kept in the repo root without accidental commits
 - the current `npm audit` output includes one moderate Next.js advisory tied to `next/image` disk-cache growth; this is an accepted temporary MVP risk because the app is private and does not currently use `next/image`, but it should be revisited before broader exposure
 - repository-level security automation now includes `.github/dependabot.yml` for weekly dependency update checks and `.github/workflows/codeql.yml` for CodeQL scanning on push, pull request, and a weekly schedule
+- `.github/workflows/ci.yml` now runs backend tests and frontend build verification on push and pull request, with dependency-audit and Trivy checks running in a separate advisory CI job for now
 - GitHub-native alerts and automatic security update PRs may still require the repository's security settings to be enabled in the GitHub UI after these files are pushed
 - the backend test suite now covers FIT parsing, analytics queries, health/activity API responses, and end-to-end ingestion of a sample FIT file via `PYTHONPATH=backend ./.venv/bin/pytest backend/tests`
 - the dashboard now includes a sync-status card backed by `GET /api/v1/sync/status`, and `/status/sync` provides a more detailed operator view

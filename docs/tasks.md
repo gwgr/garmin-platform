@@ -574,7 +574,7 @@ Current state:
   - accepted temporary risks must be documented
 - the docs now explicitly state that these checks are best-effort risk reduction rather than proof of zero vulnerabilities
 
-### Task 66
+### Task 66 `[done]`
 Add CI automation to run backend and frontend verification on GitHub.
 
 Scope:
@@ -584,6 +584,11 @@ Scope:
 - run the repo-defined Trivy checks from Task 63 in CI once they exist
 - keep Task 64 separate as GitHub-native repository security automation rather than a normal CI job step
 - make CI the default place where regressions are caught before deployment
+
+Status:
+- `.github/workflows/ci.yml` now runs backend tests and frontend build verification on `push` and `pull_request` to `main`
+- the workflow also runs dependency-audit and Trivy checks in a separate advisory security job
+- the security job is intentionally non-blocking for now because the accepted Next.js audit finding and the remaining frontend Trivy cleanup are still being tracked separately in Tasks 71 and 72
 
 ### Task 67
 Implement private API access enforcement for the MVP deployment.

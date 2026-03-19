@@ -487,7 +487,13 @@ Current accepted risk:
 Current repository-level security automation:
 - `.github/dependabot.yml` now configures weekly Dependabot version-update checks for Python/`uv`, frontend `npm`, and GitHub Actions dependencies
 - `.github/workflows/codeql.yml` now runs CodeQL for Python and JavaScript/TypeScript on pushes, pull requests, and a weekly schedule
+- `.github/workflows/ci.yml` now runs backend tests and frontend build checks on push and pull request, with dependency-audit and Trivy checks included as an advisory CI job
 - GitHub-native alerts and automatic security update pull requests may still require repository security settings to be enabled in the GitHub UI
+
+Current CI posture:
+- backend tests and frontend build are the required regression gates
+- dependency-audit and Trivy checks run in CI as advisory signals for now, because the current accepted Next.js audit finding and the remaining frontend Trivy items are still being tracked separately
+- once the remaining accepted security findings are reduced, the advisory security job can be tightened into a blocking gate
 
 Security verification checklist before production deploy:
 - run `./infra/scripts/dependency_audit.sh`

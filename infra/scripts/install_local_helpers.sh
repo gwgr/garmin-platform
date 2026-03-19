@@ -104,6 +104,20 @@ gp-local-health() {
   curl -sf http://localhost:8000/api/v1/health
 }
 
+# Run the same required checks as GitHub CI: backend tests and frontend build.
+gp-local-ci-check() {
+  gp-local-root
+  uv sync --frozen --dev
+  PYTHONPATH=backend uv run pytest backend/tests
+  (
+    cd frontend
+    npm ci
+    NEXT_PUBLIC_API_BASE_URL="http://127.0.0.1:8000/api/v1" \
+    INTERNAL_API_BASE_URL="http://127.0.0.1:8000/api/v1" \
+    npm run build
+  )
+}
+
 # Run backend and frontend dependency vulnerability checks for the local repo.
 gp-local-audit() {
   gp-local-root
