@@ -457,6 +457,16 @@ Security baseline to add:
 - GitHub Dependabot alerts/security updates and repository code scanning such as CodeQL
 - treat these checks as a release gate where practical, while acknowledging they reduce risk rather than guaranteeing zero vulnerabilities
 
+Current dependency-audit workflow:
+- run `uv run pip-audit` from the repo root for backend Python dependencies
+- run `cd frontend && npm run audit` for frontend npm dependencies
+- use `./infra/scripts/dependency_audit.sh` as the combined command locally and as the intended command to reuse in future CI
+
+Current accepted risk:
+- `npm audit` currently reports one moderate Next.js advisory affecting `next/image` disk-cache growth
+- the current MVP accepts that risk temporarily because the app is privately accessed and does not currently use `next/image`
+- do not hide this finding; revisit it before public exposure or a major frontend upgrade cycle
+
 ---
 
 ## 14. What to Avoid

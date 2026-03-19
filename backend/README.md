@@ -33,6 +33,7 @@ Current schema notes:
 
 Development notes:
 - `httpx` is installed as a dev dependency so `fastapi.testclient` works for local endpoint verification
+- `pip-audit` is installed as a dev dependency so backend dependency vulnerability checks can run with `uv run pip-audit`
 - `get_garmin_client()` now always uses the `garth`-backed implementation and can resume from saved `GARTH_HOME` session state without requiring `GARMIN_PASSWORD`
 - Garmin auth/login, activity listing, and FIT download calls now use configurable retry/backoff for HTTP `429` and transient request failures via `GARMIN_RETRY_DELAYS_SECONDS`
 - backend logs now emit one-line JSON records, and `LOG_LEVEL` can be set from the environment
@@ -45,6 +46,7 @@ Development notes:
 - the sync worker now performs an additional duplicate source-activity check inside the ingest loop so a duplicate that appears mid-run is skipped cleanly instead of failing the whole sync
 - invalid or empty FIT downloads are now quarantined before normal storage, and corrupt FIT files that fail parsing are skipped cleanly after quarantine instead of aborting the whole batch
 - the backend now exposes `GET /api/v1/sync/status` for frontend/operator visibility into recent sync health
+- combined dependency vulnerability checks can be run from the repo root with `./infra/scripts/dependency_audit.sh`, which runs both `uv run pip-audit` and `cd frontend && npm run audit`
 - backend tests now cover FIT parsing, analytics calculations, `/api/v1/health`, activity list/detail endpoints, full ingestion of a sample FIT file, Garmin retry behavior, invalid-download quarantine behavior, sync-status responses, and sync-worker duplicate/corrupt-file skip behavior
 
 Container runtime:

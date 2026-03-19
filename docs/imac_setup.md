@@ -102,7 +102,7 @@ Current starter set:
 
 ```bash
 uv add fastapi fitparse garth psycopg sqlalchemy alembic uvicorn
-uv add --dev httpx pytest ruff
+uv add --dev httpx pip-audit pytest ruff
 ```
 
 To refresh the environment from the lockfile:
@@ -116,6 +116,7 @@ To run tools inside the project environment:
 ```bash
 uv run pytest
 uv run ruff check .
+uv run pip-audit
 PYTHONPATH=backend ./.venv/bin/python -c "from fastapi.testclient import TestClient; from app.main import app; client = TestClient(app); print(client.get('/api/v1/health').json())"
 set -a && source .env && set +a
 ```
@@ -134,8 +135,9 @@ Containerized local app workflow:
 - to run the worker locally through Docker, use `docker compose --profile sync up --build worker`
 
 Local shell convenience setup:
-- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, and `gp-local-health`
+- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, and `gp-local-audit`
 - these helpers make it easier to start, stop, inspect, migrate, and health-check the local stack without retyping the repo path each time
+- `gp-local-audit` is the convenience wrapper for the combined dependency audit script at `./infra/scripts/dependency_audit.sh`
 
 Verified locally:
 - `npm install`
@@ -148,7 +150,9 @@ Verified locally:
 Observed frontend package status:
 - `next@15.5.13`
 - build passes locally
-- audit is clean after upgrading from the initially scaffolded vulnerable Next.js version
+- `npm audit` currently reports one moderate Next.js advisory related to `next/image` disk-cache growth
+- current decision: accept that risk for the private MVP for now rather than force a breaking upgrade to Next.js 16
+- revisit this before public exposure or if the app begins using `next/image`
 
 ### Docker Desktop
 

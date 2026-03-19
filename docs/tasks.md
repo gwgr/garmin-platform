@@ -514,13 +514,19 @@ Current state:
 - the status card links to `/status/sync`, which shows last attempt, last success, last synced activity timestamp, last source ID, and recent error summary
 - backend tests now cover the sync-status endpoint, and the frontend build includes the new `/status/sync` page
 
-### Task 62
+### Task 62 `[done]`
 Add automated dependency vulnerability scanning for backend and frontend.
 
 Scope:
 - add `pip-audit` for Python dependency checks
 - run `npm audit` for frontend dependency checks
 - document how to run both locally and in CI
+
+Current state:
+- `pip-audit` is now installed as a Python dev dependency and can be run with `uv run pip-audit`
+- the frontend now exposes `npm run audit` as the standard `npm audit` wrapper
+- `infra/scripts/dependency_audit.sh` now runs both checks together from the repo root
+- README and deployment docs now describe the local command shape and note that the combined script is intended for reuse in CI
 
 ### Task 63
 Add Trivy scanning for filesystem, secrets, and built container images.
@@ -552,6 +558,9 @@ Add CI automation to run backend and frontend verification on GitHub.
 Scope:
 - run backend tests automatically on push and pull request
 - run frontend build verification automatically on push and pull request
+- run the repo-defined security checks from Task 62 in CI, including `uv run pip-audit`, `cd frontend && npm run audit`, or the combined `./infra/scripts/dependency_audit.sh`
+- run the repo-defined Trivy checks from Task 63 in CI once they exist
+- keep Task 64 separate as GitHub-native repository security automation rather than a normal CI job step
 - make CI the default place where regressions are caught before deployment
 
 ### Task 67
