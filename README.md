@@ -192,6 +192,12 @@ From the repository root:
 docker compose up --build
 ```
 
+By default, local Compose now starts `postgres`, `backend`, and `frontend` only. The scheduled `worker` is opt-in so local UI work does not immediately begin Garmin sync activity.
+
+Current local shell convenience setup:
+- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, and `gp-local-health`
+- those helpers assume the standard local repo path at `/Users/gregrowntree/Documents/Dev/garmin-platform`
+
 Useful commands:
 
 ```bash
@@ -205,7 +211,7 @@ PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth
 PYTHONPATH=backend ./.venv/bin/python -m app.workers
 PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync
 docker compose up --build backend
-docker compose up --build worker
+docker compose --profile sync up --build worker
 docker compose ps
 docker compose -f docker-compose.prod.yml config
 ```
@@ -213,6 +219,8 @@ docker compose -f docker-compose.prod.yml config
 Note:
 - `.env` keeps `DATABASE_URL` pointed at `localhost` for host-based development
 - the Compose files override that value to use the `postgres` service hostname for container-to-container networking
+- the containerized frontend now uses `INTERNAL_API_BASE_URL=http://backend:8000/api/v1` for server-side requests while the browser continues using `NEXT_PUBLIC_API_BASE_URL`
 - set `GARTH_HOME` to a local-only directory such as `./data/garth` so Garmin session state stays out of git
 - set `LOG_LEVEL` in `.env` if you want quieter or more verbose backend logs
 - the backend test suite now covers FIT parsing, analytics queries, health/activity API responses, and end-to-end ingestion of a sample FIT file via `PYTHONPATH=backend ./.venv/bin/pytest backend/tests`
+- the dashboard now includes a sync-status card backed by `GET /api/v1/sync/status`, and `/status/sync` provides a more detailed operator view

@@ -44,7 +44,8 @@ Development notes:
 - a real local worker run has already been verified against the Postgres/Garmin setup and confirmed to import additional historical activities
 - the sync worker now performs an additional duplicate source-activity check inside the ingest loop so a duplicate that appears mid-run is skipped cleanly instead of failing the whole sync
 - invalid or empty FIT downloads are now quarantined before normal storage, and corrupt FIT files that fail parsing are skipped cleanly after quarantine instead of aborting the whole batch
-- backend tests now cover FIT parsing, analytics calculations, `/api/v1/health`, activity list/detail endpoints, full ingestion of a sample FIT file, Garmin retry behavior, invalid-download quarantine behavior, and sync-worker duplicate/corrupt-file skip behavior
+- the backend now exposes `GET /api/v1/sync/status` for frontend/operator visibility into recent sync health
+- backend tests now cover FIT parsing, analytics calculations, `/api/v1/health`, activity list/detail endpoints, full ingestion of a sample FIT file, Garmin retry behavior, invalid-download quarantine behavior, sync-status responses, and sync-worker duplicate/corrupt-file skip behavior
 
 Container runtime:
 - the backend Docker image now runs the FastAPI app with `uvicorn`

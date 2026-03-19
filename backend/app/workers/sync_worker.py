@@ -66,7 +66,7 @@ class GarminSyncWorker:
         *,
         activity,
     ) -> datetime:
-        checkpoint = checkpoint_service.upsert_checkpoint(
+        checkpoint = checkpoint_service.mark_sync_succeeded(
             GARMIN_ACTIVITY_SYNC_KEY,
             last_synced_at=activity.start_time,
             last_source_id=activity.source_activity_id,
@@ -85,6 +85,10 @@ class GarminSyncWorker:
         checkpoint_service = SyncCheckpointService(session)
 
         try:
+            current_checkpoint = checkpoint_service.get_checkpoint(GARMIN_ACTIVITY_SYNC_KEY)
+            checkpoint_service.mark_sync_started(GARMIN_ACTIVITY_SYNC_KEY)
+            session.commit()
+
             fetch_result = GarminActivityFetcher(
                 self._garmin_client,
                 checkpoint_service,
@@ -201,10 +205,18 @@ class GarminSyncWorker:
 
             if not new_activities and fetch_result.activities:
                 latest_activity = fetch_result.activities[-1]
-                checkpoint = checkpoint_service.upsert_checkpoint(
+                checkpoint = checkpoint_service.mark_sync_succeeded(
                     GARMIN_ACTIVITY_SYNC_KEY,
                     last_synced_at=latest_activity.start_time,
                     last_source_id=latest_activity.source_activity_id,
+                )
+                session.commit()
+                checkpoint_updated_to = checkpoint.last_synced_at
+            elif not fetch_result.activities:
+                checkpoint = checkpoint_service.mark_sync_succeeded(
+                    GARMIN_ACTIVITY_SYNC_KEY,
+                    last_synced_at=current_checkpoint.last_synced_at if current_checkpoint else None,
+                    last_source_id=current_checkpoint.last_source_id if current_checkpoint else None,
                 )
                 session.commit()
                 checkpoint_updated_to = checkpoint.last_synced_at
@@ -231,6 +243,11 @@ class GarminSyncWorker:
             )
         except Exception:
             session.rollback()
+            checkpoint_service.mark_sync_failed(
+                GARMIN_ACTIVITY_SYNC_KEY,
+                error_summary="Sync worker failed before completing the current batch.",
+            )
+            session.commit()
             log_event(
                 logger,
                 logging.ERROR,

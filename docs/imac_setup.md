@@ -128,6 +128,15 @@ npm install
 npm run dev
 ```
 
+Containerized local app workflow:
+- `docker compose up --build` starts `postgres`, `backend`, and `frontend`
+- the scheduled `worker` is now opt-in for local development so Garmin sync does not begin automatically
+- to run the worker locally through Docker, use `docker compose --profile sync up --build worker`
+
+Local shell convenience setup:
+- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, and `gp-local-health`
+- these helpers make it easier to start, stop, inspect, migrate, and health-check the local stack without retyping the repo path each time
+
 Verified locally:
 - `npm install`
 - `npm run build`
@@ -207,6 +216,11 @@ Configured local development values:
 - `DATABASE_URL=postgresql+psycopg://garmin:garmin_local_dev_password@localhost:5432/garmin_platform`
 - `GARTH_HOME=./data/garth`
 - `LOG_LEVEL=INFO`
+- `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1`
+
+Compose-specific networking note:
+- the browser continues using `NEXT_PUBLIC_API_BASE_URL`
+- the containerized frontend now uses `INTERNAL_API_BASE_URL=http://backend:8000/api/v1` for server-side requests between containers
 
 Garmin integration notes:
 - Garmin email may be kept in local `.env`, but steady-state local sync now resumes from saved `GARTH_HOME` session files without requiring `GARMIN_PASSWORD`

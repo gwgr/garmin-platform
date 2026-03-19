@@ -1,4 +1,5 @@
-const defaultApiBaseUrl = "http://localhost:8000/api/v1";
+const defaultBrowserApiBaseUrl = "http://localhost:8000/api/v1";
+const defaultServerApiBaseUrl = "http://backend:8000/api/v1";
 
 export type PaginatedResponse<T> = {
   items: T[];
@@ -94,6 +95,20 @@ export type AnalyticsTrends = {
   resting_heart_rate_trend: RestingHeartRatePoint[];
 };
 
+export type SyncStatus = {
+  sync_key: string;
+  state: "healthy" | "warning" | "error";
+  summary: string;
+  is_stale: boolean;
+  last_attempted_at: string | null;
+  last_succeeded_at: string | null;
+  last_synced_at: string | null;
+  last_source_id: string | null;
+  last_run_status: string | null;
+  consecutive_failures: number;
+  last_error_summary: string | null;
+};
+
 export type ActivityListParams = {
   page?: number;
   pageSize?: number;
@@ -110,7 +125,11 @@ export type DailyMetricsParams = {
 };
 
 function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_BASE_URL ?? defaultApiBaseUrl;
+  if (typeof window === "undefined") {
+    return process.env.INTERNAL_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? defaultServerApiBaseUrl;
+  }
+
+  return process.env.NEXT_PUBLIC_API_BASE_URL ?? defaultBrowserApiBaseUrl;
 }
 
 function buildUrl(path: string, params?: Record<string, string | number | undefined>): string {
@@ -178,4 +197,8 @@ export async function getDailyMetrics(
 
 export async function getAnalyticsTrends(): Promise<AnalyticsTrends> {
   return fetchJson<AnalyticsTrends>("/analytics/trends");
+}
+
+export async function getSyncStatus(): Promise<SyncStatus> {
+  return fetchJson<SyncStatus>("/sync/status");
 }

@@ -505,13 +505,14 @@ Current state:
 - if a duplicate source ID slips past the initial dedupe stage, the worker now logs `worker.sync.duplicate_activity_skipped`, advances the sync checkpoint, and continues cleanly
 - backend test coverage now includes an explicit worker test for this duplicate-skip path
 
-### Task 61
+### Task 61 `[done]`
 Expose sync health and recent ingestion errors in the frontend.
 
-Scope:
-- add a compact sync-status card to the main dashboard page
-- show healthy, warning, or error state based on recent sync outcome and staleness
-- make the status card click through to a more detailed sync-status view with last success, last attempt, and recent error summary
+Current state:
+- the backend now exposes `GET /api/v1/sync/status` backed by persisted sync checkpoint metadata
+- the dashboard now shows a compact sync-status card with healthy, warning, or error state
+- the status card links to `/status/sync`, which shows last attempt, last success, last synced activity timestamp, last source ID, and recent error summary
+- backend tests now cover the sync-status endpoint, and the frontend build includes the new `/status/sync` page
 
 ### Task 62
 Add automated dependency vulnerability scanning for backend and frontend.

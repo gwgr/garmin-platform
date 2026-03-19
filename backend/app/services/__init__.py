@@ -38,6 +38,7 @@ from app.services.garmin_activity_fetcher import (
     GarminActivityFetchResult,
 )
 from app.services.sync_checkpoint import SyncCheckpointService, SyncCheckpointState
+from app.services.sync_status import SyncStatusResult, SyncStatusService
 from app.services.raw_file_storage import RawFileSaveResult, RawFileStorageService
 
 __all__ = [
@@ -72,6 +73,8 @@ __all__ = [
     "RestingHeartRatePoint",
     "SyncCheckpointService",
     "SyncCheckpointState",
+    "SyncStatusResult",
+    "SyncStatusService",
     "TrendWindowSummary",
     "get_garmin_client",
 ]

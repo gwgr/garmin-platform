@@ -23,6 +23,8 @@ services:
   worker:
     <<: *backend-common
     container_name: garmin-platform-worker
+    profiles:
+      - sync
     command: ["python", "-m", "app.workers.scheduled_sync"]
 
   frontend:
@@ -31,6 +33,10 @@ services:
       dockerfile: frontend/Dockerfile
     container_name: garmin-platform-frontend
     restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      INTERNAL_API_BASE_URL: "http://backend:8000/api/v1"
     ports:
       - "3000:3000"
     depends_on:

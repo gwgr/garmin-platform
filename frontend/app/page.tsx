@@ -4,10 +4,12 @@ import {
   type ActivityListItem,
   type AnalyticsTrends,
   type DailyMetricItem,
+  type SyncStatus,
   getActivities,
   getAnalyticsTrends,
   getDailyMetrics,
   getFrontendApiBaseUrl,
+  getSyncStatus,
 } from "../lib/api";
 import { formatDateLabel, formatDistance, formatDuration } from "../lib/formatting";
 
@@ -19,19 +21,22 @@ async function loadDashboardData(): Promise<{
   trends: AnalyticsTrends | null;
   recentActivities: ActivityListItem[];
   dailyMetrics: DailyMetricItem[];
+  syncStatus: SyncStatus | null;
   loadError: string | null;
 }> {
   try {
-    const [trends, activitiesResponse, metricsResponse] = await Promise.all([
+    const [trends, activitiesResponse, metricsResponse, syncStatus] = await Promise.all([
       getAnalyticsTrends(),
       getActivities({ page: 1, pageSize: 5 }),
       getDailyMetrics({ page: 1, pageSize: 5 }),
+      getSyncStatus(),
     ]);
 
     return {
       trends,
       recentActivities: activitiesResponse.items,
       dailyMetrics: metricsResponse.items,
+      syncStatus,
       loadError: null,
     };
   } catch (error) {
@@ -39,13 +44,14 @@ async function loadDashboardData(): Promise<{
       trends: null,
       recentActivities: [],
       dailyMetrics: [],
+      syncStatus: null,
       loadError: error instanceof Error ? error.message : "Unable to load dashboard data.",
     };
   }
 }
 
 export default async function HomePage() {
-  const { trends, recentActivities, dailyMetrics, loadError } = await loadDashboardData();
+  const { trends, recentActivities, dailyMetrics, syncStatus, loadError } = await loadDashboardData();
   const currentWeek = trends?.current_week;
   const currentMonth = trends?.current_month;
   const recentCounts = trends?.recent_activity_counts;
@@ -89,7 +95,21 @@ export default async function HomePage() {
           <h2>Current training picture</h2>
         </div>
 
-        <div className="stat-grid">
+        <div className="stat-grid four-up">
+          <article className="panel stat-card sync-status-card">
+            <span className="panel-label">Sync Status</span>
+            <p className="stat-value sync-status-value">
+              <span className={`status-dot status-${syncStatus?.state ?? "warning"}`} />
+              {syncStatus?.state ?? "warning"}
+            </p>
+            <p className="stat-subtle">
+              {syncStatus?.summary ?? "Sync status is unavailable right now."}
+            </p>
+            <Link className="text-link" href="/status/sync">
+              View sync details
+            </Link>
+          </article>
+
           <article className="panel stat-card">
             <span className="panel-label">This Week</span>
             <p className="stat-value">

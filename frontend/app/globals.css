@@ -99,6 +99,10 @@ code {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.four-up {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .chart-grid {
   display: grid;
   gap: 18px;
@@ -320,6 +324,42 @@ code {
   font-weight: 600;
 }
 
+.warning-text {
+  margin: 0;
+  color: #9a4528;
+  line-height: 1.6;
+}
+
+.sync-status-card {
+  min-height: 182px;
+}
+
+.sync-status-value {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-transform: capitalize;
+}
+
+.status-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.status-healthy {
+  background: #2d8a57;
+}
+
+.status-warning {
+  background: #d28c1b;
+}
+
+.status-error {
+  background: #be3e2d;
+}
+
 .table-stack {
   display: grid;
 }
@@ -494,6 +534,7 @@ code {
 
   .hero-grid,
   .stat-grid,
+  .four-up,
   .chart-grid,
   .split {
     grid-template-columns: 1fr;

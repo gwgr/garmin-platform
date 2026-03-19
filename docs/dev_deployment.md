@@ -391,6 +391,7 @@ Current repo state:
 - for the initial large historical import, prefer manual one-shot worker runs before enabling the timer so Garmin rate limits and long-running backfill behavior can be observed directly
 - recommended manual backfill command: `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers`
 - current recommended order is: install timer files first, keep them disabled during backfill, then enable `garmin-sync.timer` for steady-state syncs
+- the backend now exposes `GET /api/v1/sync/status`, and the frontend dashboard links through to `/status/sync` for a lightweight operator-facing sync view
 
 Agreed production secret direction:
 - store production secrets in a protected host env file such as `/opt/garmin-platform/.env`
