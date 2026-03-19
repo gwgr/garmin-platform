@@ -16,6 +16,14 @@ from app.observability import log_event
 logger = logging.getLogger(__name__)
 
 
+class FitFileValidationError(ValueError):
+    """Raised when a FIT payload or file cannot be validated for ingestion."""
+
+
+class CorruptFitFileError(FitFileValidationError):
+    """Raised when a FIT file appears unreadable or malformed."""
+
+
 @dataclass(frozen=True)
 class ParsedActivitySummary:
     name: str | None
@@ -54,6 +62,30 @@ class ParsedActivityRecord:
 
 class FitParserService:
     """Parse Garmin FIT files into normalized summary data."""
+
+    def validate_fit_payload(self, payload: bytes) -> None:
+        try:
+            fit_file = FitFile(self._read_fit_bytes(payload))
+            fit_file.parse()
+            session_message = next(iter(fit_file.get_messages("session")), None)
+            if session_message is None:
+                raise CorruptFitFileError("No session message found in FIT payload.")
+        except FitFileValidationError:
+            raise
+        except Exception as exc:
+            self._raise_validation_error("fit.validate_payload.failed", "<bytes>", exc)
+
+    def validate_fit_file(self, fit_path: str | Path) -> None:
+        try:
+            fit_file = FitFile(self._read_fit_bytes(fit_path))
+            fit_file.parse()
+            session_message = next(iter(fit_file.get_messages("session")), None)
+            if session_message is None:
+                raise CorruptFitFileError(f"No session message found in FIT file: {fit_path}")
+        except FitFileValidationError:
+            raise
+        except Exception as exc:
+            self._raise_validation_error("fit.validate_file.failed", fit_path, exc)
 
     def parse_activity_summary(self, fit_path: str | Path) -> ParsedActivitySummary:
         try:
@@ -197,16 +229,24 @@ class FitParserService:
 
         return numeric_value * (180.0 / 2**31)
 
-    def _read_fit_bytes(self, fit_path: str | Path) -> io.BytesIO:
-        payload = Path(fit_path).read_bytes()
+    def _read_fit_bytes(self, fit_source: str | Path | bytes) -> io.BytesIO:
+        if isinstance(fit_source, bytes):
+            payload = fit_source
+        else:
+            payload = Path(fit_source).read_bytes()
         if not is_zipfile(io.BytesIO(payload)):
             return io.BytesIO(payload)
 
         with ZipFile(io.BytesIO(payload)) as archive:
             fit_members = [name for name in archive.namelist() if name.lower().endswith(".fit")]
             if not fit_members:
-                raise ValueError(f"No .fit member found in archive: {fit_path}")
+                source_label = fit_source if not isinstance(fit_source, bytes) else "<bytes>"
+                raise CorruptFitFileError(f"No .fit member found in archive: {source_label}")
             return io.BytesIO(archive.read(fit_members[0]))
+
+    def _raise_validation_error(self, event: str, fit_path: str | Path, exc: Exception) -> None:
+        self._log_parser_failure(event, fit_path, exc)
+        raise CorruptFitFileError(f"FIT validation failed for {fit_path}") from exc
 
     def _log_parser_failure(self, event: str, fit_path: str | Path, exc: Exception) -> None:
         logger.log(

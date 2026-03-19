@@ -8,7 +8,7 @@ import io
 import logging
 from pathlib import Path
 import time
-from typing import Protocol
+from typing import Callable, Protocol
 from zipfile import ZipFile, is_zipfile
 
 from requests import HTTPError, RequestException
@@ -19,7 +19,6 @@ from app.observability import log_event
 
 logger = logging.getLogger(__name__)
 RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
-GARMIN_RETRY_DELAYS_SECONDS = (15, 30, 60)
 
 
 @dataclass(frozen=True)
@@ -96,10 +95,14 @@ class GarthGarminClient:
         email: str | None,
         password: str | None,
         garth_home: Path,
+        retry_delays_seconds: tuple[int, ...],
+        sleep_func: Callable[[float], None] = time.sleep,
     ) -> None:
         self._email = email
         self._password = password
         self._garth_home = garth_home
+        self._retry_delays_seconds = retry_delays_seconds
+        self._sleep = sleep_func
 
     def _get_garth_module(self):
         original_garth_home = os.environ.pop("GARTH_HOME", None)
@@ -122,7 +125,7 @@ class GarthGarminClient:
         return isinstance(exc, RequestException)
 
     def _perform_with_backoff(self, operation_name: str, func, **context):
-        total_attempts = len(GARMIN_RETRY_DELAYS_SECONDS) + 1
+        total_attempts = len(self._retry_delays_seconds) + 1
         for attempt in range(1, total_attempts + 1):
             try:
                 return func()
@@ -142,7 +145,7 @@ class GarthGarminClient:
                     )
                     raise
 
-                sleep_seconds = GARMIN_RETRY_DELAYS_SECONDS[attempt - 1]
+                sleep_seconds = self._retry_delays_seconds[attempt - 1]
                 log_event(
                     logger,
                     logging.WARNING,
@@ -154,7 +157,7 @@ class GarthGarminClient:
                     status_code=status_code,
                     **context,
                 )
-                time.sleep(sleep_seconds)
+                self._sleep(sleep_seconds)
 
     def _has_saved_session(self) -> bool:
         return all(
@@ -330,4 +333,5 @@ def get_garmin_client() -> GarminClient:
         email=settings.garmin_email,
         password=settings.garmin_password,
         garth_home=settings.garth_home,
+        retry_delays_seconds=settings.garmin_retry_delays_seconds,
     )

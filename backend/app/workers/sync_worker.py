@@ -4,12 +4,14 @@ from dataclasses import dataclass
 from datetime import datetime
 import logging
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings, get_settings
 from app.db import get_session_factory
+from app.models import Activity
 from app.observability import configure_logging, log_event
-from app.parsers import FitParserService
+from app.parsers import CorruptFitFileError, FitParserService
 from app.services import (
     GARMIN_ACTIVITY_SYNC_KEY,
     ActivityDeduper,
@@ -21,6 +23,7 @@ from app.services import (
     RawFileStorageService,
     SyncCheckpointService,
     get_garmin_client,
+    GarminDownloadError,
 )
 
 logger = logging.getLogger(__name__)
@@ -49,6 +52,27 @@ class GarminSyncWorker:
         self._garmin_client = get_garmin_client()
         self._raw_file_storage = RawFileStorageService(settings.raw_data_dir)
         self._fit_parser = FitParserService()
+
+    def _activity_already_exists(self, session: Session, source_activity_id: str) -> bool:
+        existing_id = session.scalar(
+            select(Activity.id).where(Activity.source_activity_id == source_activity_id)
+        )
+        return existing_id is not None
+
+    def _advance_checkpoint(
+        self,
+        checkpoint_service: SyncCheckpointService,
+        session: Session,
+        *,
+        activity,
+    ) -> datetime:
+        checkpoint = checkpoint_service.upsert_checkpoint(
+            GARMIN_ACTIVITY_SYNC_KEY,
+            last_synced_at=activity.start_time,
+            last_source_id=activity.source_activity_id,
+        )
+        session.commit()
+        return checkpoint.last_synced_at
 
     def run_once(self) -> SyncWorkerResult:
         fetched_count = 0
@@ -82,36 +106,98 @@ class GarminSyncWorker:
                 sync_limit=self._settings.garmin_sync_limit,
             )
 
-            downloader = ActivityFitDownloader(self._garmin_client, self._raw_file_storage)
+            downloader = ActivityFitDownloader(
+                self._garmin_client,
+                self._raw_file_storage,
+                self._fit_parser,
+            )
             summary_ingest = ActivitySummaryIngestService(session, self._fit_parser)
             lap_ingest = ActivityLapIngestService(session, self._fit_parser)
             record_ingest = ActivityRecordIngestService(session, self._fit_parser)
 
             for activity in new_activities:
-                download_result = downloader.download_activity_fit(activity)
-                downloaded_count += 1
+                if self._activity_already_exists(session, activity.source_activity_id):
+                    checkpoint_updated_to = self._advance_checkpoint(
+                        checkpoint_service,
+                        session,
+                        activity=activity,
+                    )
+                    log_event(
+                        logger,
+                        logging.WARNING,
+                        "worker.sync.duplicate_activity_skipped",
+                        source_activity_id=activity.source_activity_id,
+                        checkpoint_updated_to=checkpoint_updated_to.isoformat(),
+                    )
+                    continue
 
-                persisted_activity = summary_ingest.ingest_activity_summary(
-                    activity=activity,
-                    fit_path=download_result.file_path,
-                )
-                lap_ingest.ingest_activity_laps(
-                    activity=persisted_activity,
-                    fit_path=download_result.file_path,
-                )
-                record_ingest.ingest_activity_records(
-                    activity=persisted_activity,
-                    fit_path=download_result.file_path,
-                )
+                download_result = None
+                try:
+                    download_result = downloader.download_activity_fit(activity)
+                    downloaded_count += 1
 
-                checkpoint = checkpoint_service.upsert_checkpoint(
-                    GARMIN_ACTIVITY_SYNC_KEY,
-                    last_synced_at=activity.start_time,
-                    last_source_id=activity.source_activity_id,
-                )
-                session.commit()
-                checkpoint_updated_to = checkpoint.last_synced_at
-                ingested_count += 1
+                    persisted_activity = summary_ingest.ingest_activity_summary(
+                        activity=activity,
+                        fit_path=download_result.file_path,
+                    )
+                    lap_ingest.ingest_activity_laps(
+                        activity=persisted_activity,
+                        fit_path=download_result.file_path,
+                    )
+                    record_ingest.ingest_activity_records(
+                        activity=persisted_activity,
+                        fit_path=download_result.file_path,
+                    )
+
+                    checkpoint_updated_to = self._advance_checkpoint(
+                        checkpoint_service,
+                        session,
+                        activity=activity,
+                    )
+                    ingested_count += 1
+                except GarminDownloadError as exc:
+                    session.rollback()
+                    checkpoint_updated_to = self._advance_checkpoint(
+                        checkpoint_service,
+                        session,
+                        activity=activity,
+                    )
+                    log_event(
+                        logger,
+                        logging.ERROR,
+                        "worker.sync.activity_skipped",
+                        source_activity_id=activity.source_activity_id,
+                        error_type=type(exc).__name__,
+                        quarantine_path=None,
+                        checkpoint_updated_to=checkpoint_updated_to.isoformat(),
+                    )
+                    continue
+                except CorruptFitFileError as exc:
+                    session.rollback()
+                    quarantine_path = None
+                    if download_result is not None:
+                        quarantine_path = self._raw_file_storage.copy_to_quarantine(
+                            source_activity_id=activity.source_activity_id,
+                            start_year=activity.start_time.year,
+                            start_month=activity.start_time.month,
+                            source_path=download_result.file_path,
+                            reason="parse-failed",
+                        )
+                    checkpoint_updated_to = self._advance_checkpoint(
+                        checkpoint_service,
+                        session,
+                        activity=activity,
+                    )
+                    log_event(
+                        logger,
+                        logging.ERROR,
+                        "worker.sync.activity_skipped",
+                        source_activity_id=activity.source_activity_id,
+                        error_type=type(exc).__name__,
+                        quarantine_path=str(quarantine_path) if quarantine_path else None,
+                        checkpoint_updated_to=checkpoint_updated_to.isoformat(),
+                    )
+                    continue
 
             if not new_activities and fetch_result.activities:
                 latest_activity = fetch_result.activities[-1]

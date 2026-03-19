@@ -34,7 +34,7 @@ Current schema notes:
 Development notes:
 - `httpx` is installed as a dev dependency so `fastapi.testclient` works for local endpoint verification
 - `get_garmin_client()` now always uses the `garth`-backed implementation and can resume from saved `GARTH_HOME` session state without requiring `GARMIN_PASSWORD`
-- Garmin auth/login, activity listing, and FIT download calls now use conservative retry/backoff for HTTP `429` and transient request failures
+- Garmin auth/login, activity listing, and FIT download calls now use configurable retry/backoff for HTTP `429` and transient request failures via `GARMIN_RETRY_DELAYS_SECONDS`
 - backend logs now emit one-line JSON records, and `LOG_LEVEL` can be set from the environment
 - backend startup now validates database connectivity plus required storage paths for `RAW_DATA_DIR` and `GARTH_HOME`
 - the sync worker can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers`
@@ -42,7 +42,9 @@ Development notes:
 - the scheduled sync loop can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`
 - first-time or recovery Garmin auth bootstrap can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth`
 - a real local worker run has already been verified against the Postgres/Garmin setup and confirmed to import additional historical activities
-- backend tests now cover FIT parsing, analytics calculations, `/api/v1/health`, activity list/detail endpoints, and full ingestion of a sample FIT file
+- the sync worker now performs an additional duplicate source-activity check inside the ingest loop so a duplicate that appears mid-run is skipped cleanly instead of failing the whole sync
+- invalid or empty FIT downloads are now quarantined before normal storage, and corrupt FIT files that fail parsing are skipped cleanly after quarantine instead of aborting the whole batch
+- backend tests now cover FIT parsing, analytics calculations, `/api/v1/health`, activity list/detail endpoints, full ingestion of a sample FIT file, Garmin retry behavior, invalid-download quarantine behavior, and sync-worker duplicate/corrupt-file skip behavior
 
 Container runtime:
 - the backend Docker image now runs the FastAPI app with `uvicorn`

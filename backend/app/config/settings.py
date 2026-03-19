@@ -6,6 +6,16 @@ from functools import lru_cache
 from pathlib import Path
 
 
+def _get_int_tuple_env(name: str, default: tuple[int, ...]) -> tuple[int, ...]:
+    raw_value = _get_env(name)
+    if raw_value is None:
+        return default
+
+    parts = [part.strip() for part in raw_value.split(",")]
+    values = tuple(int(part) for part in parts if part)
+    return values or default
+
+
 @dataclass(frozen=True)
 class Settings:
     app_env: str
@@ -17,6 +27,7 @@ class Settings:
     raw_data_dir: Path
     garth_home: Path
     garmin_sync_limit: int
+    garmin_retry_delays_seconds: tuple[int, ...]
     garmin_email: str | None
     garmin_password: str | None
 
@@ -54,6 +65,7 @@ def get_settings() -> Settings:
         raw_data_dir=raw_data_dir,
         garth_home=garth_home,
         garmin_sync_limit=int(_get_env("GARMIN_SYNC_LIMIT", "100") or "100"),
+        garmin_retry_delays_seconds=_get_int_tuple_env("GARMIN_RETRY_DELAYS_SECONDS", (15, 30, 60)),
         garmin_email=_get_env("GARMIN_EMAIL"),
         garmin_password=_get_env("GARMIN_PASSWORD"),
     )
