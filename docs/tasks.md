@@ -496,6 +496,70 @@ Current state:
 ### Task 60
 Add validation to avoid duplicate activity insertion.
 
+### Task 61
+Add automated dependency vulnerability scanning for backend and frontend.
+
+Scope:
+- add `pip-audit` for Python dependency checks
+- run `npm audit` for frontend dependency checks
+- document how to run both locally and in CI
+
+### Task 62
+Add Trivy scanning for filesystem, secrets, and built container images.
+
+Scope:
+- scan the repository filesystem for vulnerabilities and leaked secrets
+- scan built backend and frontend images
+- include Docker/config misconfiguration checks where useful
+
+### Task 63
+Enable repository-level dependency monitoring and code scanning.
+
+Scope:
+- enable GitHub Dependabot alerts and security updates
+- enable GitHub CodeQL or equivalent code scanning for Python and TypeScript
+- document the expected baseline security workflow
+
+### Task 64
+Document the security verification checklist for releases and production deploys.
+
+Scope:
+- include dependency scanning, container scanning, and secret scanning steps
+- define what must be green before production deploys
+- capture known limitations such as “best effort” detection rather than absolute guarantees
+
+### Task 65
+Implement private API access enforcement for the MVP deployment.
+
+Scope:
+- choose and implement a concrete access-control boundary for the private MVP deployment
+- align the choice with the current Tailscale-first deployment model and future HTTPS options
+- document how API access is restricted in practice, not just recommended
+
+### Task 66
+Add a raw FIT reprocessing workflow to rebuild normalized activity data.
+
+Scope:
+- support reprocessing stored raw FIT files after parser or schema improvements
+- define how activity summaries, laps, and records are safely rebuilt without losing raw files
+- document when to use reprocessing versus normal sync ingestion
+
+### Task 67
+Verify backup restore flow in a clean environment.
+
+Scope:
+- restore PostgreSQL plus raw FIT storage from backup artifacts
+- verify the application boots and serves expected data after restore
+- document the restore runbook, not just the backup command
+
+### Task 68
+Add sync-status visibility for operations.
+
+Scope:
+- expose last successful sync time and recent failure state in an operator-friendly way
+- support quick diagnosis when scheduled syncs stall or fail repeatedly
+- keep the MVP solution lightweight, such as an API endpoint, status card, or structured health summary
+
 ---
 
 ## Version 2 — Health Metrics Expansion
@@ -504,7 +568,7 @@ These tasks are intentionally deferred until after the MVP is complete.
 The MVP should continue to preserve raw data, keep ingestion separate from analytics,
 and avoid overloading `daily_metrics` so these additions remain straightforward later.
 
-### Task 61
+### Task 69
 Implement device identification for activities.
 
 Scope:
@@ -513,7 +577,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 62
+### Task 70
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -521,7 +585,7 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 63
+### Task 71
 Add HTTPS-friendly private access for the VPS deployment.
 
 Scope:
@@ -529,7 +593,7 @@ Scope:
 - support private HTTPS access to the frontend and backend over the tailnet
 - keep the setup compatible with the existing Docker Compose deployment model
 
-### Task 64
+### Task 72
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -537,7 +601,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 65
+### Task 73
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -545,10 +609,10 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 66
+### Task 74
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 67
+### Task 75
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -556,7 +620,7 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 68
+### Task 76
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -564,34 +628,78 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 69
+### Task 77
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
-### Task 70
+### Task 78
+Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.
+
+Scope:
+- adopt Tailwind as the primary layout and spacing system
+- keep the existing visual direction while reducing ad hoc global CSS
+- standardize spacing, typography, and responsive breakpoints across pages
+
+### Task 79
+Adopt `shadcn/ui` components for core dashboard UI primitives.
+
+Scope:
+- use `shadcn/ui` for cards, tabs, tables, dialogs, and related reusable primitives
+- keep the component set intentionally small and aligned with the product’s visual language
+- avoid over-customized one-off components where standard primitives are a better fit
+
+### Task 80
+Create a responsive dashboard shell and shared frontend page layout system.
+
+Scope:
+- add a reusable app shell with header/navigation/content regions
+- support desktop and mobile layouts cleanly
+- make dashboard, activities list, and activity detail pages share the same structural system
+
+### Task 81
+Standardize frontend typography and spacing across all pages.
+
+Scope:
+- define consistent page spacing, section spacing, headings, body copy, and data-density rules
+- remove inconsistent sizing/layout patterns across dashboard and activity pages
+- ensure charts, cards, filters, and tables align to the same rhythm
+
+### Task 82
+Standardize frontend loading, empty, error, and partial-data states.
+
+Scope:
+- create shared UI patterns for loading, empty, error, and sparse-data views
+- apply them consistently across dashboard, activities list, and activity detail pages
+- make frontend behavior clearer when backend data is missing, delayed, or partially populated
+
+### Task 83
+Add Playwright screenshot coverage for the main dashboard and activity pages.
+
+Scope:
+- add screenshot tests for the home dashboard, activities list, and activity detail pages
+- use stable fixture data or deterministic local test setup
+- make the screenshots useful for catching layout regressions during frontend refactors
+
+### Task 84
+Create a deterministic fixture dataset for frontend development and screenshot testing.
+
+Scope:
+- provide a stable seeded dataset for dashboard and activity-page development
+- decouple UI regression testing from live Garmin sync state
+- support repeatable Playwright screenshot baselines
+
+### Task 85
 Add downsampling or capped payload strategy for large activity stream responses.
 
-### Task 71
+### Task 86
 Verify that raw FIT files are never modified after download.
 
-### Task 72
+### Task 87
+Review database performance strategy for long-term `activity_records` growth.
+
+Scope:
+- evaluate whether `activity_records` needs partitioning, archiving, or other scaling changes
+- revisit the implementation-spec note about month-based partitioning
+- keep the solution aligned with expected single-user growth and query patterns
+
+### Task 88
 Review all MVP acceptance criteria against `docs/prd.md`.
-
----
-
-## Suggested Codex Prompt Pattern
-
-Use prompts like:
-
-```text
-Read docs/prd.md, docs/implementation.md, docs/dev_deployment.md, and docs/tasks.md.
-Implement Task 13.
-Keep changes minimal and production-sensible.
-Explain what you changed.
-```
-
-Or:
-
-```text
-Implement Tasks 20 through 24.
-Do not skip tests or configuration updates that are necessary for those tasks.
-```

@@ -32,6 +32,9 @@ download FIT files - update sync checkpoint
 
 Retry strategy: - exponential backoff - max 5 retries
 
+Operational visibility:
+- expose recent sync success/failure state in an operator-friendly way
+
 ## FIT Parser
 
 Library suggestion: fitparse
@@ -39,6 +42,10 @@ Library suggestion: fitparse
 Extract: - summary - laps - record streams
 
 Insert normalized data into database.
+
+Reprocessing note:
+- preserve raw FIT files as immutable inputs
+- support rebuilding normalized activity summaries, laps, and records from stored FIT files after parser or schema improvements
 
 ## API Contract
 
@@ -50,6 +57,9 @@ samples.
 GET /api/v1/metrics/daily Returns daily health metrics.
 
 GET /api/v1/analytics/trends Returns computed trend data.
+
+Operational/API note:
+- the MVP API is private and should sit behind a real access-control boundary in deployment
 
 ## Frontend
 
@@ -67,6 +77,9 @@ Activity queries should be indexed on: - start_time - sport - distance
 
 activity_records table should be partitioned by month.
 
+Version 2 note:
+- revisit partitioning only in the context of observed single-user growth and real query patterns
+
 ## Logging
 
 Use structured logging.
@@ -79,6 +92,9 @@ Unit tests: - FIT parsing - analytics calculations - API responses
 
 Integration tests: - full sync pipeline - activity ingestion
 
+Frontend/regression note:
+- add deterministic fixture data for frontend development and screenshot-based regression coverage
+
 ## Deployment
 
 Option 1: Local machine
@@ -86,6 +102,10 @@ Option 1: Local machine
 Option 2: Docker deployment
 
 Containers: - backend - postgres - frontend
+
+Operational hardening:
+- verify backup restore in a clean environment
+- document and surface sync health/state for operators
 
 ## Future Work
 

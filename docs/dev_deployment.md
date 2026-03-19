@@ -381,6 +381,7 @@ Agreed production direction:
 - keep the long-running `worker` container as a development convenience and optional fallback, not the primary production scheduler
 - install `docker.io` and `docker-compose-v2` from Ubuntu apt packages during VPS setup
 - run normal deploys as the chosen VPS app user after one-time system setup
+- keep the MVP API privately accessible rather than broadly public, with Tailscale-first access as the current baseline
 
 Current repo state:
 - `infra/systemd/garmin-sync.service` runs the one-shot worker via Docker Compose with `SKIP_GARMIN_BOOTSTRAP=1`
@@ -420,6 +421,10 @@ Minimum backup outputs:
 - Postgres dump
 - compressed raw data archive
 
+Restore expectation:
+- backup work is not complete until a clean restore has been exercised and documented
+- restore verification should confirm the app boots and serves expected data after database and raw-file recovery
+
 Suggested backup locations:
 - local mounted backup directory
 - Synology or other secondary storage
@@ -442,6 +447,14 @@ Add GitHub Actions for:
 - running tests on push
 - building containers
 - optional automated deploy on merge to `main`
+- running security checks such as `pip-audit`, `npm audit`, and Trivy scans
+
+Security baseline to add:
+- `pip-audit` for Python dependency vulnerability checks
+- `npm audit` for frontend dependency vulnerability checks
+- Trivy scanning for repository filesystem, leaked secrets, and built backend/frontend images
+- GitHub Dependabot alerts/security updates and repository code scanning such as CodeQL
+- treat these checks as a release gate where practical, while acknowledging they reduce risk rather than guaranteeing zero vulnerabilities
 
 ---
 

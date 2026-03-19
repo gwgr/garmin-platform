@@ -87,6 +87,10 @@ Base path: /api/v1
 Endpoints: GET /activities GET /activities/{id} GET /metrics/daily GET
 /analytics/trends
 
+Operational note:
+- the MVP API is intended for private access only
+- deployment should enforce a real access boundary such as Tailscale-only exposure or equivalent private access controls
+
 ## 11. Frontend Features
 
 Dashboard: - weekly mileage - resting HR trend - recent activities
@@ -108,6 +112,11 @@ Training: - rolling weekly load
 Run every 6 hours. Avoid duplicates via activity ID. Retry failures
 automatically.
 
+Operational note:
+- raw FIT files remain the source of truth for later reprocessing
+- the system should support rebuilding normalized activity data from preserved raw FIT files after parser improvements
+- operators should be able to see when sync has last succeeded or failed
+
 ## 14. Security
 
 -   Encrypt Garmin credentials
@@ -117,6 +126,9 @@ automatically.
 ## 15. Backup
 
 Daily backups must include: - PostgreSQL database - raw FIT file storage
+
+Operational note:
+- backup success alone is not sufficient; the restore path should be tested in a clean environment
 
 ## 16. Roadmap
 
@@ -141,6 +153,11 @@ Version 2 gear/device note:
 Version 2+ enrichment ideas:
 - weather correlation for activities and trend analysis
 - additional external-context enrichment should remain separate from core ingestion
+
+Version 2 frontend/platform note:
+- introduce a shared frontend layout/component system with consistent spacing, typography, and state handling
+- support deterministic fixture data for frontend regression and screenshot testing
+- review long-term `activity_records` scaling strategy as the archive grows
 
 Phase 3: - AI insights - Custom dashboards
 
