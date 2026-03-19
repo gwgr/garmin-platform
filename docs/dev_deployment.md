@@ -257,7 +257,10 @@ Note:
 - the backend image now runs the real FastAPI app and can execute Alembic and Garmin bootstrap commands inside the container
 - production app services should live under `/opt/garmin-platform/app`
 - protect the production env file at `/opt/garmin-platform/.env`
-- current VPS shell convenience setup includes `~/.bashrc` helpers such as `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, and `gp-timer-status`
+- current VPS shell convenience setup can now be installed with `infra/scripts/install_vps_helpers.sh`
+- that installer writes a versioned helper block into `~/.bashrc`
+- the installed set includes `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, and `gp-timer-status`
+- the helper block includes comments above each function describing what it does
 - backend startup now checks database connectivity plus required `RAW_DATA_DIR` and `GARTH_HOME` paths before reporting healthy
 
 Wrap this later in:

@@ -635,6 +635,21 @@ Scope:
 - document why riskier updates such as major framework or Garmin-library jumps are deferred or accepted
 - keep the repo-level automation useful without creating alert fatigue or unreviewed upgrade churn
 
+### Task 73 `[done]`
+Add versioned scripts to install documented helper functions into local and VPS shell profiles.
+
+Scope:
+- provide a repo-owned installer for the local `~/.zshrc` helper functions
+- provide a repo-owned installer for the VPS `~/.bashrc` helper functions
+- include comments above each installed function describing what it does
+- update the docs to use these installers instead of ad hoc copy-paste shell snippets
+
+Current state:
+- `infra/scripts/install_local_helpers.sh` now installs a versioned helper block into `~/.zshrc`
+- `infra/scripts/install_vps_helpers.sh` now installs a versioned helper block into `~/.bashrc`
+- both installers replace any prior managed helper block cleanly instead of duplicating functions
+- README, local setup notes, and deployment docs now point to the installer scripts and describe the installed helper sets
+
 ---
 
 ## Version 2 — Health Metrics Expansion
@@ -643,7 +658,7 @@ These tasks are intentionally deferred until after the MVP is complete.
 The MVP should continue to preserve raw data, keep ingestion separate from analytics,
 and avoid overloading `daily_metrics` so these additions remain straightforward later.
 
-### Task 73
+### Task 74
 Implement device identification for activities.
 
 Scope:
@@ -652,7 +667,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 74
+### Task 75
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -660,7 +675,7 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 75
+### Task 76
 Add HTTPS-friendly private access for the VPS deployment.
 
 Scope:
@@ -668,7 +683,7 @@ Scope:
 - support private HTTPS access to the frontend and backend over the tailnet
 - keep the setup compatible with the existing Docker Compose deployment model
 
-### Task 76
+### Task 77
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -676,7 +691,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 77
+### Task 78
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -684,10 +699,10 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 78
+### Task 79
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 79
+### Task 80
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -695,7 +710,7 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 80
+### Task 81
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -703,7 +718,7 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 81
+### Task 82
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
 ### Task 81

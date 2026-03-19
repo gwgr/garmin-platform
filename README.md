@@ -130,8 +130,11 @@ APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data do
 ```
 
 Current VPS convenience setup:
-- helper functions have been added to `~/.bashrc` for `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, and `gp-timer-status`
-- those helpers assume the standard `/opt/garmin-platform` layout
+- helper functions can now be installed into `~/.bashrc` with:
+  - `APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_vps_helpers.sh`
+- that installer adds documented helpers for `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, and `gp-timer-status`
+- the installed helpers assume the standard `/opt/garmin-platform` layout
+- if you source the installer instead of executing it, it also reloads the updated profile immediately
 
 ## Production Sync Timer
 
@@ -197,9 +200,11 @@ docker compose up --build
 By default, local Compose now starts `postgres`, `backend`, and `frontend` only. The scheduled `worker` is opt-in so local UI work does not immediately begin Garmin sync activity.
 
 Current local shell convenience setup:
-- helper functions can be added to `~/.zshrc` for `gp-local-root`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-audit`, and `gp-local-trivy`
-- those helpers assume the standard local repo path at `/Users/gregrowntree/Documents/Dev/garmin-platform`
-- `gp-local-trivy` can be defined to both display output and save it with `./infra/scripts/trivy_scan.sh | tee trivy.log`
+- helper functions can now be installed into `~/.zshrc` with:
+  - `./infra/scripts/install_local_helpers.sh`
+- that installer adds documented helpers for `gp-local-root`, `gp-local-git-pull`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-audit`, and `gp-local-trivy`
+- the installed helpers assume the standard local repo path at `/Users/gregrowntree/Documents/Dev/garmin-platform`
+- if you source the installer instead of executing it, it also reloads the updated profile immediately
 
 Useful commands:
 
