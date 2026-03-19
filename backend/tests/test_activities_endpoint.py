@@ -220,7 +220,7 @@ def test_get_activity_detail_returns_summary_laps_and_records() -> None:
         assert payload["activity"]["sport"] == "walking"
         assert [lap["lap_index"] for lap in payload["laps"]] == [1, 2]
         assert len(payload["records"]) == 2
-        assert payload["records"][0]["record_time"] == "2026-03-17T06:00:00Z"
+        assert payload["records"][0]["record_time"] == "2026-03-17T06:00:00"
 
 
 def test_get_activity_detail_returns_404_for_missing_activity() -> None:

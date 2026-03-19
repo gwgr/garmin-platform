@@ -215,3 +215,4 @@ Note:
 - the Compose files override that value to use the `postgres` service hostname for container-to-container networking
 - set `GARTH_HOME` to a local-only directory such as `./data/garth` so Garmin session state stays out of git
 - set `LOG_LEVEL` in `.env` if you want quieter or more verbose backend logs
+- the backend test suite now covers FIT parsing, analytics queries, health/activity API responses, and end-to-end ingestion of a sample FIT file via `PYTHONPATH=backend ./.venv/bin/pytest backend/tests`

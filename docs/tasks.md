@@ -441,20 +441,37 @@ Current state:
 
 ## Phase 9 — Testing
 
-### Task 54
+### Task 54 `[done]`
 Add unit tests for FIT parsing.
 
-### Task 55
+Current state:
+- `backend/tests/test_fit_parser.py` now exercises FIT summary, lap, and record parsing against a real sample fixture
+- parser coverage now explicitly checks coordinate normalization into latitude/longitude degrees
+
+### Task 55 `[done]`
 Add unit tests for analytics calculations.
 
-### Task 56
+Current state:
+- `backend/tests/test_analytics_queries.py` now covers empty-result behavior and rolling resting-heart-rate trend limits/order
+- existing analytics endpoint coverage remains in place via `backend/tests/test_analytics_endpoint.py`
+
+### Task 56 `[done]`
 Add API tests for:
 - health endpoint
 - activities endpoint
 - activity detail endpoint
 
-### Task 57
+Current state:
+- `backend/tests/test_health_endpoint.py` now covers `/api/v1/health`
+- `backend/tests/test_activities_endpoint.py` covers both activity list and activity detail behavior
+- backend API tests now run under a safe `test` environment bootstrap via `backend/tests/conftest.py`
+
+### Task 57 `[done]`
 Add integration test for full ingestion of a sample FIT file.
+
+Current state:
+- `backend/tests/test_fit_ingestion_integration.py` now ingests a real sample FIT fixture end-to-end into an in-memory database
+- the integration test verifies persisted activity summary, lap count, record count, and normalized route coordinates
 
 ---
 

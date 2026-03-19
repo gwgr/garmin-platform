@@ -42,6 +42,7 @@ Development notes:
 - the scheduled sync loop can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`
 - first-time or recovery Garmin auth bootstrap can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth`
 - a real local worker run has already been verified against the Postgres/Garmin setup and confirmed to import additional historical activities
+- backend tests now cover FIT parsing, analytics calculations, `/api/v1/health`, activity list/detail endpoints, and full ingestion of a sample FIT file
 
 Container runtime:
 - the backend Docker image now runs the FastAPI app with `uvicorn`
