@@ -23,7 +23,7 @@ gp-env() {
 
 # List the available Garmin Platform VPS helper commands.
 gp-help() {
-  cat <<'EOF'
+  cat <<'VPS_HELP'
 gp-env              Export the standard Garmin Platform VPS environment variables.
 gp-app              Change into the Garmin Platform app checkout on the VPS.
 gp-deploy           Pull latest main and run the standard steady-state deploy flow.
@@ -34,7 +34,7 @@ gp-ps               Show current production container status.
 gp-logs             Show recent backend logs from the production stack.
 gp-backend-health   Check backend health from inside the production Compose network.
 gp-timer-status     Show the current Garmin sync timer status.
-EOF
+VPS_HELP
 }
 
 # Change into the Garmin Platform app checkout on the VPS.

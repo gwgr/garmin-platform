@@ -19,7 +19,7 @@ gp-local-root() {
 
 # List the available local Garmin Platform helper commands.
 gp-local-help() {
-  cat <<'EOF'
+  cat <<'LOCAL_HELP'
 gp-local-root            Change into the local garmin-platform repo root.
 gp-local-git-pull        Pull the latest changes from origin/main.
 gp-local-env             Load the local .env file into the current shell.
@@ -40,7 +40,7 @@ gp-local-health          Check the local backend health endpoint.
 gp-local-ci-check        Run the required local CI-equivalent checks.
 gp-local-audit           Run backend and frontend dependency audits.
 gp-local-trivy           Run Trivy scans and save output to trivy.log.
-EOF
+LOCAL_HELP
 }
 
 # Pull the latest changes for the local garmin-platform repo.
