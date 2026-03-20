@@ -41,10 +41,14 @@ data preservation - Fast visualization
 Garmin Connect → Sync Worker → Raw Storage → Parser Pipeline →
 PostgreSQL → API Server → Web UI
 
+Operational deployment note:
+- the current MVP deployment publishes the frontend over the private tailnet and keeps the backend API private to the Docker network
+- frontend server-side requests call the backend over the internal service network rather than exposing the API directly on a host port
+
 ## 6. Technology Stack
 
 Backend: Python + FastAPI Database: PostgreSQL Frontend: Next.js Charts:
-ECharts Maps: Leaflet or MapLibre Workers: Cron + Python async workers
+ECharts Maps: Leaflet Workers: one-shot Python worker via `systemd` timer in production, scheduled Python loop for local/dev convenience
 
 ## 7. Data Storage
 
@@ -84,20 +88,40 @@ Celsius
 
 Base path: /api/v1
 
-Endpoints: GET /activities GET /activities/{id} GET /metrics/daily GET
-/analytics/trends
+Endpoints:
+- GET /health
+- GET /activities
+- GET /activities/{id}
+- GET /metrics/daily
+- GET /analytics/trends
+- GET /sync/status
 
 Operational note:
 - the MVP API is intended for private access only
 - deployment should enforce a real access boundary such as Tailscale-only exposure or equivalent private access controls
+- current MVP enforcement is: frontend published privately over Tailscale, backend API kept private to the internal container network, and operational health checks performed from inside the stack
 
 ## 11. Frontend Features
 
-Dashboard: - weekly mileage - resting HR trend - recent activities
+Dashboard:
+- weekly and monthly distance summaries
+- resting HR trend
+- recent activities
+- daily metric snapshot
+- sync-status card with click-through details
 
-Activity List: - filtering - sorting - pagination
+Activity List:
+- filtering
+- pagination
+- sorted by most recent activity
 
-Activity Detail: - route map - pace chart - HR chart - elevation chart
+Activity Detail:
+- route map
+- pace chart
+- HR chart
+- elevation chart
+- lap breakdown
+- per-record stream detail
 
 ## 12. Derived Metrics
 
@@ -119,9 +143,11 @@ Operational note:
 
 ## 14. Security
 
--   Encrypt Garmin credentials
+-   Treat Garmin password as bootstrap/recovery-only rather than always-present runtime config
+-   Persist Garmin session state in protected local/VPS storage
 -   Restrict API access
--   Prefer local deployment
+-   Prefer local-first/private deployment
+-   Use dependency, Trivy, and GitHub-native security checks as the MVP release baseline
 
 ## 15. Backup
 
@@ -163,6 +189,10 @@ Phase 3: - AI insights - Custom dashboards
 
 ## 17. Acceptance Criteria
 
-System must: - Import historical Garmin data - Sync new activities
-automatically - Display activity detail - Render trends dashboard -
-Preserve raw FIT files
+System must:
+- Import historical Garmin data
+- Sync new activities automatically
+- Display activity detail with charts and route map when GPS data is available
+- Render the dashboard and activity list views from live backend data
+- Preserve raw FIT files
+- Support rebuilding normalized activity data from preserved raw FIT files

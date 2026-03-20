@@ -259,8 +259,9 @@ Note:
 - protect the production env file at `/opt/garmin-platform/.env`
 - current VPS shell convenience setup can now be installed with `infra/scripts/install_vps_helpers.sh`
 - that installer writes a versioned helper block into `~/.bashrc`
-- the installed set includes `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-ps`, `gp-logs`, and `gp-timer-status`
+- the installed set includes `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
 - the helper block includes comments above each function describing what it does
+- `gp-reprocess` wraps `python -m app.reprocess_fit_files` through the production Compose stack and forwards options such as `--limit` or `--source-activity-id`
 - backend startup now checks database connectivity plus required `RAW_DATA_DIR` and `GARTH_HOME` paths before reporting healthy
 
 Wrap this later in:
@@ -398,6 +399,7 @@ Current repo state:
 - current recommended order is: install timer files first, keep them disabled during backfill, then enable `garmin-sync.timer` for steady-state syncs
 - the backend now exposes `GET /api/v1/sync/status`, and the frontend dashboard links through to `/status/sync` for a lightweight operator-facing sync view
 - `docker-compose.prod.yml` now exposes only the frontend on the host; backend and Postgres stay private to the Compose network in the default production topology
+- a raw FIT reprocessing command is now available at `python -m app.reprocess_fit_files` for rebuilding normalized activity data from stored FIT files after parser or schema changes
 
 Agreed production secret direction:
 - store production secrets in a protected host env file such as `/opt/garmin-platform/.env`
@@ -411,6 +413,7 @@ Worker responsibilities:
 - download FIT files
 - update sync checkpoint
 - trigger parsing
+- leave raw FIT files intact so they remain the source of truth for later reprocessing
 
 ---
 

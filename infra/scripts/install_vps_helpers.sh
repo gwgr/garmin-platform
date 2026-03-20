@@ -38,6 +38,12 @@ gp-sync-once() {
   cd "${APP_DIR}" && SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" run --rm backend python -m app.workers
 }
 
+# Reprocess stored raw FIT files into normalized activity data on the VPS.
+gp-reprocess() {
+  gp-env
+  cd "${APP_DIR}" && SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" run --rm backend python -m app.reprocess_fit_files "$@"
+}
+
 # Show current production container status on the VPS.
 gp-ps() {
   gp-env

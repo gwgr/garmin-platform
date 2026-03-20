@@ -92,6 +92,13 @@ gp-local-worker-once() {
   PYTHONPATH=backend ./.venv/bin/python -m app.workers
 }
 
+# Reprocess stored raw FIT files into normalized activity data locally.
+gp-local-reprocess() {
+  gp-local-root
+  gp-local-env
+  PYTHONPATH=backend ./.venv/bin/python -m app.reprocess_fit_files "$@"
+}
+
 # Apply the latest Alembic migrations to the local database.
 gp-local-alembic-upgrade() {
   gp-local-root

@@ -3,6 +3,7 @@
 from app.services.activity_deduper import ActivityDeduplicationResult, ActivityDeduper
 from app.services.activity_fit_downloader import ActivityFitDownloadResult, ActivityFitDownloader
 from app.services.activity_lap_ingest import ActivityLapIngestService
+from app.services.activity_reprocess import ActivityReprocessBatchResult, ActivityReprocessService
 from app.services.activity_queries import (
     ActivityDetailResult,
     ActivityListFilters,
@@ -47,6 +48,8 @@ __all__ = [
     "ActivityFitDownloadResult",
     "ActivityFitDownloader",
     "ActivityLapIngestService",
+    "ActivityReprocessBatchResult",
+    "ActivityReprocessService",
     "ActivityDetailResult",
     "ActivityListFilters",
     "ActivityListResult",

@@ -604,13 +604,19 @@ Current state:
 - the deploy script and VPS helpers now use in-stack backend health checks instead of relying on `http://localhost:8000`
 - docs now describe the concrete MVP access boundary as frontend-on-Tailscale with backend/private-network-only access, while leaving room for a future authenticated HTTPS layer
 
-### Task 68
+### Task 68 `[done]`
 Add a raw FIT reprocessing workflow to rebuild normalized activity data.
 
 Scope:
 - support reprocessing stored raw FIT files after parser or schema improvements
 - define how activity summaries, laps, and records are safely rebuilt without losing raw files
 - document when to use reprocessing versus normal sync ingestion
+
+Current state:
+- `PYTHONPATH=backend ./.venv/bin/python -m app.reprocess_fit_files` now rebuilds activity summaries, laps, and records from stored `raw_file_path` values
+- the reprocess flow reuses the existing FIT ingest services so it updates activity summaries in place and replaces lap/record rows from the raw FIT source of truth
+- missing raw files are skipped cleanly, raw FIT files are never modified by the reprocess command, and batch runs continue per activity rather than aborting on the first issue
+- backend tests now cover both successful activity reprocessing and safe skipping when a raw FIT path is missing
 
 ### Task 69
 Verify backup restore flow in a clean environment.

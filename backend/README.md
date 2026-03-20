@@ -43,6 +43,8 @@ Development notes:
 - `GARMIN_SYNC_LIMIT` can be set to a smaller value such as `5` for cautious test batches during an initial backfill
 - the scheduled sync loop can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`
 - first-time or recovery Garmin auth bootstrap can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth`
+- raw FIT reprocessing can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.reprocess_fit_files`
+- the reprocess command reuses the existing FIT summary/lap/record ingest services, commits one activity at a time, and leaves the stored raw FIT files untouched
 - a real local worker run has already been verified against the Postgres/Garmin setup and confirmed to import additional historical activities
 - the sync worker now performs an additional duplicate source-activity check inside the ingest loop so a duplicate that appears mid-run is skipped cleanly instead of failing the whole sync
 - invalid or empty FIT downloads are now quarantined before normal storage, and corrupt FIT files that fail parsing are skipped cleanly after quarantine instead of aborting the whole batch
