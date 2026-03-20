@@ -134,8 +134,9 @@ APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data do
 Current VPS convenience setup:
 - helper functions can now be installed into `~/.bashrc` with:
   - `APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_vps_helpers.sh`
-- that installer adds documented helpers for `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
+- that installer adds documented helpers for `gp-help`, `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
 - the installed helpers assume the standard `/opt/garmin-platform` layout
+- `gp-help` prints the full VPS helper list with a one-line description of each command
 - if you source the installer instead of executing it, it also reloads the updated profile immediately
 
 ## Production Sync Timer
@@ -204,8 +205,9 @@ By default, local Compose now starts `postgres`, `backend`, and `frontend` only.
 Current local shell convenience setup:
 - helper functions can now be installed into `~/.zshrc` with:
   - `./infra/scripts/install_local_helpers.sh`
-- that installer adds documented helpers for `gp-local-root`, `gp-local-git-pull`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-reprocess`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-ci-check`, `gp-local-audit`, and `gp-local-trivy`
+- that installer adds documented helpers for `gp-local-help`, `gp-local-root`, `gp-local-git-pull`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-sync-status`, `gp-local-reprocess`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-ci-check`, `gp-local-audit`, and `gp-local-trivy`
 - the installed helpers assume the standard local repo path at `/Users/gregrowntree/Documents/Dev/garmin-platform`
+- `gp-local-help` prints the full local helper list with a one-line description of each command
 - if you source the installer instead of executing it, it also reloads the updated profile immediately
 - `gp-local-ci-check` runs the same required checks as GitHub CI: backend tests plus frontend build
 - `gp-local-reprocess` wraps `python -m app.reprocess_fit_files` and forwards options such as `--limit` or `--source-activity-id`
@@ -251,6 +253,7 @@ Note:
 - the backend test suite now covers FIT parsing, analytics queries, health/activity API responses, and end-to-end ingestion of a sample FIT file via `PYTHONPATH=backend ./.venv/bin/pytest backend/tests`
 - a raw FIT reprocessing command is now available at `PYTHONPATH=backend ./.venv/bin/python -m app.reprocess_fit_files`, which rebuilds activity summaries, laps, and records from stored `raw_file_path` values without modifying the raw FIT files themselves
 - the dashboard now includes a sync-status card backed by `GET /api/v1/sync/status`, and `/status/sync` provides a more detailed operator view
+- an operator-friendly CLI summary is also available at `PYTHONPATH=backend ./.venv/bin/python -m app.print_sync_status`, with `--json` available for structured output
 
 ## Security Checklist
 

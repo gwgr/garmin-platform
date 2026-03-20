@@ -146,9 +146,11 @@ Local shell convenience setup:
   - `./infra/scripts/install_local_helpers.sh`
 - the installer writes a versioned helper block into `~/.zshrc`
 - those helpers make it easier to start, stop, inspect, migrate, and health-check the local stack without retyping the repo path each time
-- the installed set includes `gp-local-root`, `gp-local-git-pull`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-reprocess`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-ci-check`, `gp-local-audit`, and `gp-local-trivy`
+- the installed set includes `gp-local-help`, `gp-local-root`, `gp-local-git-pull`, `gp-local-env`, `gp-local-up`, `gp-local-up-bg`, `gp-local-down`, `gp-local-ps`, `gp-local-logs`, `gp-local-logs-backend`, `gp-local-logs-frontend`, `gp-local-logs-postgres`, `gp-local-worker-up`, `gp-local-worker-once`, `gp-local-sync-status`, `gp-local-reprocess`, `gp-local-alembic-upgrade`, `gp-local-health`, `gp-local-ci-check`, `gp-local-audit`, and `gp-local-trivy`
 - the helper block includes comments above each function describing what it does
+- `gp-local-help` prints the full local helper list with a one-line description of each command
 - `gp-local-ci-check` runs the same required checks as GitHub CI: backend tests plus frontend build
+- `gp-local-sync-status` prints the current persisted Garmin sync checkpoint summary, and supports `--json` for machine-readable output
 - `gp-local-reprocess` wraps `python -m app.reprocess_fit_files` and forwards options such as `--limit` or `--source-activity-id`
 - `gp-local-audit` wraps `./infra/scripts/dependency_audit.sh`
 - `gp-local-trivy` wraps `./infra/scripts/trivy_scan.sh | tee trivy.log`

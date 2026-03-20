@@ -626,13 +626,18 @@ Scope:
 - verify the application boots and serves expected data after restore
 - document the restore runbook, not just the backup command
 
-### Task 70
+### Task 70 `[done]`
 Add sync-status visibility for operations.
 
 Scope:
 - expose last successful sync time and recent failure state in an operator-friendly way
 - support quick diagnosis when scheduled syncs stall or fail repeatedly
 - keep the MVP solution lightweight, such as an API endpoint, status card, or structured health summary
+
+Current state:
+- the frontend dashboard and `/status/sync` page already expose sync state through `GET /api/v1/sync/status`
+- `python -m app.print_sync_status` now prints the persisted sync checkpoint in a shell-friendly summary, with `--json` for structured output
+- the managed helper installers now include `gp-local-sync-status` and `gp-sync-status` so local and VPS operators can inspect sync health without opening the browser
 
 ### Task 71
 Clean up the remaining frontend Trivy findings after the first Docker hardening pass.

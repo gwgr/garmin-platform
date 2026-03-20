@@ -21,6 +21,22 @@ gp-env() {
   export APP_DATA_DIR="${APP_DATA_DIR}"
 }
 
+# List the available Garmin Platform VPS helper commands.
+gp-help() {
+  cat <<'EOF'
+gp-env              Export the standard Garmin Platform VPS environment variables.
+gp-app              Change into the Garmin Platform app checkout on the VPS.
+gp-deploy           Pull latest main and run the standard steady-state deploy flow.
+gp-sync-once        Run one manual one-shot sync worker pass on the VPS.
+gp-sync-status      Print the current persisted Garmin sync checkpoint summary.
+gp-reprocess        Rebuild normalized activity data from stored FIT files.
+gp-ps               Show current production container status.
+gp-logs             Show recent backend logs from the production stack.
+gp-backend-health   Check backend health from inside the production Compose network.
+gp-timer-status     Show the current Garmin sync timer status.
+EOF
+}
+
 # Change into the Garmin Platform app checkout on the VPS.
 gp-app() {
   cd "${APP_DIR}"
@@ -36,6 +52,12 @@ gp-deploy() {
 gp-sync-once() {
   gp-env
   cd "${APP_DIR}" && SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" run --rm backend python -m app.workers
+}
+
+# Print the current Garmin sync checkpoint summary on the VPS.
+gp-sync-status() {
+  gp-env
+  cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" exec -T backend python -m app.print_sync_status "$@"
 }
 
 # Reprocess stored raw FIT files into normalized activity data on the VPS.

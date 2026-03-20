@@ -259,8 +259,10 @@ Note:
 - protect the production env file at `/opt/garmin-platform/.env`
 - current VPS shell convenience setup can now be installed with `infra/scripts/install_vps_helpers.sh`
 - that installer writes a versioned helper block into `~/.bashrc`
-- the installed set includes `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
+- the installed set includes `gp-help`, `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
 - the helper block includes comments above each function describing what it does
+- `gp-help` prints the full VPS helper list with a one-line description of each command
+- `gp-sync-status` prints the current persisted Garmin sync checkpoint summary from the running production backend, and supports `--json` for machine-readable output
 - `gp-reprocess` wraps `python -m app.reprocess_fit_files` through the production Compose stack and forwards options such as `--limit` or `--source-activity-id`
 - backend startup now checks database connectivity plus required `RAW_DATA_DIR` and `GARTH_HOME` paths before reporting healthy
 
@@ -398,6 +400,7 @@ Current repo state:
 - recommended manual backfill command: `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers`
 - current recommended order is: install timer files first, keep them disabled during backfill, then enable `garmin-sync.timer` for steady-state syncs
 - the backend now exposes `GET /api/v1/sync/status`, and the frontend dashboard links through to `/status/sync` for a lightweight operator-facing sync view
+- `python -m app.print_sync_status` now provides the same sync checkpoint state in a shell-friendly operator summary, with `--json` available for structured output
 - `docker-compose.prod.yml` now exposes only the frontend on the host; backend and Postgres stay private to the Compose network in the default production topology
 - a raw FIT reprocessing command is now available at `python -m app.reprocess_fit_files` for rebuilding normalized activity data from stored FIT files after parser or schema changes
 

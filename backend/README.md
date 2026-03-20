@@ -43,12 +43,14 @@ Development notes:
 - `GARMIN_SYNC_LIMIT` can be set to a smaller value such as `5` for cautious test batches during an initial backfill
 - the scheduled sync loop can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.workers.scheduled_sync`
 - first-time or recovery Garmin auth bootstrap can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.bootstrap_garmin_auth`
+- sync checkpoint status can be printed with `PYTHONPATH=backend ./.venv/bin/python -m app.print_sync_status`
 - raw FIT reprocessing can be run with `PYTHONPATH=backend ./.venv/bin/python -m app.reprocess_fit_files`
 - the reprocess command reuses the existing FIT summary/lap/record ingest services, commits one activity at a time, and leaves the stored raw FIT files untouched
 - a real local worker run has already been verified against the Postgres/Garmin setup and confirmed to import additional historical activities
 - the sync worker now performs an additional duplicate source-activity check inside the ingest loop so a duplicate that appears mid-run is skipped cleanly instead of failing the whole sync
 - invalid or empty FIT downloads are now quarantined before normal storage, and corrupt FIT files that fail parsing are skipped cleanly after quarantine instead of aborting the whole batch
 - the backend now exposes `GET /api/v1/sync/status` for frontend/operator visibility into recent sync health
+- `python -m app.print_sync_status --json` can be used for a lightweight structured operator summary without going through the frontend
 - combined dependency vulnerability checks can be run from the repo root with `./infra/scripts/dependency_audit.sh`, which runs both `uv run pip-audit` and `cd frontend && npm run audit`
 - Trivy checks now cover repo filesystem scanning plus the built backend/frontend images, using a local `trivy` binary when available or the official Trivy Docker image as fallback
 - backend tests now cover FIT parsing, analytics calculations, `/api/v1/health`, activity list/detail endpoints, full ingestion of a sample FIT file, Garmin retry behavior, invalid-download quarantine behavior, sync-status responses, and sync-worker duplicate/corrupt-file skip behavior

@@ -17,6 +17,32 @@ gp-local-root() {
   cd "${REPO_ROOT}"
 }
 
+# List the available local Garmin Platform helper commands.
+gp-local-help() {
+  cat <<'EOF'
+gp-local-root            Change into the local garmin-platform repo root.
+gp-local-git-pull        Pull the latest changes from origin/main.
+gp-local-env             Load the local .env file into the current shell.
+gp-local-up              Start postgres, backend, and frontend in the foreground.
+gp-local-up-bg           Start postgres, backend, and frontend in the background.
+gp-local-down            Stop and remove the local app containers.
+gp-local-ps              Show current local container status.
+gp-local-logs            Show recent logs for backend, frontend, and postgres.
+gp-local-logs-backend    Show recent backend logs only.
+gp-local-logs-frontend   Show recent frontend logs only.
+gp-local-logs-postgres   Show recent postgres logs only.
+gp-local-worker-up       Start the optional local sync worker profile.
+gp-local-worker-once     Run one manual sync worker pass locally.
+gp-local-sync-status     Print the current persisted sync checkpoint summary.
+gp-local-reprocess       Rebuild normalized activity data from stored FIT files.
+gp-local-alembic-upgrade Apply the latest Alembic migrations locally.
+gp-local-health          Check the local backend health endpoint.
+gp-local-ci-check        Run the required local CI-equivalent checks.
+gp-local-audit           Run backend and frontend dependency audits.
+gp-local-trivy           Run Trivy scans and save output to trivy.log.
+EOF
+}
+
 # Pull the latest changes for the local garmin-platform repo.
 gp-local-git-pull() {
   gp-local-root
@@ -90,6 +116,13 @@ gp-local-worker-once() {
   gp-local-root
   gp-local-env
   PYTHONPATH=backend ./.venv/bin/python -m app.workers
+}
+
+# Print the current local Garmin sync checkpoint summary.
+gp-local-sync-status() {
+  gp-local-root
+  gp-local-env
+  PYTHONPATH=backend ./.venv/bin/python -m app.print_sync_status "$@"
 }
 
 # Reprocess stored raw FIT files into normalized activity data locally.
