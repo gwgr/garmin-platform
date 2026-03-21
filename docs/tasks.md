@@ -414,6 +414,16 @@ Current state:
 - `GARMIN_SYNC_LIMIT` can now be overridden for smaller test batches such as `5`
 - enable the timer only after manual runs show the backlog is under control and steady-state sync behavior looks safe
 
+### Task 49A `[done]`
+Support historical Garmin backfill pagination after recent activities already exist locally.
+
+Current state:
+- the Garmin activity checkpoint now tracks a dedicated `backfill_offset` alongside the normal steady-state `last_synced_at` / `last_source_id` values
+- repeated manual one-shot worker runs now continue paging into older Garmin activity pages even when the newest page is entirely duplicate data
+- the normal incremental checkpoint stays anchored to the newest known activity while historical backfill is in progress, so steady-state sync resumes cleanly once older pages are exhausted
+- operator-facing sync status now exposes `Backfill offset` in both `python -m app.print_sync_status` and `GET /api/v1/sync/status`
+- verified locally with focused backend tests plus an Alembic upgrade through the new checkpoint-column migration
+
 ### Task 50 `[partial]`
 Create `infra/scripts/backup.sh`.
 

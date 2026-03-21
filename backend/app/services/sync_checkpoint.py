@@ -14,6 +14,7 @@ class SyncCheckpointState:
     sync_key: str
     last_synced_at: datetime | None
     last_source_id: str | None
+    backfill_offset: int | None
     last_attempted_at: datetime | None
     last_succeeded_at: datetime | None
     last_run_status: str | None
@@ -42,6 +43,7 @@ class SyncCheckpointService:
             sync_key=checkpoint.sync_key,
             last_synced_at=checkpoint.last_synced_at,
             last_source_id=checkpoint.last_source_id,
+            backfill_offset=checkpoint.backfill_offset,
             last_attempted_at=checkpoint.last_attempted_at,
             last_succeeded_at=checkpoint.last_succeeded_at,
             last_run_status=checkpoint.last_run_status,
@@ -63,10 +65,12 @@ class SyncCheckpointService:
         *,
         last_synced_at: datetime | None,
         last_source_id: str | None = None,
+        backfill_offset: int | None = None,
     ) -> SyncCheckpointState:
         checkpoint = self._get_or_create_checkpoint(sync_key)
         checkpoint.last_synced_at = last_synced_at
         checkpoint.last_source_id = last_source_id
+        checkpoint.backfill_offset = backfill_offset
         self._session.flush()
         return self._to_state(checkpoint)
 
@@ -88,6 +92,7 @@ class SyncCheckpointService:
         *,
         last_synced_at: datetime | None,
         last_source_id: str | None = None,
+        backfill_offset: int | None = None,
         completed_at: datetime | None = None,
     ) -> SyncCheckpointState:
         checkpoint = self._get_or_create_checkpoint(sync_key)
@@ -99,6 +104,7 @@ class SyncCheckpointService:
         checkpoint.last_error_summary = None
         checkpoint.last_synced_at = last_synced_at
         checkpoint.last_source_id = last_source_id
+        checkpoint.backfill_offset = backfill_offset
         self._session.flush()
         return self._to_state(checkpoint)
 

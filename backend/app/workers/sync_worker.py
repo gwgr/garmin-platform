@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 from sqlalchemy import select
@@ -53,6 +53,13 @@ class GarminSyncWorker:
         self._raw_file_storage = RawFileStorageService(settings.raw_data_dir)
         self._fit_parser = FitParserService()
 
+    def _normalize_checkpoint_time(self, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value
+
     def _activity_already_exists(self, session: Session, source_activity_id: str) -> bool:
         existing_id = session.scalar(
             select(Activity.id).where(Activity.source_activity_id == source_activity_id)
@@ -73,6 +80,27 @@ class GarminSyncWorker:
         )
         session.commit()
         return checkpoint.last_synced_at
+
+    def _resolve_backfill_checkpoint(
+        self,
+        current_checkpoint,
+        fetched_activities,
+    ) -> tuple[datetime | None, str | None]:
+        preserved_synced_at = (
+            self._normalize_checkpoint_time(current_checkpoint.last_synced_at)
+            if current_checkpoint
+            else None
+        )
+        preserved_source_id = current_checkpoint.last_source_id if current_checkpoint else None
+
+        if not fetched_activities:
+            return preserved_synced_at, preserved_source_id
+
+        latest_fetched_activity = fetched_activities[-1]
+        if preserved_synced_at is None or latest_fetched_activity.start_time >= preserved_synced_at:
+            return latest_fetched_activity.start_time, latest_fetched_activity.source_activity_id
+
+        return preserved_synced_at, preserved_source_id
 
     def run_once(self) -> SyncWorkerResult:
         fetched_count = 0
@@ -107,6 +135,8 @@ class GarminSyncWorker:
                 fetched_count=fetched_count,
                 new_count=new_count,
                 sync_key=fetch_result.sync_key,
+                is_backfill=fetch_result.is_backfill,
+                fetch_start=fetch_result.start,
                 sync_limit=self._settings.garmin_sync_limit,
             )
 
@@ -118,20 +148,24 @@ class GarminSyncWorker:
             summary_ingest = ActivitySummaryIngestService(session, self._fit_parser)
             lap_ingest = ActivityLapIngestService(session, self._fit_parser)
             record_ingest = ActivityRecordIngestService(session, self._fit_parser)
+            advance_checkpoint_per_activity = not fetch_result.is_backfill
 
             for activity in new_activities:
                 if self._activity_already_exists(session, activity.source_activity_id):
-                    checkpoint_updated_to = self._advance_checkpoint(
-                        checkpoint_service,
-                        session,
-                        activity=activity,
-                    )
+                    if advance_checkpoint_per_activity:
+                        checkpoint_updated_to = self._advance_checkpoint(
+                            checkpoint_service,
+                            session,
+                            activity=activity,
+                        )
                     log_event(
                         logger,
                         logging.WARNING,
                         "worker.sync.duplicate_activity_skipped",
                         source_activity_id=activity.source_activity_id,
-                        checkpoint_updated_to=checkpoint_updated_to.isoformat(),
+                        checkpoint_updated_to=checkpoint_updated_to.isoformat()
+                        if checkpoint_updated_to
+                        else None,
                     )
                     continue
 
@@ -153,19 +187,21 @@ class GarminSyncWorker:
                         fit_path=download_result.file_path,
                     )
 
-                    checkpoint_updated_to = self._advance_checkpoint(
-                        checkpoint_service,
-                        session,
-                        activity=activity,
-                    )
+                    if advance_checkpoint_per_activity:
+                        checkpoint_updated_to = self._advance_checkpoint(
+                            checkpoint_service,
+                            session,
+                            activity=activity,
+                        )
                     ingested_count += 1
                 except GarminDownloadError as exc:
                     session.rollback()
-                    checkpoint_updated_to = self._advance_checkpoint(
-                        checkpoint_service,
-                        session,
-                        activity=activity,
-                    )
+                    if advance_checkpoint_per_activity:
+                        checkpoint_updated_to = self._advance_checkpoint(
+                            checkpoint_service,
+                            session,
+                            activity=activity,
+                        )
                     log_event(
                         logger,
                         logging.ERROR,
@@ -173,7 +209,9 @@ class GarminSyncWorker:
                         source_activity_id=activity.source_activity_id,
                         error_type=type(exc).__name__,
                         quarantine_path=None,
-                        checkpoint_updated_to=checkpoint_updated_to.isoformat(),
+                        checkpoint_updated_to=checkpoint_updated_to.isoformat()
+                        if checkpoint_updated_to
+                        else None,
                     )
                     continue
                 except CorruptFitFileError as exc:
@@ -187,11 +225,12 @@ class GarminSyncWorker:
                             source_path=download_result.file_path,
                             reason="parse-failed",
                         )
-                    checkpoint_updated_to = self._advance_checkpoint(
-                        checkpoint_service,
-                        session,
-                        activity=activity,
-                    )
+                    if advance_checkpoint_per_activity:
+                        checkpoint_updated_to = self._advance_checkpoint(
+                            checkpoint_service,
+                            session,
+                            activity=activity,
+                        )
                     log_event(
                         logger,
                         logging.ERROR,
@@ -199,11 +238,31 @@ class GarminSyncWorker:
                         source_activity_id=activity.source_activity_id,
                         error_type=type(exc).__name__,
                         quarantine_path=str(quarantine_path) if quarantine_path else None,
-                        checkpoint_updated_to=checkpoint_updated_to.isoformat(),
+                        checkpoint_updated_to=checkpoint_updated_to.isoformat()
+                        if checkpoint_updated_to
+                        else None,
                     )
                     continue
 
-            if not new_activities and fetch_result.activities:
+            if fetch_result.is_backfill:
+                preserved_synced_at, preserved_source_id = self._resolve_backfill_checkpoint(
+                    current_checkpoint,
+                    fetch_result.activities,
+                )
+                next_backfill_offset = (
+                    fetch_result.start + fetched_count
+                    if fetched_count == self._settings.garmin_sync_limit and fetched_count > 0
+                    else None
+                )
+                checkpoint = checkpoint_service.mark_sync_succeeded(
+                    GARMIN_ACTIVITY_SYNC_KEY,
+                    last_synced_at=preserved_synced_at,
+                    last_source_id=preserved_source_id,
+                    backfill_offset=next_backfill_offset,
+                )
+                session.commit()
+                checkpoint_updated_to = checkpoint.last_synced_at
+            elif not new_activities and fetch_result.activities:
                 latest_activity = fetch_result.activities[-1]
                 checkpoint = checkpoint_service.mark_sync_succeeded(
                     GARMIN_ACTIVITY_SYNC_KEY,
@@ -229,6 +288,8 @@ class GarminSyncWorker:
                 new_count=new_count,
                 downloaded_count=downloaded_count,
                 ingested_count=ingested_count,
+                is_backfill=fetch_result.is_backfill,
+                fetch_start=fetch_result.start,
                 sync_limit=self._settings.garmin_sync_limit,
                 checkpoint_updated_to=checkpoint_updated_to.isoformat()
                 if checkpoint_updated_to

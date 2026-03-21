@@ -408,6 +408,8 @@ Current repo state:
 - enable/start is now explicit via `ENABLE_SYNC_TIMER=1` or `systemctl enable --now garmin-sync.timer`
 - for the initial large historical import, prefer manual one-shot worker runs before enabling the timer so Garmin rate limits and long-running backfill behavior can be observed directly
 - recommended manual backfill command: `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env exec -T backend python -m app.workers`
+- repeated manual runs now continue paging backward through older Garmin activity pages even when the newest page is already present locally
+- `gp-sync-status` now exposes `Backfill offset` so operators can tell whether the historical import still has older pages left to inspect
 - current recommended order is: install timer files first, keep them disabled during backfill, then enable `garmin-sync.timer` for steady-state syncs
 - the backend now exposes `GET /api/v1/sync/status`, and the frontend dashboard links through to `/status/sync` for a lightweight operator-facing sync view
 - `python -m app.print_sync_status` now provides the same sync checkpoint state in a shell-friendly operator summary, with `--json` available for structured output

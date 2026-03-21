@@ -22,6 +22,7 @@ class SyncStatusResult:
     last_succeeded_at: datetime | None
     last_synced_at: datetime | None
     last_source_id: str | None
+    backfill_offset: int | None
     last_run_status: str | None
     consecutive_failures: int
     last_error_summary: str | None
@@ -50,6 +51,7 @@ class SyncStatusService:
                 last_succeeded_at=None,
                 last_synced_at=None,
                 last_source_id=None,
+                backfill_offset=None,
                 last_run_status=None,
                 consecutive_failures=0,
                 last_error_summary=None,
@@ -80,6 +82,7 @@ class SyncStatusService:
             last_succeeded_at=checkpoint.last_succeeded_at,
             last_synced_at=checkpoint.last_synced_at,
             last_source_id=checkpoint.last_source_id,
+            backfill_offset=checkpoint.backfill_offset,
             last_run_status=checkpoint.last_run_status,
             consecutive_failures=checkpoint.consecutive_failures,
             last_error_summary=checkpoint.last_error_summary,

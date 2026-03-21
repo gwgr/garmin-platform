@@ -15,6 +15,7 @@ class SyncCheckpoint(Base):
     sync_key: Mapped[str] = mapped_column(String(128), unique=True, nullable=False)
     last_synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_source_id: Mapped[str | None] = mapped_column(String(128))
+    backfill_offset: Mapped[int | None] = mapped_column(Integer)
     last_attempted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_succeeded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_run_status: Mapped[str | None] = mapped_column(String(32))

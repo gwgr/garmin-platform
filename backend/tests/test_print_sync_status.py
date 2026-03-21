@@ -16,6 +16,7 @@ def test_render_sync_status_includes_key_operator_fields() -> None:
         last_succeeded_at=datetime(2026, 3, 20, 18, 0, tzinfo=timezone.utc),
         last_synced_at=datetime(2026, 3, 20, 17, 45, tzinfo=timezone.utc),
         last_source_id="22198027348",
+        backfill_offset=50,
         last_run_status="error",
         consecutive_failures=2,
         last_error_summary="garmin returned 429",
@@ -27,5 +28,6 @@ def test_render_sync_status_includes_key_operator_fields() -> None:
     assert "Summary: The latest sync attempt failed." in rendered
     assert "Stale: yes" in rendered
     assert "Last source activity id: 22198027348" in rendered
+    assert "Backfill offset: 50" in rendered
     assert "Consecutive failures: 2" in rendered
     assert "Last error summary: garmin returned 429" in rendered

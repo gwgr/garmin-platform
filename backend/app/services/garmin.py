@@ -37,6 +37,7 @@ class GarminClient(Protocol):
         self,
         since: datetime | None = None,
         limit: int = 100,
+        start: int = 0,
     ) -> list[GarminActivitySummary]:
         """Return Garmin activities, optionally filtered by a checkpoint."""
 
@@ -73,6 +74,7 @@ class PlaceholderGarminClient:
         self,
         since: datetime | None = None,
         limit: int = 100,
+        start: int = 0,
     ) -> list[GarminActivitySummary]:
         self._require_credentials()
         raise NotImplementedError(
@@ -227,8 +229,9 @@ class GarthGarminClient:
         self,
         since: datetime | None = None,
         limit: int = 100,
+        start: int = 0,
     ) -> list[GarminActivitySummary]:
-        params: dict[str, str | int] = {"start": 0, "limit": limit}
+        params: dict[str, str | int] = {"start": start, "limit": limit}
         if since is not None:
             params["startDate"] = since.date().isoformat()
 
@@ -237,6 +240,7 @@ class GarthGarminClient:
             logging.INFO,
             "garmin.list_activities.started",
             since=since.isoformat() if since else None,
+            start=params["start"],
             limit=params["limit"],
         )
         response = self._perform_with_backoff(
@@ -246,6 +250,7 @@ class GarthGarminClient:
                 params=params,
             ),
             since=since.isoformat() if since else None,
+            start=params["start"],
             limit=params["limit"],
         )
         activities: list[GarminActivitySummary] = []
@@ -269,6 +274,7 @@ class GarthGarminClient:
             "garmin.list_activities.completed",
             fetched_count=len(activities),
             since=since.isoformat() if since else None,
+            start=params["start"],
         )
         return activities
 

@@ -37,6 +37,7 @@ def render_sync_status(result: SyncStatusResult) -> str:
             f"Last succeeded: {_format_timestamp(result.last_succeeded_at)}",
             f"Last synced activity time: {_format_timestamp(result.last_synced_at)}",
             f"Last source activity id: {result.last_source_id or '--'}",
+            f"Backfill offset: {result.backfill_offset if result.backfill_offset is not None else '--'}",
             f"Last run status: {result.last_run_status or '--'}",
             f"Consecutive failures: {result.consecutive_failures}",
             f"Last error summary: {result.last_error_summary or '--'}",

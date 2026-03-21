@@ -161,6 +161,11 @@ APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DAT
 
 Repeat that command until the backlog is mostly caught up. Then enable the timer for steady-state syncs.
 
+Backfill behavior note:
+- repeated manual runs now continue through older Garmin pages even when the newest page is already fully duplicate data
+- `gp-sync-status` now shows `Backfill offset` while that historical import is still paging backward
+- once `Backfill offset` returns to `--`, the worker has exhausted the older pages and normal steady-state incremental sync resumes
+
 For a smaller test batch first, override the default limit of `100`:
 
 ```bash
