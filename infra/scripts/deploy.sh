@@ -76,6 +76,17 @@ run_compose() {
     "$@"
 }
 
+run_garmin_bootstrap() {
+  local password_value="${1:-}"
+
+  if [[ -n "${password_value}" ]]; then
+    run_compose run --rm -e "GARMIN_PASSWORD=${password_value}" backend python -m app.bootstrap_garmin_auth
+    return
+  fi
+
+  run_compose run --rm backend python -m app.bootstrap_garmin_auth
+}
+
 require_command git
 require_command docker
 require_command python3
@@ -135,7 +146,7 @@ EOF
     GARMIN_PASSWORD_VALUE="$(prompt_for_garmin_password)"
   fi
 
-  if ! GARMIN_PASSWORD="${GARMIN_PASSWORD_VALUE}" run_compose run --rm backend python -m app.bootstrap_garmin_auth; then
+  if ! run_garmin_bootstrap "${GARMIN_PASSWORD_VALUE}"; then
     cat >&2 <<EOF
 Garmin auth bootstrap failed.
 
