@@ -157,11 +157,11 @@ EOF
   fi
 fi
 
-log "Applying database migrations"
-run_compose run --rm backend alembic -c alembic.ini upgrade head
-
 log "Starting application services"
-run_compose up -d frontend backend
+run_compose up -d backend frontend
+
+log "Applying database migrations"
+run_compose exec -T backend alembic -c alembic.ini upgrade head
 
 log "Current service status"
 run_compose ps
