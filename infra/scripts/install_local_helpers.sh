@@ -122,7 +122,12 @@ gp-local-worker-once() {
 gp-local-sync-status() {
   gp-local-root
   gp-local-env
-  PYTHONPATH=backend ./.venv/bin/python -m app.print_sync_status "$@"
+  if [[ "$#" -gt 0 ]]; then
+    PYTHONPATH=backend ./.venv/bin/python -m app.print_sync_status "$@"
+    return
+  fi
+
+  PYTHONPATH=backend ./.venv/bin/python -m app.print_sync_status
 }
 
 # Reprocess stored raw FIT files into normalized activity data locally.

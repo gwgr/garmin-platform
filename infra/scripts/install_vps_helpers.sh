@@ -57,7 +57,12 @@ gp-sync-once() {
 # Print the current Garmin sync checkpoint summary on the VPS.
 gp-sync-status() {
   gp-env
-  cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" exec -T backend python -m app.print_sync_status "$@"
+  if [[ "$#" -gt 0 ]]; then
+    cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" exec -T backend python -m app.print_sync_status "$@"
+    return
+  fi
+
+  cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" exec -T backend python -m app.print_sync_status
 }
 
 # Reprocess stored raw FIT files into normalized activity data on the VPS.
