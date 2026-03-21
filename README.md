@@ -140,7 +140,7 @@ APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data do
 Current VPS convenience setup:
 - helper functions can now be installed into `~/.bashrc` with:
   - `APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_vps_helpers.sh`
-- that installer adds documented helpers for `gp-help`, `gp-env`, `gp-app`, `gp-deploy`, `gp-backup`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
+- that installer adds documented helpers for `gp-help`, `gp-env`, `gp-app`, `gp-gitpull`, `gp-deploy`, `gp-backup`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
 - the installed helpers assume the standard `/opt/garmin-platform` layout
 - `gp-help` prints the full VPS helper list with a one-line description of each command
 - if you source the installer instead of executing it, it also reloads the updated profile immediately
@@ -244,6 +244,11 @@ Current restore-verification approach:
 - start Postgres and backend
 - restore the Postgres dump plus raw/Garmin session archives
 - verify backend health and confirm activity data is present
+- bring `frontend` back separately afterward with `docker compose ... up -d frontend` or a normal steady-state `deploy.sh` run if you want the full stack back immediately
+
+Recent VPS recovery note:
+- this backup/restore flow was used successfully to recover a VPS after regenerating simpler non-`$` secrets and recreating only the Postgres data directory
+- practical recommendation: prefer production secrets that do not contain `$` so Docker Compose interpolation cannot become part of the recovery/debug path
 
 Useful commands:
 

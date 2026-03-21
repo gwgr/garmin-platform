@@ -421,6 +421,7 @@ Current state:
 - `infra/scripts/backup.sh` now creates timestamped snapshot directories containing `postgres.dump`, `raw-data.tar.gz`, `garth-data.tar.gz`, and `metadata.json`
 - backups work against either the local Compose stack or the production Compose stack via `APP_*`/`COMPOSE_FILE` environment overrides
 - local and VPS helper installers now include `gp-local-backup` and `gp-backup` so the standard snapshot flow does not require retyping the full command shape
+- the backup workflow has now also been exercised successfully on the VPS before a real Postgres reset/recovery event
 - remaining work: exercise and harden the backup flow against the real production-scale raw FIT corpus and finalize the longer-term raw-file backup/recovery expectations
 
 ### Task 51 `[done]`
@@ -640,6 +641,11 @@ Current state:
   - creating a snapshot with `backup.sh`
   - restoring that snapshot into a second clean environment with a different Postgres password
   - confirming the restored backend booted and still reported `1` activity, `4` laps, `481` records, and `1` restored raw FIT file
+- the same recovery shape has now also been exercised on the VPS:
+  - fresh non-`$` secrets were generated
+  - only the Postgres data directory was recreated
+  - the backup snapshot was restored successfully
+  - backend health and sync checkpoint state came back as expected
 - remaining work: verify the restore runbook against a more realistic raw FIT backup set and complete the end-to-end recovery story for the production raw-data volume
 
 ### Task 70 `[done]`

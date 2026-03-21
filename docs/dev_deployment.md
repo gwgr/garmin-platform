@@ -264,7 +264,7 @@ Note:
 - protect the production env file at `/opt/garmin-platform/.env`
 - current VPS shell convenience setup can now be installed with `infra/scripts/install_vps_helpers.sh`
 - that installer writes a versioned helper block into `~/.bashrc`
-- the installed set includes `gp-help`, `gp-env`, `gp-app`, `gp-deploy`, `gp-backup`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
+- the installed set includes `gp-help`, `gp-env`, `gp-app`, `gp-gitpull`, `gp-deploy`, `gp-backup`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
 - the helper block includes comments above each function describing what it does
 - `gp-help` prints the full VPS helper list with a one-line description of each command
 - `gp-sync-once` now runs the one-shot worker inside the already-running backend container, which keeps it aligned with the live production environment
@@ -470,6 +470,11 @@ Current restore-verification baseline:
 - restore the Postgres dump into the newly created database
 - restore raw FIT storage and Garmin session state from the backup archives
 - start the backend and verify health plus expected activity data presence
+- bring the frontend back separately after restore verification, or rerun the normal steady-state deploy flow if you want the full stack online immediately
+
+Current recovery guidance:
+- if a VPS reset is needed, keep `/opt/garmin-platform/data/raw` and `/opt/garmin-platform/data/garth`, recreate only `/opt/garmin-platform/data/postgres`, then restore from the latest backup snapshot
+- prefer production secrets that do not contain `$` so Docker Compose interpolation does not complicate steady-state operations or disaster recovery
 
 ---
 

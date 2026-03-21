@@ -26,6 +26,7 @@ gp-help() {
   cat <<'VPS_HELP'
 gp-env              Export the standard Garmin Platform VPS environment variables.
 gp-app              Change into the Garmin Platform app checkout on the VPS.
+gp-gitpull          Pull the latest changes from origin/main on the VPS.
 gp-deploy           Pull latest main and run the standard steady-state deploy flow.
 gp-backup           Create a timestamped production backup snapshot.
 gp-sync-once        Run one manual one-shot sync worker pass on the VPS.
@@ -41,6 +42,12 @@ VPS_HELP
 # Change into the Garmin Platform app checkout on the VPS.
 gp-app() {
   cd "${APP_DIR}"
+}
+
+# Pull the latest changes for the Garmin Platform app checkout on the VPS.
+gp-gitpull() {
+  gp-env
+  cd "${APP_DIR}" && git pull origin main
 }
 
 # Pull latest main and run the standard steady-state deploy flow.
