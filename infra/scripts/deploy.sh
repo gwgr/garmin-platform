@@ -80,7 +80,7 @@ run_garmin_bootstrap() {
   local password_value="${1:-}"
 
   if [[ -n "${password_value}" ]]; then
-    run_compose run --rm -e "GARMIN_PASSWORD=${password_value}" backend python -m app.bootstrap_garmin_auth
+    GARMIN_PASSWORD="${password_value}" run_compose run --rm -e GARMIN_PASSWORD backend python -m app.bootstrap_garmin_auth
     return
   fi
 
