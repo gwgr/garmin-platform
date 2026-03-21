@@ -329,7 +329,8 @@ Keep:
 
 Container networking note:
 - host-based local tooling can use `localhost` in `DATABASE_URL`
-- containerized services should use the Compose service name `postgres` instead
+- the production deploy script keeps `/opt/garmin-platform/.env` aligned so `DATABASE_URL` uses the Compose service name `postgres`
+- keep literal secret values in the production `.env`; `$` characters should not need to be escaped as `$$`
 
 Likely variables:
 - `GARMIN_EMAIL`

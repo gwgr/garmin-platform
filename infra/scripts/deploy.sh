@@ -43,6 +43,85 @@ for line in env_path.read_text().splitlines():
 PY
 }
 
+write_env_file_value() {
+  local key="$1"
+  local value="$2"
+  python3 - "$APP_ENV_FILE" "$key" "$value" <<'PY'
+from pathlib import Path
+import sys
+
+env_path = Path(sys.argv[1])
+key = sys.argv[2]
+value = sys.argv[3]
+
+lines = []
+if env_path.exists():
+    lines = env_path.read_text().splitlines()
+
+prefix = f"{key}="
+replaced = False
+for index, line in enumerate(lines):
+    if line.startswith(prefix):
+        lines[index] = f"{key}={value}"
+        replaced = True
+        break
+
+if not replaced:
+    lines.append(f"{key}={value}")
+
+env_path.write_text("\n".join(lines) + "\n")
+PY
+}
+
+normalize_env_value() {
+  local value="${1:-}"
+  printf '%s' "${value//\$\$/\$}"
+}
+
+sync_database_env() {
+  local raw_postgres_user raw_postgres_password raw_postgres_db
+  local postgres_user postgres_password postgres_db database_url
+
+  raw_postgres_user="$(read_env_file_value POSTGRES_USER || true)"
+  raw_postgres_password="$(read_env_file_value POSTGRES_PASSWORD || true)"
+  raw_postgres_db="$(read_env_file_value POSTGRES_DB || true)"
+
+  postgres_user="$(normalize_env_value "${raw_postgres_user}")"
+  postgres_password="$(normalize_env_value "${raw_postgres_password}")"
+  postgres_db="$(normalize_env_value "${raw_postgres_db}")"
+
+  if [[ -z "${postgres_user}" || -z "${postgres_password}" || -z "${postgres_db}" ]]; then
+    cat >&2 <<EOF
+POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB must all be set in ${APP_ENV_FILE}.
+EOF
+    exit 1
+  fi
+
+  if [[ "${raw_postgres_password}" != "${postgres_password}" ]]; then
+    log "Normalizing escaped POSTGRES_PASSWORD in ${APP_ENV_FILE}"
+    write_env_file_value POSTGRES_PASSWORD "${postgres_password}"
+    chmod 600 "${APP_ENV_FILE}"
+  fi
+
+  database_url="$(
+    python3 - "${postgres_user}" "${postgres_password}" "${postgres_db}" <<'PY'
+from urllib.parse import quote
+import sys
+
+postgres_user, postgres_password, postgres_db = sys.argv[1:4]
+
+print(
+    "postgresql+psycopg://"
+    f"{quote(postgres_user, safe='')}:{quote(postgres_password, safe='')}"
+    f"@postgres:5432/{quote(postgres_db, safe='')}"
+)
+PY
+  )"
+
+  write_env_file_value DATABASE_URL "${database_url}"
+  chmod 600 "${APP_ENV_FILE}"
+}
+
 prompt_for_garmin_password() {
   if [[ ! -t 0 ]]; then
     printf 'Garmin password is required for first-time auth bootstrap, but stdin is not interactive.\n' >&2
@@ -110,6 +189,9 @@ mkdir -p \
   "${APP_DATA_DIR}/raw" \
   "${APP_DATA_DIR}/garth"
 find "${APP_DATA_DIR}/raw" "${APP_DATA_DIR}/garth" -type d -exec chmod a+rwx {} +
+
+log "Syncing production database configuration"
+sync_database_env
 
 log "Refreshing git checkout"
 git -C "${REPO_ROOT}" fetch origin main
