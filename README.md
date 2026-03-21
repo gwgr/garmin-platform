@@ -110,6 +110,11 @@ cp .env.example /opt/garmin-platform/.env
 APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data ./infra/scripts/deploy.sh
 ```
 
+Fresh-VPS auth note:
+- `bootstrap_vps.sh` now prompts for your Garmin email address and saves it into `/opt/garmin-platform/.env`
+- `deploy.sh` now prompts securely for your Garmin password only when it needs to create a fresh Garmin session under `/opt/garmin-platform/data/garth`
+- that password is passed only to the bootstrap run and is not saved back into `/opt/garmin-platform/.env`
+
 If the VPS already has valid Garmin session files under `/opt/garmin-platform/data/garth`, you can skip the bootstrap login step during deploy:
 
 ```bash
@@ -118,6 +123,7 @@ APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DAT
 
 Production note:
 - the protected production env file lives at `/opt/garmin-platform/.env`
+- `GARMIN_EMAIL` may remain in `/opt/garmin-platform/.env` for bootstrap/recovery convenience
 - after Garmin session state has been seeded successfully under `/opt/garmin-platform/data/garth`, remove `GARMIN_PASSWORD` from `/opt/garmin-platform/.env`
 - from then on, use `SKIP_GARMIN_BOOTSTRAP=1` for steady-state deploys
 - current private Tailscale access example: `http://prod-vps:3000` for the frontend

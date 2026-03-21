@@ -34,9 +34,86 @@ run_as_target_user() {
   runuser -u "${TARGET_USER}" -- "$@"
 }
 
+read_env_file_value() {
+  local key="$1"
+  python3 - "$APP_ENV_FILE" "$key" <<'PY'
+from pathlib import Path
+import sys
+
+env_path = Path(sys.argv[1])
+key = sys.argv[2]
+
+if not env_path.exists():
+    raise SystemExit(0)
+
+for line in env_path.read_text().splitlines():
+    if line.startswith(f"{key}="):
+        print(line.split("=", 1)[1].strip())
+        break
+PY
+}
+
+write_env_file_value() {
+  local key="$1"
+  local value="$2"
+  python3 - "$APP_ENV_FILE" "$key" "$value" <<'PY'
+from pathlib import Path
+import sys
+
+env_path = Path(sys.argv[1])
+key = sys.argv[2]
+value = sys.argv[3]
+
+lines = []
+if env_path.exists():
+    lines = env_path.read_text().splitlines()
+
+prefix = f"{key}="
+replaced = False
+for index, line in enumerate(lines):
+    if line.startswith(prefix):
+        lines[index] = f"{key}={value}"
+        replaced = True
+        break
+
+if not replaced:
+    lines.append(f"{key}={value}")
+
+env_path.write_text("\n".join(lines) + "\n")
+PY
+}
+
+prompt_for_garmin_email() {
+  local existing_email entered_email
+
+  if [[ ! -t 0 ]]; then
+    log "Skipping Garmin email prompt because stdin is not interactive"
+    return
+  fi
+
+  existing_email="$(read_env_file_value GARMIN_EMAIL || true)"
+  if [[ -n "${existing_email}" ]]; then
+    read -rp "Garmin email [${existing_email}]: " entered_email
+    entered_email="${entered_email:-${existing_email}}"
+  else
+    read -rp "Garmin email (saved to ${APP_ENV_FILE}; leave blank to skip for now): " entered_email
+  fi
+
+  if [[ -z "${entered_email}" ]]; then
+    log "Leaving GARMIN_EMAIL unchanged in ${APP_ENV_FILE}"
+    return
+  fi
+
+  write_env_file_value GARMIN_EMAIL "${entered_email}"
+  chown "${TARGET_USER}:${TARGET_USER}" "${APP_ENV_FILE}"
+  chmod 600 "${APP_ENV_FILE}"
+  log "Saved GARMIN_EMAIL to ${APP_ENV_FILE}"
+}
+
 require_root
 require_command apt-get
 require_command git
+require_command python3
 
 if [[ -z "${TARGET_USER}" ]]; then
   printf 'Unable to determine target user. Set TARGET_USER when running the script.\n' >&2
@@ -73,6 +150,9 @@ usermod -aG docker "${TARGET_USER}"
 
 log "Setting ownership for application directories"
 chown -R "${TARGET_USER}:${TARGET_USER}" "${APP_BASE_DIR}"
+chmod 600 "${APP_ENV_FILE}"
+
+prompt_for_garmin_email
 
 if [[ -d "${APP_DIR}/.git" ]]; then
   log "Updating existing repository checkout in ${APP_DIR}"
@@ -91,4 +171,5 @@ log "App checkout: ${APP_DIR}"
 log "Persistent data: ${APP_DATA_DIR}"
 log "Next step: log out and back in so docker group membership applies for ${TARGET_USER}"
 log "Then run: cd ${APP_DIR} && APP_BASE_DIR=${APP_BASE_DIR} APP_ENV_FILE=${APP_ENV_FILE} APP_DATA_DIR=${APP_DATA_DIR} ./infra/scripts/deploy.sh"
+log "The deploy script will prompt for Garmin password only if it needs to create a fresh GARTH_HOME session, and it will not save that password."
 log "Later, install the production sync timer with: sudo APP_USER=${TARGET_USER} APP_BASE_DIR=${APP_BASE_DIR} APP_ENV_FILE=${APP_ENV_FILE} APP_DATA_DIR=${APP_DATA_DIR} ${APP_DIR}/infra/scripts/install_sync_timer.sh"

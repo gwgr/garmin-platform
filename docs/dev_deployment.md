@@ -253,6 +253,11 @@ sudo APP_USER="$(whoami)" APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/ga
 sudo systemctl enable --now garmin-sync.timer
 ```
 
+Fresh-VPS credential handling:
+- `bootstrap_vps.sh` now prompts for the Garmin email address and writes `GARMIN_EMAIL` into `/opt/garmin-platform/.env`
+- `deploy.sh` now prompts securely for the Garmin password only when it needs to bootstrap a fresh Garmin session
+- that password is not written back into `/opt/garmin-platform/.env`
+
 Note:
 - the backend image now runs the real FastAPI app and can execute Alembic and Garmin bootstrap commands inside the container
 - production app services should live under `/opt/garmin-platform/app`
@@ -279,6 +284,7 @@ Current repo state:
 - it uses `/opt/garmin-platform/data` for persistent PostgreSQL, raw FIT, and Garmin session storage
 - it installs Docker packages, prepares `/opt/garmin-platform`, configures Docker group access, and clones or updates the repo into the target app path
 - the deploy wrapper now also supports `SKIP_GARMIN_BOOTSTRAP=1` for VPSes where valid `GARTH_HOME` session files are already seeded
+- `GARMIN_EMAIL` can remain in the protected env file for bootstrap/recovery convenience, while `GARMIN_PASSWORD` should be treated as prompt-only bootstrap input whenever possible
 
 ---
 

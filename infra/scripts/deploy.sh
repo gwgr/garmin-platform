@@ -20,6 +20,47 @@ check_backend_health() {
   run_compose exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)"
 }
 
+has_saved_garmin_session() {
+  [[ -f "${APP_DATA_DIR}/garth/oauth1_token.json" && -f "${APP_DATA_DIR}/garth/oauth2_token.json" ]]
+}
+
+read_env_file_value() {
+  local key="$1"
+  python3 - "$APP_ENV_FILE" "$key" <<'PY'
+from pathlib import Path
+import sys
+
+env_path = Path(sys.argv[1])
+key = sys.argv[2]
+
+if not env_path.exists():
+    raise SystemExit(0)
+
+for line in env_path.read_text().splitlines():
+    if line.startswith(f"{key}="):
+        print(line.split("=", 1)[1].strip())
+        break
+PY
+}
+
+prompt_for_garmin_password() {
+  if [[ ! -t 0 ]]; then
+    printf 'Garmin password is required for first-time auth bootstrap, but stdin is not interactive.\n' >&2
+    exit 1
+  fi
+
+  local password
+  read -rsp "Garmin password (used once, not saved): " password
+  printf '\n'
+
+  if [[ -z "${password}" ]]; then
+    printf 'Garmin password cannot be empty for first-time auth bootstrap.\n' >&2
+    exit 1
+  fi
+
+  printf '%s' "${password}"
+}
+
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
     printf 'Required command not found: %s\n' "$1" >&2
@@ -37,6 +78,7 @@ run_compose() {
 
 require_command git
 require_command docker
+require_command python3
 
 if [[ ! -f "${APP_ENV_FILE}" ]]; then
   printf 'Expected env file not found: %s\n' "${APP_ENV_FILE}" >&2
@@ -77,7 +119,23 @@ if [[ "${SKIP_GARMIN_BOOTSTRAP}" == "1" ]]; then
   log "Skipping Garmin auth bootstrap because SKIP_GARMIN_BOOTSTRAP=1"
 else
   log "Running Garmin auth bootstrap"
-  if ! run_compose run --rm backend python -m app.bootstrap_garmin_auth; then
+  GARMIN_EMAIL_VALUE="$(read_env_file_value GARMIN_EMAIL || true)"
+  GARMIN_PASSWORD_VALUE="${GARMIN_PASSWORD:-}"
+
+  if [[ -z "${GARMIN_EMAIL_VALUE}" && ! has_saved_garmin_session ]]; then
+    cat >&2 <<EOF
+GARMIN_EMAIL is not set in ${APP_ENV_FILE}.
+
+Set GARMIN_EMAIL in ${APP_ENV_FILE} first, or rerun the fresh VPS bootstrap and enter it when prompted.
+EOF
+    exit 1
+  fi
+
+  if [[ -z "${GARMIN_PASSWORD_VALUE}" && ! has_saved_garmin_session ]]; then
+    GARMIN_PASSWORD_VALUE="$(prompt_for_garmin_password)"
+  fi
+
+  if ! GARMIN_PASSWORD="${GARMIN_PASSWORD_VALUE}" run_compose run --rm backend python -m app.bootstrap_garmin_auth; then
     cat >&2 <<EOF
 Garmin auth bootstrap failed.
 
