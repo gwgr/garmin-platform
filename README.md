@@ -155,7 +155,7 @@ Recommended manual backfill command:
 
 ```bash
 cd /opt/garmin-platform/app
-APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers
+APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env exec -T backend python -m app.workers
 ```
 
 Repeat that command until the backlog is mostly caught up. Then enable the timer for steady-state syncs.
@@ -164,7 +164,7 @@ For a smaller test batch first, override the default limit of `100`:
 
 ```bash
 cd /opt/garmin-platform/app
-APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data GARMIN_SYNC_LIMIT=5 SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers
+APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env exec -T -e GARMIN_SYNC_LIMIT=5 backend python -m app.workers
 ```
 
 Install it on the VPS with:

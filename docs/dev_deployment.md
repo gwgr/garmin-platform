@@ -248,7 +248,7 @@ cd /opt/garmin-platform/app
 cp .env.example /opt/garmin-platform/.env
 # edit /opt/garmin-platform/.env with real values
 APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data ./infra/scripts/deploy.sh
-APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data SKIP_GARMIN_BOOTSTRAP=1 docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers
+APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env exec -T backend python -m app.workers
 sudo APP_USER="$(whoami)" APP_BASE_DIR=/opt/garmin-platform APP_ENV_FILE=/opt/garmin-platform/.env APP_DATA_DIR=/opt/garmin-platform/data /opt/garmin-platform/app/infra/scripts/install_sync_timer.sh
 sudo systemctl enable --now garmin-sync.timer
 ```
@@ -267,8 +267,9 @@ Note:
 - the installed set includes `gp-help`, `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
 - the helper block includes comments above each function describing what it does
 - `gp-help` prints the full VPS helper list with a one-line description of each command
+- `gp-sync-once` now runs the one-shot worker inside the already-running backend container, which keeps it aligned with the live production environment
 - `gp-sync-status` prints the current persisted Garmin sync checkpoint summary from the running production backend, and supports `--json` for machine-readable output
-- `gp-reprocess` wraps `python -m app.reprocess_fit_files` through the production Compose stack and forwards options such as `--limit` or `--source-activity-id`
+- `gp-reprocess` now runs inside the already-running backend container and forwards options such as `--limit` or `--source-activity-id`
 - backend startup now checks database connectivity plus required `RAW_DATA_DIR` and `GARTH_HOME` paths before reporting healthy
 
 Wrap this later in:
@@ -398,12 +399,12 @@ Agreed production direction:
 - enforce that private API boundary in production by not publishing the backend container port on the host at all; the frontend uses the internal Docker network instead
 
 Current repo state:
-- `infra/systemd/garmin-sync.service` runs the one-shot worker via Docker Compose with `SKIP_GARMIN_BOOTSTRAP=1`
+- `infra/systemd/garmin-sync.service` runs the one-shot worker by executing it inside the running backend container
 - `infra/systemd/garmin-sync.timer` triggers that service every 6 hours
 - `infra/scripts/install_sync_timer.sh` installs the unit files and reloads `systemd`
 - enable/start is now explicit via `ENABLE_SYNC_TIMER=1` or `systemctl enable --now garmin-sync.timer`
 - for the initial large historical import, prefer manual one-shot worker runs before enabling the timer so Garmin rate limits and long-running backfill behavior can be observed directly
-- recommended manual backfill command: `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env run --rm backend python -m app.workers`
+- recommended manual backfill command: `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env exec -T backend python -m app.workers`
 - current recommended order is: install timer files first, keep them disabled during backfill, then enable `garmin-sync.timer` for steady-state syncs
 - the backend now exposes `GET /api/v1/sync/status`, and the frontend dashboard links through to `/status/sync` for a lightweight operator-facing sync view
 - `python -m app.print_sync_status` now provides the same sync checkpoint state in a shell-friendly operator summary, with `--json` available for structured output
