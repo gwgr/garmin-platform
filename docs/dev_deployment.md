@@ -264,7 +264,7 @@ Note:
 - protect the production env file at `/opt/garmin-platform/.env`
 - current VPS shell convenience setup can now be installed with `infra/scripts/install_vps_helpers.sh`
 - that installer writes a versioned helper block into `~/.bashrc`
-- the installed set includes `gp-help`, `gp-env`, `gp-app`, `gp-deploy`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
+- the installed set includes `gp-help`, `gp-env`, `gp-app`, `gp-deploy`, `gp-backup`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
 - the helper block includes comments above each function describing what it does
 - `gp-help` prints the full VPS helper list with a one-line description of each command
 - `gp-sync-once` now runs the one-shot worker inside the already-running backend container, which keeps it aligned with the live production environment
@@ -443,6 +443,7 @@ Recommended frequency:
 Minimum backup outputs:
 - Postgres dump
 - compressed raw data archive
+- Garmin session archive for faster disaster recovery when a valid session already exists
 
 Restore expectation:
 - backup work is not complete until a clean restore has been exercised and documented
@@ -452,6 +453,23 @@ Suggested backup locations:
 - local mounted backup directory
 - Synology or other secondary storage
 - optional cloud backup later
+
+Repo-owned commands:
+- local backup: `./infra/scripts/backup.sh`
+- local/VPS restore into a clean environment: `BACKUP_SOURCE=/path/to/snapshot ./infra/scripts/restore_backup.sh`
+
+Current backup artifact set:
+- `postgres.dump`
+- `raw-data.tar.gz`
+- `garth-data.tar.gz`
+- `metadata.json`
+
+Current restore-verification baseline:
+- restore into an empty target data directory
+- start PostgreSQL in the target environment
+- restore the Postgres dump into the newly created database
+- restore raw FIT storage and Garmin session state from the backup archives
+- start the backend and verify health plus expected activity data presence
 
 ---
 
@@ -570,6 +588,7 @@ Do not:
 Strongly recommended next files:
 - `infra/scripts/deploy.sh`
 - `infra/scripts/backup.sh`
+- `infra/scripts/restore_backup.sh`
 - `README.md`
 
 ---

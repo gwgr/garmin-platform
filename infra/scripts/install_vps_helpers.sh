@@ -27,6 +27,7 @@ gp-help() {
 gp-env              Export the standard Garmin Platform VPS environment variables.
 gp-app              Change into the Garmin Platform app checkout on the VPS.
 gp-deploy           Pull latest main and run the standard steady-state deploy flow.
+gp-backup           Create a timestamped production backup snapshot.
 gp-sync-once        Run one manual one-shot sync worker pass on the VPS.
 gp-sync-status      Print the current persisted Garmin sync checkpoint summary.
 gp-reprocess        Rebuild normalized activity data from stored FIT files.
@@ -46,6 +47,12 @@ gp-app() {
 gp-deploy() {
   gp-env
   cd "${APP_DIR}" && SKIP_GARMIN_BOOTSTRAP=1 ./infra/scripts/deploy.sh
+}
+
+# Create a timestamped production backup snapshot.
+gp-backup() {
+  gp-env
+  cd "${APP_DIR}" && COMPOSE_FILE=docker-compose.prod.yml ./infra/scripts/backup.sh "$@"
 }
 
 # Run one manual one-shot sync worker pass on the VPS.

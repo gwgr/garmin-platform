@@ -33,6 +33,7 @@ gp-local-logs-frontend   Show recent frontend logs only.
 gp-local-logs-postgres   Show recent postgres logs only.
 gp-local-worker-up       Start the optional local sync worker profile.
 gp-local-worker-once     Run one manual sync worker pass locally.
+gp-local-backup         Create a timestamped local backup snapshot.
 gp-local-sync-status     Print the current persisted sync checkpoint summary.
 gp-local-reprocess       Rebuild normalized activity data from stored FIT files.
 gp-local-alembic-upgrade Apply the latest Alembic migrations locally.
@@ -116,6 +117,12 @@ gp-local-worker-once() {
   gp-local-root
   gp-local-env
   PYTHONPATH=backend ./.venv/bin/python -m app.workers
+}
+
+# Create a timestamped local backup snapshot.
+gp-local-backup() {
+  gp-local-root
+  ./infra/scripts/backup.sh "$@"
 }
 
 # Print the current local Garmin sync checkpoint summary.

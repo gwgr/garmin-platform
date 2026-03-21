@@ -414,8 +414,14 @@ Current state:
 - `GARMIN_SYNC_LIMIT` can now be overridden for smaller test batches such as `5`
 - enable the timer only after manual runs show the backlog is under control and steady-state sync behavior looks safe
 
-### Task 50
+### Task 50 `[partial]`
 Create `infra/scripts/backup.sh`.
+
+Current state:
+- `infra/scripts/backup.sh` now creates timestamped snapshot directories containing `postgres.dump`, `raw-data.tar.gz`, `garth-data.tar.gz`, and `metadata.json`
+- backups work against either the local Compose stack or the production Compose stack via `APP_*`/`COMPOSE_FILE` environment overrides
+- local and VPS helper installers now include `gp-local-backup` and `gp-backup` so the standard snapshot flow does not require retyping the full command shape
+- remaining work: exercise and harden the backup flow against the real production-scale raw FIT corpus and finalize the longer-term raw-file backup/recovery expectations
 
 ### Task 51 `[done]`
 Document local setup in `README.md`.
@@ -618,13 +624,23 @@ Current state:
 - missing raw files are skipped cleanly, raw FIT files are never modified by the reprocess command, and batch runs continue per activity rather than aborting on the first issue
 - backend tests now cover both successful activity reprocessing and safe skipping when a raw FIT path is missing
 
-### Task 69
+### Task 69 `[partial]`
 Verify backup restore flow in a clean environment.
 
 Scope:
 - restore PostgreSQL plus raw FIT storage from backup artifacts
 - verify the application boots and serves expected data after restore
 - document the restore runbook, not just the backup command
+
+Current state:
+- `infra/scripts/restore_backup.sh` now restores `postgres.dump` plus the archived `raw` and `garth` directories into a clean target environment
+- the restore flow can optionally boot PostgreSQL and the backend and verify backend health plus a summarized activity count before declaring success
+- the backup/restore flow was verified locally in a disposable clean environment by:
+  - seeding one real FIT fixture into PostgreSQL plus raw storage
+  - creating a snapshot with `backup.sh`
+  - restoring that snapshot into a second clean environment with a different Postgres password
+  - confirming the restored backend booted and still reported `1` activity, `4` laps, `481` records, and `1` restored raw FIT file
+- remaining work: verify the restore runbook against a more realistic raw FIT backup set and complete the end-to-end recovery story for the production raw-data volume
 
 ### Task 70 `[done]`
 Add sync-status visibility for operations.
