@@ -49,16 +49,13 @@ prompt_for_garmin_password() {
     exit 1
   fi
 
-  local password
-  read -rsp "Garmin password (used once, not saved): " password
+  read -rsp "Garmin password (used once, not saved): " GARMIN_PASSWORD_VALUE
   printf '\n'
 
-  if [[ -z "${password}" ]]; then
+  if [[ -z "${GARMIN_PASSWORD_VALUE}" ]]; then
     printf 'Garmin password cannot be empty for first-time auth bootstrap.\n' >&2
     exit 1
   fi
-
-  printf '%s' "${password}"
 }
 
 require_command() {
@@ -143,7 +140,7 @@ EOF
   fi
 
   if [[ -z "${GARMIN_PASSWORD_VALUE}" && ! has_saved_garmin_session ]]; then
-    GARMIN_PASSWORD_VALUE="$(prompt_for_garmin_password)"
+    prompt_for_garmin_password
   fi
 
   if ! run_garmin_bootstrap "${GARMIN_PASSWORD_VALUE}"; then
