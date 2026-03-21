@@ -130,7 +130,7 @@ else
   GARMIN_EMAIL_VALUE="$(read_env_file_value GARMIN_EMAIL || true)"
   GARMIN_PASSWORD_VALUE="${GARMIN_PASSWORD:-}"
 
-  if [[ -z "${GARMIN_EMAIL_VALUE}" && ! has_saved_garmin_session ]]; then
+  if [[ -z "${GARMIN_EMAIL_VALUE}" ]] && ! has_saved_garmin_session; then
     cat >&2 <<EOF
 GARMIN_EMAIL is not set in ${APP_ENV_FILE}.
 
@@ -139,7 +139,7 @@ EOF
     exit 1
   fi
 
-  if [[ -z "${GARMIN_PASSWORD_VALUE}" && ! has_saved_garmin_session ]]; then
+  if [[ -z "${GARMIN_PASSWORD_VALUE}" ]] && ! has_saved_garmin_session; then
     prompt_for_garmin_password
   fi
 
