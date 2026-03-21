@@ -97,8 +97,11 @@ class GarminSyncWorker:
             return preserved_synced_at, preserved_source_id
 
         latest_fetched_activity = fetched_activities[-1]
-        if preserved_synced_at is None or latest_fetched_activity.start_time >= preserved_synced_at:
-            return latest_fetched_activity.start_time, latest_fetched_activity.source_activity_id
+        latest_fetched_time = self._normalize_checkpoint_time(latest_fetched_activity.start_time)
+        if preserved_synced_at is None or (
+            latest_fetched_time is not None and latest_fetched_time >= preserved_synced_at
+        ):
+            return latest_fetched_time, latest_fetched_activity.source_activity_id
 
         return preserved_synced_at, preserved_source_id
 

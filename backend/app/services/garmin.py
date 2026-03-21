@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import lru_cache
 import io
 import logging
@@ -256,7 +256,14 @@ class GarthGarminClient:
         activities: list[GarminActivitySummary] = []
         for item in response:
             source_activity_id = str(item["activityId"])
-            start_time = datetime.fromisoformat(item["startTimeLocal"].replace("Z", "+00:00"))
+            raw_start_time = item.get("startTimeGMT") or item.get("startTimeLocal")
+            if raw_start_time is None:
+                raise GarminDownloadError(
+                    f"Garmin activity {source_activity_id} did not include a usable start timestamp."
+                )
+            start_time = datetime.fromisoformat(raw_start_time.replace("Z", "+00:00"))
+            if start_time.tzinfo is None:
+                start_time = start_time.replace(tzinfo=timezone.utc)
             activities.append(
                 GarminActivitySummary(
                     source_activity_id=source_activity_id,

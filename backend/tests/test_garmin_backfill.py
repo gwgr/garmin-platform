@@ -31,7 +31,14 @@ def test_garth_garmin_client_list_activities_accepts_start_offset(monkeypatch) -
         def connectapi(self, path, params):
             assert path == "/activitylist-service/activities/search/activities"
             captured_params.update(params)
-            return []
+            return [
+                {
+                    "activityId": 123,
+                    "startTimeGMT": "2026-03-21T08:27:02.000Z",
+                    "startTimeLocal": "2026-03-21T19:27:02.000",
+                    "activityType": {"typeKey": "running"},
+                }
+            ]
 
     client = GarthGarminClient(
         email=None,
@@ -52,6 +59,32 @@ def test_garth_garmin_client_list_activities_accepts_start_offset(monkeypatch) -
         "limit": 25,
         "startDate": "2026-03-21",
     }
+
+
+def test_garth_garmin_client_prefers_gmt_start_time_and_normalizes_timezone(monkeypatch) -> None:
+    class _FakeGarth:
+        def connectapi(self, path, params):
+            return [
+                {
+                    "activityId": 456,
+                    "startTimeGMT": "2026-03-20T07:15:00.000Z",
+                    "startTimeLocal": "2026-03-20T18:15:00.000",
+                    "activityType": {"typeKey": "walking"},
+                }
+            ]
+
+    client = GarthGarminClient(
+        email=None,
+        password=None,
+        garth_home=Path("data/garth"),
+        retry_delays_seconds=(1, 2, 3),
+    )
+    monkeypatch.setattr(client, "_login", lambda: _FakeGarth())
+
+    activities = client.list_activities(limit=1, start=0)
+
+    assert len(activities) == 1
+    assert activities[0].start_time.isoformat() == "2026-03-20T07:15:00+00:00"
 
 
 def test_garmin_activity_fetcher_uses_backfill_offset_when_present() -> None:
