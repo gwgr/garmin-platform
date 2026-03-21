@@ -144,6 +144,7 @@ Current VPS convenience setup:
 - the installed helpers assume the standard `/opt/garmin-platform` layout
 - `gp-help` prints the full VPS helper list with a one-line description of each command
 - if you source the installer instead of executing it, it also reloads the updated profile immediately
+- the production backend image now builds its runtime UID/GID from the current VPS deploy user so files written under `/opt/garmin-platform/data` land with the expected host ownership instead of low-numbered system accounts
 
 ## Production Sync Timer
 

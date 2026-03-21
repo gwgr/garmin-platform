@@ -283,6 +283,7 @@ Current repo state:
 - it expects the repo checkout at `/opt/garmin-platform/app`
 - it reads production settings from `/opt/garmin-platform/.env`
 - it uses `/opt/garmin-platform/data` for persistent PostgreSQL, raw FIT, and Garmin session storage
+- it now passes the current VPS user's UID/GID into the backend image build so container-written files under `/opt/garmin-platform/data` map back to the expected host owner
 - it installs Docker packages, prepares `/opt/garmin-platform`, configures Docker group access, and clones or updates the repo into the target app path
 - the deploy wrapper now also supports `SKIP_GARMIN_BOOTSTRAP=1` for VPSes where valid `GARTH_HOME` session files are already seeded
 - `GARMIN_EMAIL` can remain in the protected env file for bootstrap/recovery convenience, while `GARMIN_PASSWORD` should be treated as prompt-only bootstrap input whenever possible

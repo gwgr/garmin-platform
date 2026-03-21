@@ -66,7 +66,7 @@ require_command() {
 }
 
 run_compose() {
-  APP_ENV_FILE="${APP_ENV_FILE}" APP_DATA_DIR="${APP_DATA_DIR}" docker compose \
+  APP_ENV_FILE="${APP_ENV_FILE}" APP_DATA_DIR="${APP_DATA_DIR}" APP_UID="$(id -u)" APP_GID="$(id -g)" docker compose \
     --project-directory "${COMPOSE_PROJECT_DIR}" \
     -f "${COMPOSE_PROJECT_DIR}/${COMPOSE_FILE}" \
     --env-file "${APP_ENV_FILE}" \

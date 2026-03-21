@@ -1,5 +1,8 @@
 FROM python:3.12-slim
 
+ARG APP_UID=1000
+ARG APP_GID=1000
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/app/.venv/bin:$PATH" \
@@ -11,8 +14,8 @@ COPY pyproject.toml uv.lock ./
 
 RUN pip install --no-cache-dir uv \
     && uv sync --frozen --no-dev \
-    && groupadd --system appgroup \
-    && useradd --system --gid appgroup --create-home --home-dir /home/appuser appuser \
+    && groupadd --gid "${APP_GID}" appgroup \
+    && useradd --uid "${APP_UID}" --gid appgroup --create-home --home-dir /home/appuser appuser \
     && chown -R appuser:appgroup /app
 
 COPY alembic.ini ./
