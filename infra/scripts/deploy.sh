@@ -109,7 +109,7 @@ mkdir -p \
   "${APP_DATA_DIR}/postgres" \
   "${APP_DATA_DIR}/raw" \
   "${APP_DATA_DIR}/garth"
-chmod -R a+rwX "${APP_DATA_DIR}/raw" "${APP_DATA_DIR}/garth"
+find "${APP_DATA_DIR}/raw" "${APP_DATA_DIR}/garth" -type d -exec chmod a+rwx {} +
 
 log "Refreshing git checkout"
 git -C "${REPO_ROOT}" fetch origin main

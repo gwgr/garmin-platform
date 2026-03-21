@@ -151,7 +151,7 @@ usermod -aG docker "${TARGET_USER}"
 log "Setting ownership for application directories"
 chown -R "${TARGET_USER}:${TARGET_USER}" "${APP_BASE_DIR}"
 chmod 600 "${APP_ENV_FILE}"
-chmod -R a+rwX "${APP_DATA_DIR}/raw" "${APP_DATA_DIR}/garth"
+find "${APP_DATA_DIR}/raw" "${APP_DATA_DIR}/garth" -type d -exec chmod a+rwx {} +
 
 prompt_for_garmin_email
 
