@@ -330,7 +330,8 @@ Keep:
 Container networking note:
 - host-based local tooling can use `localhost` in `DATABASE_URL`
 - the production deploy script keeps `/opt/garmin-platform/.env` aligned so `DATABASE_URL` uses the Compose service name `postgres`
-- keep literal secret values in the production `.env`; `$` characters should not need to be escaped as `$$`
+- Docker Compose still parses the production `.env`, so literal `$` characters in VPS secret values should remain escaped as `$$`
+- the deploy script decodes those escaped `POSTGRES_*` values when it rewrites `DATABASE_URL`
 
 Likely variables:
 - `GARMIN_EMAIL`

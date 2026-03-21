@@ -244,7 +244,8 @@ docker compose -f docker-compose.prod.yml config
 Note:
 - `.env` keeps `DATABASE_URL` pointed at `localhost` for host-based development
 - the production deploy script rewrites `DATABASE_URL` in `/opt/garmin-platform/.env` to use the `postgres` service hostname for container-to-container networking
-- keep literal secret values in the VPS `.env`; you should not need to escape `$` as `$$` once the current deploy flow is in place
+- Docker Compose still parses the VPS `.env` for interpolation, so any literal `$` in VPS secret values should remain escaped as `$$`
+- the production deploy script decodes those escaped `POSTGRES_*` values when it rewrites `DATABASE_URL` for the backend
 - the containerized frontend now uses `INTERNAL_API_BASE_URL=http://backend:8000/api/v1` for server-side requests while the browser continues using `NEXT_PUBLIC_API_BASE_URL`
 - set `GARTH_HOME` to a local-only directory such as `./data/garth` so Garmin session state stays out of git
 - set `LOG_LEVEL` in `.env` if you want quieter or more verbose backend logs

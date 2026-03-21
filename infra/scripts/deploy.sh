@@ -97,12 +97,6 @@ EOF
     exit 1
   fi
 
-  if [[ "${raw_postgres_password}" != "${postgres_password}" ]]; then
-    log "Normalizing escaped POSTGRES_PASSWORD in ${APP_ENV_FILE}"
-    write_env_file_value POSTGRES_PASSWORD "${postgres_password}"
-    chmod 600 "${APP_ENV_FILE}"
-  fi
-
   database_url="$(
     python3 - "${postgres_user}" "${postgres_password}" "${postgres_db}" <<'PY'
 from urllib.parse import quote
