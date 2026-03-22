@@ -47,8 +47,8 @@ ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
 COPY --from=build --chown=nonroot:nonroot /app/frontend/.next/standalone ./
-COPY --from=build --chown=nonroot:nonroot /app/frontend/.next/static ./frontend/.next/static
-COPY --from=build --chown=nonroot:nonroot /app/frontend/public ./frontend/public
+COPY --from=build --chown=nonroot:nonroot /app/frontend/.next/static ./.next/static
+COPY --from=build --chown=nonroot:nonroot /app/frontend/public ./public
 
 EXPOSE 3000
 
