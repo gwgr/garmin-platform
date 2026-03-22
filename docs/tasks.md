@@ -735,7 +735,7 @@ Current state:
 - rerunning Trivy against the rebuilt image reduced the frontend container findings from `20` (`1 CRITICAL`, `2 HIGH`) down to `3` OS-package findings (`1 HIGH`, `2 MEDIUM`), while the Node package findings dropped to the single already-known `next` advisory
 - remaining work: decide whether the remaining distroless/Debian `libc6` `HIGH` finding should be treated as temporary accepted base-image risk for the private MVP or whether a further runtime-base change is warranted before Task 71 can be closed
 
-### Task 72
+### Task 72 `[partial]`
 Review and triage the initial Dependabot pull requests created by the new security automation.
 
 Scope:
@@ -743,6 +743,15 @@ Scope:
 - merge or close straightforward low-risk updates where appropriate
 - document why riskier updates such as major framework or Garmin-library jumps are deferred or accepted
 - keep the repo-level automation useful without creating alert fatigue or unreviewed upgrade churn
+
+Current state:
+- as of `2026-03-22`, the open Dependabot PRs are `#7 next 15.5.13 -> 16.2.0`, `#6 @types/leaflet 1.9.20 -> 1.9.21`, `#5 typescript 5.8.3 -> 5.9.3`, `#4 react-dom + @types/react-dom`, `#3 @types/node 22.15.21 -> 25.5.0`, and `#2 garth 0.6.3 -> 0.7.10`
+- the lowest-risk frontend typing/tooling updates are `#6` and `#5`; those versions have now been applied locally and a clean `npm run build` still passes
+- `#7 next` remains the clearest deferred major upgrade because it is directly tied to the known accepted Next.js advisory, could alter App Router behavior, and should be handled as a deliberate framework-upgrade task rather than a drive-by Dependabot merge
+- `#3 @types/node` is not an automatic merge candidate because it jumps far ahead of the current Node 22 runtime and could create misleading type/runtime mismatches
+- `#4 react-dom + @types/react-dom` is a cautious upgrade rather than a no-thought merge because it changes a runtime dependency, not just type-only tooling
+- `#2 garth` is a cautious backend/Garmin-auth upgrade because recent `garth` releases have included real login and SSO behavior changes that should be tested against live Garmin auth flows before merging
+- remaining work: decide whether to merge the validated low-risk frontend updates now, then document explicit defer/close rationale for the `next`, `@types/node`, `react-dom`, and `garth` PRs
 
 ### Task 73
 Review and address GitHub Actions runtime deprecation warnings from CI and repository automation.
