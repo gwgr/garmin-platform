@@ -537,6 +537,7 @@ Current repository-level security automation:
 - `.github/dependabot.yml` now configures weekly Dependabot version-update checks for Python/`uv`, frontend `npm`, and GitHub Actions dependencies
 - `.github/workflows/codeql.yml` now runs CodeQL for Python and JavaScript/TypeScript on pushes, pull requests, and a weekly schedule
 - `.github/workflows/ci.yml` now runs backend tests and frontend build checks on push and pull request, with dependency-audit and Trivy checks included as an advisory CI job
+- the repo-owned CI setup actions have now been updated to newer maintained majors (`actions/setup-python@v6`, `actions/setup-node@v6`, `astral-sh/setup-uv@v7`), and the follow-up CI run completed successfully
 - GitHub-native alerts and automatic security update pull requests may still require repository security settings to be enabled in the GitHub UI
 
 Current CI posture:

@@ -764,9 +764,10 @@ Scope:
 
 Current state:
 - the repo-owned CI workflow had still been using older action generations for some setup steps: `actions/setup-python@v5`, `actions/setup-node@v4`, and `astral-sh/setup-uv@v6`
-- those have now been updated locally in `.github/workflows/ci.yml` to `actions/setup-python@v6`, `actions/setup-node@v6`, and `astral-sh/setup-uv@v7`, which aligns the repo-owned setup steps with the newer action runtime line
+- those have now been updated in `.github/workflows/ci.yml` to `actions/setup-python@v6`, `actions/setup-node@v6`, and `astral-sh/setup-uv@v7`, which aligns the repo-owned setup steps with the newer action runtime line
 - `actions/checkout@v6` and `github/codeql-action@v4` were already on the newer maintained major versions and did not need the same adjustment
-- remaining work: confirm in GitHub Actions that the runtime deprecation warnings actually disappear after the workflow version bumps, and document any residual warnings that originate from GitHub-managed internals rather than repo-pinned action versions
+- the follow-up `CI` run for commit `efd4411` completed successfully in GitHub Actions, with `Backend tests` and `Frontend build` both passing and the completed frontend check run reporting `annotations_count: 0`
+- remaining work: confirm whether any residual runtime warnings still appear in GitHub-managed workflow surfaces such as CodeQL or repository-level banners, and document those separately if they are not caused by repo-pinned action versions
 
 ### Task 74 `[done]`
 Add versioned scripts to install documented helper functions into local and VPS shell profiles.
