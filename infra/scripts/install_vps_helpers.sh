@@ -34,6 +34,9 @@ gp-sync-status      Print the current persisted Garmin sync checkpoint summary.
 gp-reprocess        Rebuild normalized activity data from stored FIT files.
 gp-ps               Show current production container status.
 gp-logs             Show recent backend logs from the production stack.
+gp-logs-backend     Show recent backend logs from the production stack.
+gp-logs-frontend    Show recent frontend logs from the production stack.
+gp-logs-postgres    Show recent postgres logs from the production stack.
 gp-backend-health   Check backend health from inside the production Compose network.
 gp-timer-status     Show the current Garmin sync timer status.
 VPS_HELP
@@ -100,6 +103,24 @@ gp-ps() {
 gp-logs() {
   gp-env
   cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" logs --tail=100 backend
+}
+
+# Show recent backend logs only from the production Compose stack.
+gp-logs-backend() {
+  gp-env
+  cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" logs --tail=100 backend
+}
+
+# Show recent frontend logs only from the production Compose stack.
+gp-logs-frontend() {
+  gp-env
+  cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" logs --tail=100 frontend
+}
+
+# Show recent Postgres logs only from the production Compose stack.
+gp-logs-postgres() {
+  gp-env
+  cd "${APP_DIR}" && docker compose -f docker-compose.prod.yml --env-file "${APP_ENV_FILE}" logs --tail=100 postgres
 }
 
 # Check backend health from inside the production Compose network.

@@ -264,7 +264,7 @@ Note:
 - protect the production env file at `/opt/garmin-platform/.env`
 - current VPS shell convenience setup can now be installed with `infra/scripts/install_vps_helpers.sh`
 - that installer writes a versioned helper block into `~/.bashrc`
-- the installed set includes `gp-help`, `gp-env`, `gp-app`, `gp-gitpull`, `gp-deploy`, `gp-backup`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-backend-health`, and `gp-timer-status`
+- the installed set includes `gp-help`, `gp-env`, `gp-app`, `gp-gitpull`, `gp-deploy`, `gp-backup`, `gp-sync-once`, `gp-sync-status`, `gp-reprocess`, `gp-ps`, `gp-logs`, `gp-logs-backend`, `gp-logs-frontend`, `gp-logs-postgres`, `gp-backend-health`, and `gp-timer-status`
 - the helper block includes comments above each function describing what it does
 - `gp-help` prints the full VPS helper list with a one-line description of each command
 - `gp-sync-once` now runs the one-shot worker inside the already-running backend container, which keeps it aligned with the live production environment
