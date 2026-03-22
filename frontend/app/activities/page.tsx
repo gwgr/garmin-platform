@@ -74,14 +74,13 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
 
   return (
     <main className="shell">
-      <section className="hero compact-hero">
-        <p className="eyebrow">Activities</p>
-        <h1>Browse your synced sessions.</h1>
-        <p className="lede">
-          This page is the first dedicated activity browser. It mirrors the backend
-          list endpoint with filtering and pagination so the UI stays aligned with
-          the data model we already have.
-        </p>
+      <section className="section">
+        <div className="section-header section-header-row">
+          <h2>Activities</h2>
+          <Link className="text-link" href="/">
+            Back to dashboard
+          </Link>
+        </div>
 
         <div className="hero-grid">
           <form className="panel filter-panel" action="/activities" method="get">
@@ -90,7 +89,12 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
             <div className="filter-grid">
               <label className="field">
                 <span>Sport</span>
-                <input defaultValue={sport} name="sport" placeholder="walking" type="text" />
+                <input
+                  defaultValue={sport}
+                  name="sport"
+                  placeholder="e.g. running"
+                  type="text"
+                />
               </label>
 
               <label className="field">
@@ -115,12 +119,11 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
           </form>
 
           <div className="panel">
-            <span className="panel-label">At a Glance</span>
-            <ul>
-              <li>{total} matching activities</li>
-              <li>{totalPages} page{totalPages === 1 ? "" : "s"} of results</li>
-              <li>Sorted by most recent start time</li>
-            </ul>
+            <span className="panel-label">Results Summary</span>
+            <p className="list-title">{total.toLocaleString()} matching activities</p>
+            <p className="list-meta">
+              Page {page} of {totalPages} · sorted by most recent session
+            </p>
           </div>
         </div>
       </section>
@@ -128,12 +131,8 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
       <section className="section">
         <div className="section-header section-header-row">
           <div>
-            <p className="eyebrow">Results</p>
-            <h2>Activity list</h2>
+            <h2>Activity Results</h2>
           </div>
-          <Link className="text-link" href="/">
-            Back to dashboard
-          </Link>
         </div>
 
         <div className="panel">
@@ -143,8 +142,8 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
             </p>
           ) : items.length === 0 ? (
             <p className="empty-state">
-              No activities matched the current filters. Try broadening the date range
-              or clearing the sport filter.
+              No activities matched those filters. Try a wider date range or clear the
+              sport filter.
             </p>
           ) : (
             <div className="table-stack">

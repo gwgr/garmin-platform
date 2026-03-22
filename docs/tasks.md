@@ -868,7 +868,7 @@ Candidate metrics:
 ### Task 84
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
-### Task 85
+### Task 85 [done]
 Perform a frontend content and UX cleanup pass before deeper design-system refactors.
 
 Scope:
@@ -876,6 +876,11 @@ Scope:
 - review dashboard, activity list, activity detail, and sync status pages for awkward section hierarchy, overexposed technical metadata, and low-value explanatory text
 - simplify or rebalance layouts where the current composition makes the product feel more like a prototype than a training dashboard
 - keep this pass intentionally light on framework churn so copy, hierarchy, and product emphasis are improved before Tailwind or component-library adoption
+
+Progress notes:
+- cleaned up dashboard, activity list, activity detail, and sync status page copy and section hierarchy
+- reduced placeholder/dev-oriented narrative text and toned down over-prominent technical metadata
+- simplified heading treatment and page structure before starting any Tailwind or component-library refactor
 
 ### Task 86
 Find or create a consistent set of sport icons for use across the frontend.

@@ -56,10 +56,11 @@ code {
 
 .hero h1,
 .section h2 {
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
   letter-spacing: -0.03em;
   line-height: 0.95;
   margin: 0;
+  font-weight: 600;
 }
 
 .hero h1 {

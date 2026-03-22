@@ -39,39 +39,28 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
 
     return (
       <main className="shell">
-        <section className="hero compact-hero">
-          <p className="eyebrow">Activity Detail</p>
-          <h1>{activity.name ?? "Imported activity"}</h1>
-          <p className="lede">
-            Detailed session view with persisted summary data, lap breakdown, and
-            record stream samples from the backend API.
-          </p>
-
-          <div className="hero-grid">
-            <div className="panel accent-panel">
-              <span className="panel-label">Session</span>
-              <code>{activity.source_activity_id}</code>
-              <p>{activity.sport} · {formatDateTimeLabel(activity.start_time)}</p>
+        <section className="section">
+          <div className="section-header section-header-row">
+            <div>
+              <h2>{activity.name ?? "Imported activity"}</h2>
+              <p className="lede">
+                {activity.sport} · {formatDateTimeLabel(activity.start_time)}
+              </p>
             </div>
-
-            <div className="panel">
-              <span className="panel-label">Navigation</span>
-              <div className="detail-links">
-                <Link className="text-link" href="/">
-                  Back to dashboard
-                </Link>
-                <Link className="text-link" href="/activities">
-                  Back to activity list
-                </Link>
-              </div>
+            <div className="detail-links">
+              <Link className="text-link" href="/">
+                Back to dashboard
+              </Link>
+              <Link className="text-link" href="/activities">
+                Back to activity list
+              </Link>
             </div>
           </div>
         </section>
 
         <section className="section">
           <div className="section-header">
-            <p className="eyebrow">Summary</p>
-            <h2>Core activity metrics</h2>
+            <h2>Session Summary</h2>
           </div>
 
           <div className="stat-grid">
@@ -88,7 +77,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
               <p className="stat-value">
                 {activity.duration_seconds ? formatDuration(activity.duration_seconds) : "--"}
               </p>
-              <p className="stat-subtle">Moving time from summary data</p>
+              <p className="stat-subtle">Recorded moving time</p>
             </article>
 
             <article className="panel stat-card">
@@ -96,10 +85,14 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
               <p className="stat-value">
                 {activity.calories ? activity.calories.toLocaleString() : "--"}
               </p>
-              <p className="stat-subtle">
-                {activity.raw_file_path ? "Linked to stored raw FIT file" : "No raw file path"}
-              </p>
+              <p className="stat-subtle">{activity.sport}</p>
             </article>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="section-header">
+            <h2>Route and Laps</h2>
           </div>
         </section>
 
@@ -129,15 +122,15 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
                 ))}
               </div>
             ) : (
-              <p className="empty-state">No lap data has been stored for this activity yet.</p>
+              <p className="empty-state">Lap data is not available for this activity yet.</p>
             )}
           </div>
 
           <div className="panel">
-            <span className="panel-label">File Metadata</span>
+            <span className="panel-label">Session Info</span>
             <div className="detail-meta-grid">
               <div>
-                <span className="metric-label">Source Activity ID</span>
+                <span className="metric-label">Source ID</span>
                 <p className="list-title">{activity.source_activity_id}</p>
               </div>
               <div>
@@ -149,8 +142,8 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
                 <p className="list-title">{formatDateTimeLabel(activity.updated_at)}</p>
               </div>
               <div>
-                <span className="metric-label">Raw File Path</span>
-                <p className="list-title detail-path">{activity.raw_file_path ?? "Not set"}</p>
+                <span className="metric-label">Stored FIT File</span>
+                <p className="list-meta detail-path">{activity.raw_file_path ?? "Not available"}</p>
               </div>
             </div>
           </div>
@@ -158,8 +151,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
 
         <section className="section">
           <div className="section-header">
-            <p className="eyebrow">Charts</p>
-            <h2>Quick visual reads</h2>
+            <h2>Charts</h2>
           </div>
 
           <div className="chart-grid">
@@ -172,8 +164,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
         <section className="section">
           <div className="section-header section-header-row">
             <div>
-              <p className="eyebrow">Record Stream</p>
-              <h2>Time-series samples</h2>
+              <h2>Record Samples</h2>
             </div>
             <p className="pagination-label">
               Showing {recordPreview.length} of {records.length} samples
@@ -216,7 +207,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
               </div>
             ) : (
               <p className="empty-state">
-                No record stream samples are stored for this activity yet.
+                Record samples are not available for this activity yet.
               </p>
             )}
           </div>
@@ -232,7 +223,6 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
       <main className="shell">
         <section className="section">
           <div className="panel">
-            <p className="eyebrow">Activity Detail</p>
             <h2>Unable to load activity</h2>
             <p className="warning">
               {error instanceof Error ? error.message : "An unexpected error occurred."}

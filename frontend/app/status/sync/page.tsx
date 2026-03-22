@@ -10,13 +10,13 @@ export default async function SyncStatusPage() {
 
   return (
     <main className="shell">
-      <section className="hero compact-hero">
-        <p className="eyebrow">Operations</p>
-        <h1>Sync status</h1>
-        <p className="lede">
-          A lightweight operator view for the Garmin sync pipeline. It shows the latest
-          recorded status, timestamps, and any recent error summary from the worker.
-        </p>
+      <section className="section">
+        <div className="section-header section-header-row">
+          <h2>Sync Status</h2>
+          <Link className="text-link" href="/">
+            Back to dashboard
+          </Link>
+        </div>
       </section>
 
       <section className="section split">
@@ -26,7 +26,9 @@ export default async function SyncStatusPage() {
             <span className={`status-dot status-${syncStatus.state}`} />
             {syncStatus.state}
           </p>
-          <p className="warning-text">{syncStatus.summary}</p>
+          <p className={syncStatus.state === "error" ? "warning-text" : "stat-subtle"}>
+            {syncStatus.summary}
+          </p>
         </div>
 
         <div className="panel">
@@ -53,16 +55,15 @@ export default async function SyncStatusPage() {
       </section>
 
       <section className="section">
+        <div className="section-header">
+          <h2>Run Detail</h2>
+        </div>
         <div className="panel">
-          <span className="panel-label">Failure Detail</span>
           <p>{syncStatus.last_error_summary ?? "No recent error summary is recorded."}</p>
           <p className="list-meta">
             Consecutive failures: {syncStatus.consecutive_failures} · Last run status:{" "}
             {syncStatus.last_run_status ?? "unknown"}
           </p>
-          <Link className="text-link" href="/">
-            Return to dashboard
-          </Link>
         </div>
       </section>
     </main>
