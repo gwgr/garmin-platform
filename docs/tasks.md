@@ -878,6 +878,15 @@ Scope:
 - keep this pass intentionally light on framework churn so copy, hierarchy, and product emphasis are improved before Tailwind or component-library adoption
 
 ### Task 86
+Find or create a consistent set of sport icons for use across the frontend.
+
+Scope:
+- evaluate whether an existing icon set can cover the main Garmin sport/activity types cleanly
+- create custom icons only where common libraries do not provide a good fit
+- replace repeated sport text labels with icons where they improve scanability without hurting clarity
+- define a fallback treatment for unknown or unsupported activity types
+
+### Task 87
 Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.
 
 Scope:
@@ -885,7 +894,7 @@ Scope:
 - keep the existing visual direction while reducing ad hoc global CSS
 - standardize spacing, typography, and responsive breakpoints across pages
 
-### Task 87
+### Task 88
 Adopt `shadcn/ui` components for core dashboard UI primitives.
 
 Scope:
@@ -893,7 +902,7 @@ Scope:
 - keep the component set intentionally small and aligned with the product’s visual language
 - avoid over-customized one-off components where standard primitives are a better fit
 
-### Task 88
+### Task 89
 Create a responsive dashboard shell and shared frontend page layout system.
 
 Scope:
@@ -901,7 +910,7 @@ Scope:
 - support desktop and mobile layouts cleanly
 - make dashboard, activities list, and activity detail pages share the same structural system
 
-### Task 89
+### Task 90
 Standardize frontend typography and spacing across all pages.
 
 Scope:
@@ -909,7 +918,7 @@ Scope:
 - remove inconsistent sizing/layout patterns across dashboard and activity pages
 - ensure charts, cards, filters, and tables align to the same rhythm
 
-### Task 90
+### Task 91
 Standardize frontend loading, empty, error, and partial-data states.
 
 Scope:
@@ -917,7 +926,7 @@ Scope:
 - apply them consistently across dashboard, activities list, and activity detail pages
 - make frontend behavior clearer when backend data is missing, delayed, or partially populated
 
-### Task 91
+### Task 92
 Add Playwright screenshot coverage for the main dashboard and activity pages.
 
 Scope:
@@ -925,7 +934,7 @@ Scope:
 - use stable fixture data or deterministic local test setup
 - make the screenshots useful for catching layout regressions during frontend refactors
 
-### Task 92
+### Task 93
 Create a deterministic fixture dataset for frontend development and screenshot testing.
 
 Scope:
