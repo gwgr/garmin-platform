@@ -753,7 +753,7 @@ Current state:
 - `#2 garth` is a cautious backend/Garmin-auth upgrade because recent `garth` releases have included real login and SSO behavior changes that should be tested against live Garmin auth flows before merging
 - remaining work: decide whether to merge the validated low-risk frontend updates now, then document explicit defer/close rationale for the `next`, `@types/node`, `react-dom`, and `garth` PRs
 
-### Task 73
+### Task 73 `[partial]`
 Review and address GitHub Actions runtime deprecation warnings from CI and repository automation.
 
 Scope:
@@ -761,6 +761,12 @@ Scope:
 - distinguish between upstream GitHub-managed warnings and warnings caused by action versions pinned in this repo
 - update repo-owned workflow actions where compatible newer versions are available
 - document any warnings that are upstream-only and do not require immediate repo changes
+
+Current state:
+- the repo-owned CI workflow had still been using older action generations for some setup steps: `actions/setup-python@v5`, `actions/setup-node@v4`, and `astral-sh/setup-uv@v6`
+- those have now been updated locally in `.github/workflows/ci.yml` to `actions/setup-python@v6`, `actions/setup-node@v6`, and `astral-sh/setup-uv@v7`, which aligns the repo-owned setup steps with the newer action runtime line
+- `actions/checkout@v6` and `github/codeql-action@v4` were already on the newer maintained major versions and did not need the same adjustment
+- remaining work: confirm in GitHub Actions that the runtime deprecation warnings actually disappear after the workflow version bumps, and document any residual warnings that originate from GitHub-managed internals rather than repo-pinned action versions
 
 ### Task 74 `[done]`
 Add versioned scripts to install documented helper functions into local and VPS shell profiles.
