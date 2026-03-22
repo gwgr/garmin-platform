@@ -37,7 +37,7 @@ USER appuser
 CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]
 
 
-FROM node:22-bookworm-slim AS prod
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS prod
 
 WORKDIR /app
 
@@ -46,19 +46,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
 
-COPY --from=build /app/frontend/.next/standalone ./
-COPY --from=build /app/frontend/.next/static ./frontend/.next/static
-COPY --from=build /app/frontend/public ./frontend/public
-
-RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /opt/yarn* \
-    && groupadd --system appgroup \
-    && useradd --system --gid appgroup --home-dir /home/appuser --create-home appuser \
-    && chown -R appuser:appgroup /app
+COPY --from=build --chown=nonroot:nonroot /app/frontend/.next/standalone ./
+COPY --from=build --chown=nonroot:nonroot /app/frontend/.next/static ./frontend/.next/static
+COPY --from=build --chown=nonroot:nonroot /app/frontend/public ./frontend/public
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD node -e "fetch('http://127.0.0.1:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD ["/nodejs/bin/node", "-e", "fetch('http://127.0.0.1:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
 
-USER appuser
+USER nonroot:nonroot
 
-CMD ["node", "server.js"]
+CMD ["server.js"]

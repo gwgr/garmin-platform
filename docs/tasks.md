@@ -54,6 +54,11 @@ Create `.env.example` with placeholders for:
 ### Task 4 `[done]`
 Create `backend/Dockerfile`.
 
+Current state:
+- the backend image now runs as a non-root application user and includes a container `HEALTHCHECK`
+- the production build also supports VPS UID/GID alignment so mounted files land with sensible host ownership on the server
+- the backend image remains the shared base for both the API service and worker-style command execution
+
 ### Task 5 `[done]`
 Create `frontend/Dockerfile`.
 
@@ -61,6 +66,7 @@ Current state:
 - the frontend Dockerfile now supports separate `dev` and hardened `prod` targets rather than a single shared runtime shape
 - the production target now uses a multi-stage Next.js standalone build so the VPS image does not ship the full `npm` toolchain by default
 - the development target still preserves the local `npm run dev` workflow used by `docker-compose.yml`
+- later hardening work also showed the value of keeping host `node_modules` and `.next` output out of Docker build context so image builds stay reproducible and security scans reflect the image, not local machine artifacts
 
 ### Task 6 `[done]`
 Create `docker-compose.yml` for local development.
@@ -70,6 +76,7 @@ Current state:
 - the backend runs the real FastAPI app
 - the frontend now runs a Next.js scaffold, with the real dashboard and data pages still pending
 - the local frontend service now explicitly builds the `dev` target from `frontend/Dockerfile` so local Compose keeps the hot-reload-friendly runtime shape
+- local Compose remains the safest place to preserve convenience-oriented tooling while production uses the hardened target separately
 
 ### Task 7 `[done]`
 Create `docker-compose.prod.yml` for VPS deployment.
@@ -77,6 +84,7 @@ Create `docker-compose.prod.yml` for VPS deployment.
 Current state:
 - the production Compose file now builds the hardened `prod` target from `frontend/Dockerfile` instead of reusing the local dev-oriented frontend image
 - the production frontend now serves the Next.js standalone output while the backend and Postgres continue to use the protected host env file and persistent data mounts
+- later security work confirmed that separating local and production targets materially reduces frontend vulnerability noise and makes it easier to harden the VPS runtime without harming the local dev workflow
 
 ---
 
@@ -720,11 +728,12 @@ Scope:
 - document any remaining accepted frontend security findings clearly
 
 Current state:
-- the frontend Docker image has been reworked locally into a multi-stage build with separate `dev` and `prod` targets so the VPS runtime no longer defaults to shipping the full `npm`-driven development environment
-- the production target now builds Next.js standalone output and runs it from a slimmer `node:22-bookworm-slim` runtime after removing `npm`, `npx`, and related package-manager tooling from the final image
+- the frontend Docker image now uses a multi-stage build with separate `dev` and `prod` targets so the VPS runtime no longer defaults to shipping the full `npm`-driven development environment
+- the production target now runs the Next.js standalone output on `gcr.io/distroless/nodejs22-debian12:nonroot`, while the local target keeps the normal `npm run dev` workflow
 - the local and production Compose files now select the appropriate frontend build target explicitly (`dev` for `docker-compose.yml`, `prod` for `docker-compose.prod.yml`)
 - `.dockerignore` now excludes local `frontend/node_modules/` and `.next/` content so Docker builds use a clean dependency graph instead of accidentally inheriting dirty host artifacts
-- remaining work: rerun Trivy against the rebuilt frontend image, compare the finding delta, and decide which residual frontend findings remain accepted temporary MVP risk versus follow-up remediation work
+- rerunning Trivy against the rebuilt image reduced the frontend container findings from `20` (`1 CRITICAL`, `2 HIGH`) down to `3` OS-package findings (`1 HIGH`, `2 MEDIUM`), while the Node package findings dropped to the single already-known `next` advisory
+- remaining work: decide whether the remaining distroless/Debian `libc6` `HIGH` finding should be treated as temporary accepted base-image risk for the private MVP or whether a further runtime-base change is warranted before Task 71 can be closed
 
 ### Task 72
 Review and triage the initial Dependabot pull requests created by the new security automation.

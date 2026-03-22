@@ -521,12 +521,17 @@ Current Trivy workflow:
 Current Docker hardening baseline:
 - the backend and frontend Dockerfiles now run their application processes as non-root users
 - both Dockerfiles now include container-level `HEALTHCHECK` instructions
+- the production frontend now runs the Next.js standalone output on a distroless Node 22 image rather than shipping the full local dev-oriented `npm` runtime
 - remaining image vulnerability findings should be assessed separately from these Dockerfile-level hardening wins
 
 Current accepted risk:
 - `npm audit` currently reports one moderate Next.js advisory affecting `next/image` disk-cache growth
 - the current MVP accepts that risk temporarily because the app is privately accessed and does not currently use `next/image`
 - do not hide this finding; revisit it before public exposure or a major frontend upgrade cycle
+
+Current frontend Trivy posture:
+- the frontend image hardening pass substantially reduced the earlier Node/npm vulnerability noise and removed the prior frontend-image `CRITICAL` finding
+- the remaining notable frontend image item is currently a `HIGH` `libc6` finding inherited from the distroless/Debian runtime base, so frontend Trivy cleanup is improved but not fully complete yet
 
 Current repository-level security automation:
 - `.github/dependabot.yml` now configures weekly Dependabot version-update checks for Python/`uv`, frontend `npm`, and GitHub Actions dependencies

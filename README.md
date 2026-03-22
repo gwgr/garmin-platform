@@ -292,6 +292,7 @@ Note:
 - the Trivy filesystem scan skips `data/garth` by default so known local Garmin session tokens do not dominate the secret scan; override with `TRIVY_SKIP_DIRS=` if you want to include that path
 - `trivy.log` is ignored by git so local scan captures can be kept in the repo root without accidental commits
 - the current `npm audit` output includes one moderate Next.js advisory tied to `next/image` disk-cache growth; this is an accepted temporary MVP risk because the app is private and does not currently use `next/image`, but it should be revisited before broader exposure
+- the hardened frontend production image now uses a distroless Node 22 runtime, which cut the frontend Trivy image findings down substantially; the remaining notable frontend image item is a `HIGH` `libc6` finding in the current distroless/Debian base, so Task 71 remains open even though the earlier Node/npm noise is largely gone
 - repository-level security automation now includes `.github/dependabot.yml` for weekly dependency update checks and `.github/workflows/codeql.yml` for CodeQL scanning on push, pull request, and a weekly schedule
 - `.github/workflows/ci.yml` now runs backend tests and frontend build verification on push and pull request, with dependency-audit and Trivy checks running in a separate advisory CI job for now
 - GitHub-native alerts and automatic security update PRs may still require the repository's security settings to be enabled in the GitHub UI after these files are pushed
