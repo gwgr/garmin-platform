@@ -869,6 +869,15 @@ Candidate metrics:
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
 ### Task 85
+Perform a frontend content and UX cleanup pass before deeper design-system refactors.
+
+Scope:
+- remove MVP/dev-oriented placeholder copy and replace it with user-facing product language
+- review dashboard, activity list, activity detail, and sync status pages for awkward section hierarchy, overexposed technical metadata, and low-value explanatory text
+- simplify or rebalance layouts where the current composition makes the product feel more like a prototype than a training dashboard
+- keep this pass intentionally light on framework churn so copy, hierarchy, and product emphasis are improved before Tailwind or component-library adoption
+
+### Task 86
 Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.
 
 Scope:
@@ -876,7 +885,7 @@ Scope:
 - keep the existing visual direction while reducing ad hoc global CSS
 - standardize spacing, typography, and responsive breakpoints across pages
 
-### Task 84
+### Task 87
 Adopt `shadcn/ui` components for core dashboard UI primitives.
 
 Scope:
@@ -884,7 +893,7 @@ Scope:
 - keep the component set intentionally small and aligned with the product’s visual language
 - avoid over-customized one-off components where standard primitives are a better fit
 
-### Task 85
+### Task 88
 Create a responsive dashboard shell and shared frontend page layout system.
 
 Scope:
@@ -892,7 +901,7 @@ Scope:
 - support desktop and mobile layouts cleanly
 - make dashboard, activities list, and activity detail pages share the same structural system
 
-### Task 86
+### Task 89
 Standardize frontend typography and spacing across all pages.
 
 Scope:
@@ -900,7 +909,7 @@ Scope:
 - remove inconsistent sizing/layout patterns across dashboard and activity pages
 - ensure charts, cards, filters, and tables align to the same rhythm
 
-### Task 87
+### Task 90
 Standardize frontend loading, empty, error, and partial-data states.
 
 Scope:
@@ -908,7 +917,7 @@ Scope:
 - apply them consistently across dashboard, activities list, and activity detail pages
 - make frontend behavior clearer when backend data is missing, delayed, or partially populated
 
-### Task 88
+### Task 91
 Add Playwright screenshot coverage for the main dashboard and activity pages.
 
 Scope:
@@ -916,7 +925,7 @@ Scope:
 - use stable fixture data or deterministic local test setup
 - make the screenshots useful for catching layout regressions during frontend refactors
 
-### Task 89
+### Task 92
 Create a deterministic fixture dataset for frontend development and screenshot testing.
 
 Scope:

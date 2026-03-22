@@ -8,18 +8,114 @@ import {
   getActivities,
   getAnalyticsTrends,
   getDailyMetrics,
-  getFrontendApiBaseUrl,
   getSyncStatus,
 } from "../lib/api";
 import { formatDateLabel, formatDistance, formatDuration } from "../lib/formatting";
 
 export const dynamic = "force-dynamic";
 
-const apiBaseUrl = getFrontendApiBaseUrl();
+type SportSummary = {
+  sport: string;
+  count: number;
+  totalDistanceMeters: number;
+  totalDurationSeconds: number;
+};
+
+type WindowSummary = {
+  label: string;
+  activities: ActivityListItem[];
+  sportSummaries: SportSummary[];
+};
+
+function formatSportLabel(value: string): string {
+  return value
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function buildSportSummaries(activities: ActivityListItem[]): SportSummary[] {
+  const sportMap = new Map<string, SportSummary>();
+
+  for (const activity of activities) {
+    const sport = activity.sport?.trim() || "unknown";
+    const current = sportMap.get(sport) ?? {
+      sport,
+      count: 0,
+      totalDistanceMeters: 0,
+      totalDurationSeconds: 0,
+    };
+
+    current.count += 1;
+    current.totalDistanceMeters += activity.distance_meters ?? 0;
+    current.totalDurationSeconds += activity.duration_seconds ?? 0;
+    sportMap.set(sport, current);
+  }
+
+  return Array.from(sportMap.values()).sort((left, right) => {
+    if (right.count !== left.count) {
+      return right.count - left.count;
+    }
+
+    return right.totalDistanceMeters - left.totalDistanceMeters;
+  });
+}
+
+function isWithinDays(startTime: string, days: number, now: Date): boolean {
+  const activityDate = new Date(startTime);
+  const windowStart = new Date(now);
+  windowStart.setHours(0, 0, 0, 0);
+  windowStart.setDate(windowStart.getDate() - days + 1);
+  return activityDate >= windowStart;
+}
+
+function isWithinCurrentMonth(startTime: string, now: Date): boolean {
+  const activityDate = new Date(startTime);
+  return (
+    activityDate.getFullYear() === now.getFullYear() &&
+    activityDate.getMonth() === now.getMonth()
+  );
+}
+
+function buildWindowSummaries(activities: ActivityListItem[]): WindowSummary[] {
+  const now = new Date();
+
+  const windows: Array<{ label: string; predicate: (activity: ActivityListItem) => boolean }> = [
+    {
+      label: "This week",
+      predicate: (activity) => isWithinDays(activity.start_time, 7, now),
+    },
+    {
+      label: "This month",
+      predicate: (activity) => isWithinCurrentMonth(activity.start_time, now),
+    },
+    {
+      label: "Last 6 months",
+      predicate: (activity) => isWithinDays(activity.start_time, 183, now),
+    },
+    {
+      label: "Last 12 months",
+      predicate: (activity) => isWithinDays(activity.start_time, 366, now),
+    },
+  ];
+
+  return windows.map(({ label, predicate }) => {
+    const windowActivities = activities.filter(predicate);
+
+    return {
+      label,
+      activities: windowActivities,
+      sportSummaries: buildSportSummaries(windowActivities).slice(0, 4),
+    };
+  });
+}
 
 async function loadDashboardData(): Promise<{
   trends: AnalyticsTrends | null;
+  allActivities: ActivityListItem[];
   recentActivities: ActivityListItem[];
+  recentActivityTotal: number;
   dailyMetrics: DailyMetricItem[];
   syncStatus: SyncStatus | null;
   loadError: string | null;
@@ -27,14 +123,16 @@ async function loadDashboardData(): Promise<{
   try {
     const [trends, activitiesResponse, metricsResponse, syncStatus] = await Promise.all([
       getAnalyticsTrends(),
-      getActivities({ page: 1, pageSize: 5 }),
+      getActivities({ page: 1, pageSize: 100 }),
       getDailyMetrics({ page: 1, pageSize: 5 }),
       getSyncStatus(),
     ]);
 
     return {
       trends,
-      recentActivities: activitiesResponse.items,
+      allActivities: activitiesResponse.items,
+      recentActivities: activitiesResponse.items.slice(0, 5),
+      recentActivityTotal: activitiesResponse.total,
       dailyMetrics: metricsResponse.items,
       syncStatus,
       loadError: null,
@@ -42,7 +140,9 @@ async function loadDashboardData(): Promise<{
   } catch (error) {
     return {
       trends: null,
+      allActivities: [],
       recentActivities: [],
+      recentActivityTotal: 0,
       dailyMetrics: [],
       syncStatus: null,
       loadError: error instanceof Error ? error.message : "Unable to load dashboard data.",
@@ -51,94 +151,64 @@ async function loadDashboardData(): Promise<{
 }
 
 export default async function HomePage() {
-  const { trends, recentActivities, dailyMetrics, syncStatus, loadError } = await loadDashboardData();
-  const currentWeek = trends?.current_week;
-  const currentMonth = trends?.current_month;
-  const recentCounts = trends?.recent_activity_counts;
+  const {
+    trends,
+    allActivities,
+    recentActivities,
+    recentActivityTotal,
+    dailyMetrics,
+    syncStatus,
+    loadError,
+  } = await loadDashboardData();
   const restingHeartRate = trends?.resting_heart_rate_trend ?? [];
+  const windowSummaries = buildWindowSummaries(allActivities);
 
   return (
     <main className="shell">
-      <section className="hero">
-        <p className="eyebrow">Dashboard</p>
-        <h1>Your Garmin data is now landing in a real dashboard.</h1>
-        <p className="lede">
-          This page is the first frontend that actually consumes the backend API.
-          It focuses on the essentials for the MVP: current activity volume, recent
-          sessions, and a light health snapshot when daily metrics exist.
-        </p>
+      <section className="section">
+        <div className="section-header">
+          <h2>Training Overview</h2>
+        </div>
+      </section>
 
-        <div className="hero-grid">
-          <div className="panel accent-panel">
-            <span className="panel-label">API Base URL</span>
-            <code>{apiBaseUrl}</code>
-            <p>
-              Set <code>NEXT_PUBLIC_API_BASE_URL</code> in <code>.env</code> if you
-              want the frontend to point somewhere else.
-            </p>
-          </div>
-
-          <div className="panel">
-            <span className="panel-label">Current Focus</span>
-            <ul>
-              <li>Use live backend analytics for the dashboard.</li>
-              <li>Keep the UI readable before charts arrive.</li>
-              <li>Set up the next activity list and detail pages.</li>
-            </ul>
-          </div>
+      <section className="section">
+        <div className="stat-grid four-up">
+          {windowSummaries.map((windowSummary) => (
+            <article className="panel stat-card" key={windowSummary.label}>
+              <span className="panel-label">{windowSummary.label}</span>
+              {windowSummary.sportSummaries.length > 0 ? (
+                <div className="list-stack">
+                  {windowSummary.sportSummaries.map((summary) => (
+                    <div className="list-row" key={`${windowSummary.label}-${summary.sport}`}>
+                      <div>
+                        <p className="list-title">{formatSportLabel(summary.sport)}</p>
+                      </div>
+                      <div className="list-values">
+                        <strong>
+                          {summary.totalDistanceMeters > 0
+                            ? formatDistance(summary.totalDistanceMeters)
+                            : `${summary.count}`}
+                        </strong>
+                        <span>{formatDuration(summary.totalDurationSeconds)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-state">No activities in this window yet.</p>
+              )}
+              <p className="stat-subtle">
+                {windowSummary.activities.length.toLocaleString()} total{" "}
+                {windowSummary.activities.length === 1 ? "activity" : "activities"}
+              </p>
+            </article>
+          ))}
         </div>
       </section>
 
       <section className="section">
         <div className="section-header">
-          <p className="eyebrow">Snapshot</p>
-          <h2>Current training picture</h2>
-        </div>
-
-        <div className="stat-grid four-up">
-          <article className="panel stat-card sync-status-card">
-            <span className="panel-label">Sync Status</span>
-            <p className="stat-value sync-status-value">
-              <span className={`status-dot status-${syncStatus?.state ?? "warning"}`} />
-              {syncStatus?.state ?? "warning"}
-            </p>
-            <p className="stat-subtle">
-              {syncStatus?.summary ?? "Sync status is unavailable right now."}
-            </p>
-            <Link className="text-link" href="/status/sync">
-              View sync details
-            </Link>
-          </article>
-
-          <article className="panel stat-card">
-            <span className="panel-label">This Week</span>
-            <p className="stat-value">
-              {currentWeek ? formatDistance(currentWeek.total_distance_meters) : "--"}
-            </p>
-            <p className="stat-subtle">
-              {currentWeek ? `${currentWeek.activity_count} activities` : "Waiting for backend data"}
-            </p>
-          </article>
-
-          <article className="panel stat-card">
-            <span className="panel-label">This Month</span>
-            <p className="stat-value">
-              {currentMonth ? formatDistance(currentMonth.total_distance_meters) : "--"}
-            </p>
-            <p className="stat-subtle">
-              {currentMonth
-                ? formatDuration(currentMonth.total_duration_seconds)
-                : "No duration data yet"}
-            </p>
-          </article>
-
-          <article className="panel stat-card">
-            <span className="panel-label">Recent Activity Count</span>
-            <p className="stat-value">
-              {recentCounts ? recentCounts.last_30_days : "--"}
-            </p>
-            <p className="stat-subtle">Last 30 days</p>
-          </article>
+          <h2>Recent Activities and Health Snapshot</h2>
         </div>
       </section>
 
@@ -176,8 +246,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <p className="empty-state">
-              No recent activities are available yet. Once sync runs populate the
-              database, they will show up here.
+              Recent sessions will appear here as activities are imported.
             </p>
           )}
         </div>
@@ -218,29 +287,35 @@ export default async function HomePage() {
             </div>
           ) : (
             <p className="empty-state">
-              Daily health metrics have not been ingested yet, so this section will
-              stay intentionally light for now.
+              Daily health metrics will appear here as they are imported.
             </p>
           )}
         </div>
       </section>
 
       <section className="section">
-        <div className="panel">
-          <span className="panel-label">Build Notes</span>
-          {loadError ? (
-            <p className="warning">
-              The frontend loaded, but backend data could not be fetched: {loadError}
-            </p>
-          ) : (
-            <p>
-              The dashboard is now using the shared frontend API client and live
-              backend endpoints. Charts, richer comparisons, and maps are the next
-              layer on top of this foundation.
-            </p>
-          )}
+        <div className="panel compact-panel">
+          <span className="panel-label">Sync Status</span>
+          <p className="compact-status-line">
+            <span className={`status-dot status-${syncStatus?.state ?? "warning"}`} />{" "}
+            {syncStatus?.summary ?? "Sync status is unavailable right now."}
+          </p>
+          <Link className="text-link compact-status-link" href="/status/sync">
+            View sync details
+          </Link>
         </div>
       </section>
+
+      {loadError ? (
+        <section className="section">
+          <div className="panel">
+            <span className="panel-label">Data Availability</span>
+            <p className="warning">
+              Dashboard data could not be loaded right now: {loadError}
+            </p>
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 }
