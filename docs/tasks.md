@@ -57,6 +57,11 @@ Create `backend/Dockerfile`.
 ### Task 5 `[done]`
 Create `frontend/Dockerfile`.
 
+Current state:
+- the frontend Dockerfile now supports separate `dev` and hardened `prod` targets rather than a single shared runtime shape
+- the production target now uses a multi-stage Next.js standalone build so the VPS image does not ship the full `npm` toolchain by default
+- the development target still preserves the local `npm run dev` workflow used by `docker-compose.yml`
+
 ### Task 6 `[done]`
 Create `docker-compose.yml` for local development.
 
@@ -64,9 +69,14 @@ Current state:
 - backend, frontend, and PostgreSQL services are defined
 - the backend runs the real FastAPI app
 - the frontend now runs a Next.js scaffold, with the real dashboard and data pages still pending
+- the local frontend service now explicitly builds the `dev` target from `frontend/Dockerfile` so local Compose keeps the hot-reload-friendly runtime shape
 
 ### Task 7 `[done]`
 Create `docker-compose.prod.yml` for VPS deployment.
+
+Current state:
+- the production Compose file now builds the hardened `prod` target from `frontend/Dockerfile` instead of reusing the local dev-oriented frontend image
+- the production frontend now serves the Next.js standalone output while the backend and Postgres continue to use the protected host env file and persistent data mounts
 
 ---
 
@@ -400,6 +410,19 @@ Current state:
 - README and deployment docs now include the VPS install command and verification commands
 - verified locally with `bash -n` on the new install script
 
+### Task 48A `[todo]`
+Harden the production `systemd` timer so it always retains a future trigger after manual disable/enable and backfill transitions.
+
+Scope:
+- investigate why `garmin-sync.timer` can end up in `active (elapsed)` with `Trigger: n/a` and no future run scheduled
+- adjust the timer definition and/or install flow so steady-state scheduling is robust even when the timer is enabled long after boot
+- document the expected recovery/verification commands and whether an initial manual `garmin-sync.service` run should ever be necessary
+
+Current context:
+- on the new VPS, after historical backfill completed and the timer was re-enabled, `systemctl list-timers garmin-sync.timer --all` showed `NEXT -` and `Trigger: n/a`
+- the timer resumed normal scheduling only after manually running `sudo systemctl start garmin-sync.service` and then `sudo systemctl restart garmin-sync.timer`
+- the current unit uses `OnBootSec=10m` plus `OnUnitActiveSec=6h`, which is a likely contributor to the missing-next-trigger state
+
 ### Task 49 `[done]`
 Perform and document the initial historical Garmin backfill strategy.
 
@@ -660,6 +683,8 @@ Scope:
 Current state:
 - `infra/scripts/restore_backup.sh` now restores `postgres.dump` plus the archived `raw` and `garth` directories into a clean target environment
 - the restore flow can optionally boot PostgreSQL and the backend and verify backend health plus a summarized activity count before declaring success
+- a real VPS recovery using the backup/restore flow has already been exercised successfully in production, but Task 69 remains partial until a production-generated snapshot is copied down to the iMac and restored into a clean local environment
+- remaining proof for completion: `prod VPS backup snapshot -> copy to iMac -> clean local restore -> verify backend health, sync status, and representative restored activity data locally`
 - the backup/restore flow was verified locally in a disposable clean environment by:
   - seeding one real FIT fixture into PostgreSQL plus raw storage
   - creating a snapshot with `backup.sh`
@@ -685,7 +710,7 @@ Current state:
 - `python -m app.print_sync_status` now prints the persisted sync checkpoint in a shell-friendly summary, with `--json` for structured output
 - the managed helper installers now include `gp-local-sync-status` and `gp-sync-status` so local and VPS operators can inspect sync health without opening the browser
 
-### Task 71
+### Task 71 `[partial]`
 Clean up the remaining frontend Trivy findings after the first Docker hardening pass.
 
 Scope:
@@ -693,6 +718,13 @@ Scope:
 - review the current frontend base image and runtime shape for safer defaults
 - decide which findings are true remediation targets versus accepted temporary MVP risk
 - document any remaining accepted frontend security findings clearly
+
+Current state:
+- the frontend Docker image has been reworked locally into a multi-stage build with separate `dev` and `prod` targets so the VPS runtime no longer defaults to shipping the full `npm`-driven development environment
+- the production target now builds Next.js standalone output and runs it from a slimmer `node:22-bookworm-slim` runtime after removing `npm`, `npx`, and related package-manager tooling from the final image
+- the local and production Compose files now select the appropriate frontend build target explicitly (`dev` for `docker-compose.yml`, `prod` for `docker-compose.prod.yml`)
+- `.dockerignore` now excludes local `frontend/node_modules/` and `.next/` content so Docker builds use a clean dependency graph instead of accidentally inheriting dirty host artifacts
+- remaining work: rerun Trivy against the rebuilt frontend image, compare the finding delta, and decide which residual frontend findings remain accepted temporary MVP risk versus follow-up remediation work
 
 ### Task 72
 Review and triage the initial Dependabot pull requests created by the new security automation.
