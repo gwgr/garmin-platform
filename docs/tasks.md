@@ -784,6 +784,19 @@ Current state:
 - both installers replace any prior managed helper block cleanly instead of duplicating functions
 - README, local setup notes, and deployment docs now point to the installer scripts and describe the installed helper sets
 
+### Task 75 `[done]`
+Create and publish the Version 1 MVP release marker.
+
+Scope:
+- choose the MVP release version and freeze point on `main`
+- create and push an annotated git tag for the MVP baseline
+- create a GitHub release so the Version 1 scope is easy to reference before Version 2 work continues
+
+Current state:
+- the Version 1 MVP baseline is now tagged and released as `v1.0.0`
+- the GitHub release is published at `https://github.com/gwgr/garmin-platform/releases/tag/v1.0.0`
+- `main` remains the active line for continued Version 2 work and for any remaining Version 1 follow-ups that were intentionally left partial or deferred
+
 ---
 
 ## Version 2 — Health Metrics Expansion
@@ -792,7 +805,7 @@ These tasks are intentionally deferred until after the MVP is complete.
 The MVP should continue to preserve raw data, keep ingestion separate from analytics,
 and avoid overloading `daily_metrics` so these additions remain straightforward later.
 
-### Task 74
+### Task 76
 Implement device identification for activities.
 
 Scope:
@@ -801,7 +814,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 75
+### Task 77
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -809,7 +822,7 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 76
+### Task 78
 Add HTTPS-friendly private access for the VPS deployment.
 
 Scope:
@@ -817,7 +830,7 @@ Scope:
 - support private HTTPS access to the frontend and backend over the tailnet
 - keep the setup compatible with the existing Docker Compose deployment model
 
-### Task 77
+### Task 79
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -825,7 +838,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 78
+### Task 80
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -833,10 +846,10 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 79
+### Task 81
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 80
+### Task 82
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -844,7 +857,7 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 81
+### Task 83
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -852,10 +865,10 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 82
+### Task 84
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
-### Task 83
+### Task 85
 Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.
 
 Scope:
