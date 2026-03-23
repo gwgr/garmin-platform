@@ -909,7 +909,7 @@ Current state:
 - it also explicitly excludes WHOOP-style heavy lifestyle journaling and opaque readiness/recovery scoring from the near-term target
 - the blueprint now provides a practical implementation sequence that feeds directly into the next frontend/system tasks
 
-### Task 78
+### Task 78 [done]
 Create a deterministic fixture dataset for frontend development and screenshot testing.
 
 Scope:
@@ -917,6 +917,22 @@ Scope:
 - include enough variety to exercise the target V2 dashboard patterns: multiple sports, dense recent history, long-window history, sync-status states, and sparse/no-data cases
 - decouple UI regression testing and design work from live Garmin sync state
 - support repeatable Playwright screenshot baselines and local visual review
+
+Current state:
+- `backend/app/seed_frontend_fixture.py` now provides a repo-owned seed command for a deterministic local frontend dataset
+- the seed currently creates:
+  - 12 activities across multiple sports
+  - lap and record-stream data for route/chart/detail views
+  - 7 daily metrics
+  - 7 sleep sessions
+  - a healthy sync checkpoint
+- `docs/frontend_fixture_dataset.md` now documents the intended workflow and command shape
+- `backend/tests/test_frontend_fixture_seed.py` now covers the expected seeded record counts and rerun behavior
+- the seed workflow has now been verified end-to-end against the live local dev database:
+  - the command completed successfully
+  - fixture record counts matched the expected seeded dataset
+  - total local activity count remained higher because the seed intentionally preserves non-fixture activity rows
+- later follow-up can still decide whether a more isolated frontend-only mock path is useful, but the deterministic DB/API seed path is now working and usable
 
 ### Task 79
 Add Playwright screenshot coverage for the main dashboard and activity pages.

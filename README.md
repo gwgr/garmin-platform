@@ -65,6 +65,7 @@ Backend startup now also validates database connectivity and required runtime di
 - Development and deployment workflow: `docs/dev_deployment.md`
 - Task list and current progress: `docs/tasks.md`
 - Local machine setup notes: `docs/imac_setup.md`
+- Frontend fixture dataset notes: `docs/frontend_fixture_dataset.md`
 
 ## Production Direction
 
