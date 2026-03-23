@@ -813,43 +813,7 @@ These tasks are intentionally deferred until after the MVP is complete.
 The MVP should continue to preserve raw data, keep ingestion separate from analytics,
 and avoid overloading `daily_metrics` so these additions remain straightforward later.
 
-### Task 76
-Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
-
-Execution note for the frontend/design tasks below:
-- complete the target-definition work in Task 76A before making large framework or design-system bets
-- use a stable fixture dataset and screenshot baseline early so later visual refactors are easier to judge
-- treat Tailwind and `shadcn/ui` as enabling tools, not as the goal by themselves
-
-### Task 76A [next]
-Research and define the target standard for a best-in-class training dashboard experience.
-
-Scope:
-- study high-quality consumer fitness/training products such as Whoop and adjacent best-in-class dashboards for information hierarchy, visual polish, behavior framing, and day-to-day usability
-- identify which qualities are genuinely worth emulating for this product versus which are tied to features or data we do not have
-- turn the research into a concrete target experience for this app, including dashboard structure, key views, interaction patterns, and content priorities
-- identify the design-system, data-model, analytics, and frontend tasks needed to close the gap from the current MVP to that target
-
-Deliverables:
-- a short research summary in `docs/`
-- explicit definition of the target dashboard qualities and primary user jobs
-- a prioritized gap list mapping the target experience onto existing and new Version 2 tasks
-
-### Task 76B [todo]
-Turn the dashboard research into a concrete Garmin Platform Version 2 product blueprint.
-
-Scope:
-- convert the research from Task 76A into a Garmin-specific information architecture for the home dashboard, activity views, and key supporting surfaces
-- decide which core user questions the product should answer daily, weekly, and over longer training arcs
-- define the target section hierarchy, key cards/modules, and which metrics belong in the default experience versus secondary views
-- produce a short implementation sequence so the UI/system tasks below can be executed against an explicit target state
-
-Deliverables:
-- a concise dashboard blueprint in `docs/`
-- a prioritized V2 UX roadmap that maps product ideas onto concrete engineering tasks
-- explicit notes about which best-in-class patterns are intentionally not being copied because the data or product context differs
-
-### Task 77 [done]
+### Task 76 [done]
 Perform a frontend content and UX cleanup pass before deeper design-system refactors.
 
 Scope:
@@ -863,7 +827,7 @@ Progress notes:
 - reduced placeholder/dev-oriented narrative text and toned down over-prominent technical metadata
 - simplified heading treatment and page structure before starting any Tailwind or component-library refactor
 
-### Task 77A [done]
+### Task 76A [done]
 Add backend-powered dashboard activity-type rollups for full-history time windows.
 
 Scope:
@@ -876,6 +840,74 @@ Current state:
 - this caused the `Last 6 months` and `Last 12 months` cards to undercount once older activities fell beyond that page limit
 - the dashboard summary cards now read per-window sport rollups from backend analytics queries instead of deriving them from the latest page of activities
 - production verification confirmed the long-window cards now reflect the full synced dataset rather than truncating at `100` activities
+
+### Task 77
+Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
+
+Execution note for the frontend/design tasks below:
+- complete the target-definition work in Task 77A before making large framework or design-system bets
+- use a stable fixture dataset and screenshot baseline early so later visual refactors are easier to judge
+- treat Tailwind and `shadcn/ui` as enabling tools, not as the goal by themselves
+
+### Task 77A [done]
+Research and define the target standard for a best-in-class training dashboard experience.
+
+Scope:
+- study high-quality consumer fitness/training products such as Whoop and adjacent best-in-class dashboards for information hierarchy, visual polish, behavior framing, and day-to-day usability
+- identify which qualities are genuinely worth emulating for this product versus which are tied to features or data we do not have
+- turn the research into a concrete target experience for this app, including dashboard structure, key views, interaction patterns, and content priorities
+- identify the design-system, data-model, analytics, and frontend tasks needed to close the gap from the current MVP to that target
+
+Deliverables:
+- a short research summary in `docs/`
+- explicit definition of the target dashboard qualities and primary user jobs
+- a prioritized gap list mapping the target experience onto existing and new Version 2 tasks
+
+Current state:
+- `docs/v2_dashboard_research.md` now captures an initial benchmark pass across WHOOP, Oura, Strava, and Garmin Connect
+- the research recommends aiming for:
+  - WHOOP-style daily guidance framing
+  - Oura-style baseline and readiness clarity
+  - Strava-style training trend analysis
+- the strongest current conclusion is that Garmin Platform should optimize for:
+  - daily decision support
+  - trend and baseline interpretation
+  - progressive disclosure from summary to detail
+- the research has now also been pressure-tested against the data we actually have today:
+  - strong activity detail and long-window activity history
+  - partial health-data groundwork but not a mature health product surface
+  - no near-term appetite for WHOOP-style heavy behavior logging
+  - not yet enough trustworthy recovery/readiness inputs to justify opaque scoring systems
+- the resulting recommendation is:
+  - use Task 77B to turn this research into a Garmin-specific dashboard blueprint
+  - prioritize fixture data, screenshot coverage, and frontend-system work before committing to broader health-data expansion
+
+### Task 77B [done]
+Turn the dashboard research into a concrete Garmin Platform Version 2 product blueprint.
+
+Scope:
+- convert the research from Task 77A into a Garmin-specific information architecture for the home dashboard, activity views, and key supporting surfaces
+- decide which core user questions the product should answer daily, weekly, and over longer training arcs
+- define the target section hierarchy, key cards/modules, and which metrics belong in the default experience versus secondary views
+- produce a short implementation sequence so the UI/system tasks below can be executed against an explicit target state
+
+Deliverables:
+- a concise dashboard blueprint in `docs/`
+- a prioritized V2 UX roadmap that maps product ideas onto concrete engineering tasks
+- explicit notes about which best-in-class patterns are intentionally not being copied because the data or product context differs
+
+Current state:
+- `docs/v2_dashboard_blueprint.md` now defines a Garmin-specific target experience for:
+  - the home dashboard
+  - activity list
+  - activity detail
+- the blueprint explicitly prioritizes:
+  - daily overview
+  - training trend
+  - trustworthy supporting health signals
+  - progressive disclosure from summary to raw detail
+- it also explicitly excludes WHOOP-style heavy lifestyle journaling and opaque readiness/recovery scoring from the near-term target
+- the blueprint now provides a practical implementation sequence that feeds directly into the next frontend/system tasks
 
 ### Task 78
 Create a deterministic fixture dataset for frontend development and screenshot testing.

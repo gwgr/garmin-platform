@@ -11,6 +11,11 @@ through a web application.
 Primary principles: - Local data ownership - Extensible analytics - Raw
 data preservation - Fast visualization
 
+Version 2 product direction:
+- evolve from a Garmin archive/viewer into a private training dashboard that helps answer daily and long-term training questions
+- prioritize clear guidance, trend interpretation, and trustworthy drill-down detail over raw metric density alone
+- avoid copying WHOOP-style heavy lifestyle journaling or opaque scoring systems unless the product later gains the data needed to support them credibly
+
 ## 2. Goals
 
 1.  Maintain a complete local archive of Garmin activity and health
@@ -18,6 +23,7 @@ data preservation - Fast visualization
 2.  Provide fast visualization of activities and trends.
 3.  Enable custom analysis beyond Garmin Connect.
 4.  Preserve original FIT files for reproducibility.
+5.  Evolve the dashboard toward daily decision support and interpretable long-term training/health trends.
 
 ## 3. Non‑Goals (MVP)
 
@@ -110,6 +116,16 @@ Dashboard:
 - daily metric snapshot
 - sync-status card with click-through details
 
+Version 2 dashboard direction:
+- a daily overview that answers a small set of high-value questions first
+  - how ready does today look?
+  - how much have I trained recently?
+  - is training load building, maintaining, or overreaching?
+  - is the underlying data fresh and trustworthy?
+- stronger baseline/trend interpretation rather than only raw cards of independent numbers
+- progressive disclosure from summary, to supporting explanation, to detailed drill-down
+- a calmer, more opinionated hierarchy inspired by products such as Whoop, Oura, and Strava without copying their product assumptions blindly
+
 Activity List:
 - filtering
 - pagination
@@ -161,7 +177,11 @@ Operational note:
 Phase 1: - Activity sync - FIT storage - Activity viewer - Dashboard
 charts
 
-Phase 2: - Health metrics - Gear tracking - Advanced analytics
+Phase 2:
+- define the target standard for a best-in-class private training dashboard
+- turn that target into a Garmin-specific dashboard blueprint
+- improve frontend layout, visual system, fixture data, and regression coverage
+- expand health metrics and advanced analytics only after the target experience is clear
 
 Version 2 health metrics focus:
 - HRV history
@@ -182,6 +202,8 @@ Version 2+ enrichment ideas:
 
 Version 2 frontend/platform note:
 - begin with explicit research into best-in-class training dashboard products (for example Whoop and similar experiences) so the frontend roadmap is guided by a clear target standard rather than only by implementation mechanics
+- prefer daily decision support, baseline/trend interpretation, and progressive disclosure over dense metric walls
+- do not assume WHOOP-style heavy lifestyle journaling is part of the target experience
 - introduce a shared frontend layout/component system with consistent spacing, typography, and state handling
 - support deterministic fixture data for frontend regression and screenshot testing
 - review long-term `activity_records` scaling strategy as the archive grows
