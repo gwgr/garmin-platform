@@ -814,69 +814,42 @@ The MVP should continue to preserve raw data, keep ingestion separate from analy
 and avoid overloading `daily_metrics` so these additions remain straightforward later.
 
 ### Task 76
-Implement device identification for activities.
-
-Scope:
-- parse device metadata from FIT files or Garmin source data
-- populate the `devices` table
-- link activities to the recording device
-- expose device information in activity APIs
-
-### Task 77
-Add optional weather enrichment for activities and analytics.
-
-Scope:
-- decide whether to fetch historical weather from a provider or derive it from exported Garmin data if available
-- store weather as separate enrichment data rather than mixing it into core activity ingestion
-- support future weather correlation views and analytics
-
-### Task 78
-Add HTTPS-friendly private access for the VPS deployment.
-
-Scope:
-- choose between Tailscale Serve and a reverse proxy such as Caddy for TLS termination
-- support private HTTPS access to the frontend and backend over the tailnet
-- keep the setup compatible with the existing Docker Compose deployment model
-
-### Task 79
-Research Garmin retrieval options for additional health and physiology data:
-- HRV
-- VO2 max
-- lactate threshold
-- endurance-related metrics
-- richer sleep metrics
-
-### Task 80
-Design Version 2 schema additions for specialized health data.
-
-Recommended direction:
-- keep `daily_metrics` for lightweight daily rollups
-- add focused tables for physiology/performance and richer sleep data
-- include source timestamps and ingestion provenance
-
-### Task 81
-Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
-
-### Task 82
-Implement ingestion for daily health metrics beyond the MVP set.
-
-Candidate metrics:
-- HRV
-- richer sleep summary/detail
-- VO2 max
-
-### Task 83
-Implement ingestion for performance metrics.
-
-Candidate metrics:
-- lactate threshold
-- endurance score
-- related training-readiness style metrics if reliable
-
-### Task 84
 Expand analytics endpoints and dashboard views to visualize Version 2 health metrics over time.
 
-### Task 85 [done]
+Execution note for the frontend/design tasks below:
+- complete the target-definition work in Task 76A before making large framework or design-system bets
+- use a stable fixture dataset and screenshot baseline early so later visual refactors are easier to judge
+- treat Tailwind and `shadcn/ui` as enabling tools, not as the goal by themselves
+
+### Task 76A [next]
+Research and define the target standard for a best-in-class training dashboard experience.
+
+Scope:
+- study high-quality consumer fitness/training products such as Whoop and adjacent best-in-class dashboards for information hierarchy, visual polish, behavior framing, and day-to-day usability
+- identify which qualities are genuinely worth emulating for this product versus which are tied to features or data we do not have
+- turn the research into a concrete target experience for this app, including dashboard structure, key views, interaction patterns, and content priorities
+- identify the design-system, data-model, analytics, and frontend tasks needed to close the gap from the current MVP to that target
+
+Deliverables:
+- a short research summary in `docs/`
+- explicit definition of the target dashboard qualities and primary user jobs
+- a prioritized gap list mapping the target experience onto existing and new Version 2 tasks
+
+### Task 76B [todo]
+Turn the dashboard research into a concrete Garmin Platform Version 2 product blueprint.
+
+Scope:
+- convert the research from Task 76A into a Garmin-specific information architecture for the home dashboard, activity views, and key supporting surfaces
+- decide which core user questions the product should answer daily, weekly, and over longer training arcs
+- define the target section hierarchy, key cards/modules, and which metrics belong in the default experience versus secondary views
+- produce a short implementation sequence so the UI/system tasks below can be executed against an explicit target state
+
+Deliverables:
+- a concise dashboard blueprint in `docs/`
+- a prioritized V2 UX roadmap that maps product ideas onto concrete engineering tasks
+- explicit notes about which best-in-class patterns are intentionally not being copied because the data or product context differs
+
+### Task 77 [done]
 Perform a frontend content and UX cleanup pass before deeper design-system refactors.
 
 Scope:
@@ -890,7 +863,7 @@ Progress notes:
 - reduced placeholder/dev-oriented narrative text and toned down over-prominent technical metadata
 - simplified heading treatment and page structure before starting any Tailwind or component-library refactor
 
-### Task 85A [partial]
+### Task 77A [done]
 Add backend-powered dashboard activity-type rollups for full-history time windows.
 
 Scope:
@@ -901,9 +874,27 @@ Scope:
 Current state:
 - the dashboard cards had been built in the frontend from the latest `100` activities fetched via `GET /api/v1/activities`
 - this caused the `Last 6 months` and `Last 12 months` cards to undercount once older activities fell beyond that page limit
-- work has now started to move these summaries onto backend analytics queries instead
+- the dashboard summary cards now read per-window sport rollups from backend analytics queries instead of deriving them from the latest page of activities
+- production verification confirmed the long-window cards now reflect the full synced dataset rather than truncating at `100` activities
 
-### Task 86
+### Task 78
+Create a deterministic fixture dataset for frontend development and screenshot testing.
+
+Scope:
+- provide a stable seeded dataset for dashboard and activity-page development
+- include enough variety to exercise the target V2 dashboard patterns: multiple sports, dense recent history, long-window history, sync-status states, and sparse/no-data cases
+- decouple UI regression testing and design work from live Garmin sync state
+- support repeatable Playwright screenshot baselines and local visual review
+
+### Task 79
+Add Playwright screenshot coverage for the main dashboard and activity pages.
+
+Scope:
+- add screenshot tests for the home dashboard, activities list, activity detail, and sync-status pages
+- use the deterministic fixture data from Task 78 or a repeatable local test setup
+- make the screenshots useful for catching layout regressions during frontend refactors and design-system work
+
+### Task 80
 Find or create a consistent set of sport icons for use across the frontend.
 
 Scope:
@@ -912,7 +903,7 @@ Scope:
 - replace repeated sport text labels with icons where they improve scanability without hurting clarity
 - define a fallback treatment for unknown or unsupported activity types
 
-### Task 87
+### Task 81
 Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.
 
 Scope:
@@ -920,7 +911,7 @@ Scope:
 - keep the existing visual direction while reducing ad hoc global CSS
 - standardize spacing, typography, and responsive breakpoints across pages
 
-### Task 88
+### Task 82
 Adopt `shadcn/ui` components for core dashboard UI primitives.
 
 Scope:
@@ -928,7 +919,7 @@ Scope:
 - keep the component set intentionally small and aligned with the product’s visual language
 - avoid over-customized one-off components where standard primitives are a better fit
 
-### Task 89
+### Task 83
 Create a responsive dashboard shell and shared frontend page layout system.
 
 Scope:
@@ -936,7 +927,7 @@ Scope:
 - support desktop and mobile layouts cleanly
 - make dashboard, activities list, and activity detail pages share the same structural system
 
-### Task 90
+### Task 84
 Standardize frontend typography and spacing across all pages.
 
 Scope:
@@ -944,7 +935,7 @@ Scope:
 - remove inconsistent sizing/layout patterns across dashboard and activity pages
 - ensure charts, cards, filters, and tables align to the same rhythm
 
-### Task 91
+### Task 85
 Standardize frontend loading, empty, error, and partial-data states.
 
 Scope:
@@ -952,29 +943,73 @@ Scope:
 - apply them consistently across dashboard, activities list, and activity detail pages
 - make frontend behavior clearer when backend data is missing, delayed, or partially populated
 
-### Task 92
-Add Playwright screenshot coverage for the main dashboard and activity pages.
+### Task 86
+Implement device identification for activities.
 
 Scope:
-- add screenshot tests for the home dashboard, activities list, and activity detail pages
-- use stable fixture data or deterministic local test setup
-- make the screenshots useful for catching layout regressions during frontend refactors
+- parse device metadata from FIT files or Garmin source data
+- populate the `devices` table
+- link activities to the recording device
+- expose device information in activity APIs
 
-### Task 93
-Create a deterministic fixture dataset for frontend development and screenshot testing.
+### Task 87
+Add optional weather enrichment for activities and analytics.
 
 Scope:
-- provide a stable seeded dataset for dashboard and activity-page development
-- decouple UI regression testing from live Garmin sync state
-- support repeatable Playwright screenshot baselines
+- decide whether to fetch historical weather from a provider or derive it from exported Garmin data if available
+- store weather as separate enrichment data rather than mixing it into core activity ingestion
+- support future weather correlation views and analytics
+
+### Task 88
+Add HTTPS-friendly private access for the VPS deployment.
+
+Scope:
+- choose between Tailscale Serve and a reverse proxy such as Caddy for TLS termination
+- support private HTTPS access to the frontend and backend over the tailnet
+- keep the setup compatible with the existing Docker Compose deployment model
+
+### Task 89
+Research Garmin retrieval options for additional health and physiology data:
+- HRV
+- VO2 max
+- lactate threshold
+- endurance-related metrics
+- richer sleep metrics
 
 ### Task 90
-Add downsampling or capped payload strategy for large activity stream responses.
+Design Version 2 schema additions for specialized health data.
+
+Recommended direction:
+- keep `daily_metrics` for lightweight daily rollups
+- add focused tables for physiology/performance and richer sleep data
+- include source timestamps and ingestion provenance
 
 ### Task 91
-Verify that raw FIT files are never modified after download.
+Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
 ### Task 92
+Implement ingestion for daily health metrics beyond the MVP set.
+
+Candidate metrics:
+- HRV
+- richer sleep summary/detail
+- VO2 max
+
+### Task 93
+Implement ingestion for performance metrics.
+
+Candidate metrics:
+- lactate threshold
+- endurance score
+- related training-readiness style metrics if reliable
+
+### Task 94
+Add downsampling or capped payload strategy for large activity stream responses.
+
+### Task 95
+Verify that raw FIT files are never modified after download.
+
+### Task 96
 Review database performance strategy for long-term `activity_records` growth.
 
 Scope:
@@ -982,5 +1017,5 @@ Scope:
 - revisit the implementation-spec note about month-based partitioning
 - keep the solution aligned with expected single-user growth and query patterns
 
-### Task 93
+### Task 97
 Review all MVP acceptance criteria against `docs/prd.md`.

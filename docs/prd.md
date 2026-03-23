@@ -181,6 +181,7 @@ Version 2+ enrichment ideas:
 - additional external-context enrichment should remain separate from core ingestion
 
 Version 2 frontend/platform note:
+- begin with explicit research into best-in-class training dashboard products (for example Whoop and similar experiences) so the frontend roadmap is guided by a clear target standard rather than only by implementation mechanics
 - introduce a shared frontend layout/component system with consistent spacing, typography, and state handling
 - support deterministic fixture data for frontend regression and screenshot testing
 - review long-term `activity_records` scaling strategy as the archive grows
