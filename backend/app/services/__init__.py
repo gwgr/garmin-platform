@@ -17,6 +17,7 @@ from app.services.analytics_queries import (
     AnalyticsQueryService,
     RecentActivityCounts,
     RestingHeartRatePoint,
+    SportRollupSummary,
     TrendWindowSummary,
 )
 from app.services.daily_metric_queries import (
@@ -74,6 +75,7 @@ __all__ = [
     "RawFileStorageService",
     "RecentActivityCounts",
     "RestingHeartRatePoint",
+    "SportRollupSummary",
     "SyncCheckpointService",
     "SyncCheckpointState",
     "SyncStatusResult",

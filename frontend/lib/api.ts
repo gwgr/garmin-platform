@@ -73,6 +73,14 @@ export type TrendWindowSummary = {
   activity_count: number;
   total_distance_meters: number;
   total_duration_seconds: number;
+  sport_rollups: SportRollupSummary[];
+};
+
+export type SportRollupSummary = {
+  sport: string;
+  activity_count: number;
+  total_distance_meters: number;
+  total_duration_seconds: number;
 };
 
 export type RecentActivityCounts = {

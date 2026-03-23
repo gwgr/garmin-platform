@@ -74,3 +74,60 @@ def test_get_activity_trends_limits_resting_heart_rate_points_to_latest_30_in_as
         assert result.resting_heart_rate_trend[-1].resting_heart_rate == 40
     finally:
         session.close()
+
+
+def test_get_activity_trends_includes_full_window_sport_rollups() -> None:
+    today = date(2026, 3, 17)
+    session = _build_test_session()
+    try:
+        session.add_all(
+            [
+                Activity(
+                    source_activity_id="run-1",
+                    name="Run One",
+                    sport="running",
+                    start_time=datetime.combine(today - timedelta(days=120), time(6, 0), tzinfo=timezone.utc),
+                    distance_meters=10000,
+                    duration_seconds=3600,
+                ),
+                Activity(
+                    source_activity_id="run-2",
+                    name="Run Two",
+                    sport="running",
+                    start_time=datetime.combine(today - timedelta(days=60), time(6, 0), tzinfo=timezone.utc),
+                    distance_meters=5000,
+                    duration_seconds=1800,
+                ),
+                Activity(
+                    source_activity_id="walk-1",
+                    name="Walk One",
+                    sport="walking",
+                    start_time=datetime.combine(today - timedelta(days=20), time(6, 0), tzinfo=timezone.utc),
+                    distance_meters=3000,
+                    duration_seconds=2400,
+                ),
+                Activity(
+                    source_activity_id="bike-1",
+                    name="Bike One",
+                    sport="cycling",
+                    start_time=datetime.combine(today - timedelta(days=10), time(6, 0), tzinfo=timezone.utc),
+                    distance_meters=25000,
+                    duration_seconds=3900,
+                ),
+            ]
+        )
+        session.commit()
+
+        result = AnalyticsQueryService(session).get_activity_trends(today=today)
+
+        assert result.last_6_months.activity_count == 4
+        assert [rollup.sport for rollup in result.last_6_months.sport_rollups] == [
+            "running",
+            "cycling",
+            "walking",
+        ]
+        assert result.last_6_months.sport_rollups[0].activity_count == 2
+        assert result.last_6_months.sport_rollups[0].total_distance_meters == 15000.0
+        assert result.last_6_months.sport_rollups[0].total_duration_seconds == 5400.0
+    finally:
+        session.close()

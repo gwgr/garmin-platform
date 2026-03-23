@@ -44,8 +44,8 @@ def _test_client(TestSession: sessionmaker[Session]) -> Generator[TestClient, No
 
 
 def test_get_analytics_trends_returns_expected_summaries() -> None:
-    today = date(2026, 3, 17)
-    week_activity_date = today - timedelta(days=1)
+    today = datetime.now(timezone.utc).date()
+    week_activity_date = today
     month_activity_date = today.replace(day=5)
     year_activity_date = date(2025, 12, 1)
 
@@ -110,4 +110,7 @@ def test_get_analytics_trends_returns_expected_summaries() -> None:
         assert response.status_code == 200
         assert payload["current_week"]["activity_count"] == 1
         assert payload["current_month"]["activity_count"] == 2
+        assert payload["last_6_months"]["sport_rollups"][0]["sport"] == "walking"
+        assert payload["last_6_months"]["sport_rollups"][0]["activity_count"] == 2
+        assert payload["last_6_months"]["sport_rollups"][1]["sport"] == "running"
         assert "resting_heart_rate_trend" in payload

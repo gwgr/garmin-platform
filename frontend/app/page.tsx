@@ -5,6 +5,8 @@ import {
   type ActivityListItem,
   type AnalyticsTrends,
   type DailyMetricItem,
+  type SportRollupSummary,
+  type TrendWindowSummary,
   type SyncStatus,
   getActivities,
   getAnalyticsTrends,
@@ -15,17 +17,10 @@ import { formatDistance, formatDuration } from "../lib/formatting";
 
 export const dynamic = "force-dynamic";
 
-type SportSummary = {
-  sport: string;
-  count: number;
-  totalDistanceMeters: number;
-  totalDurationSeconds: number;
-};
-
 type WindowSummary = {
   label: string;
-  activities: ActivityListItem[];
-  sportSummaries: SportSummary[];
+  activityCount: number;
+  sportSummaries: SportRollupSummary[];
 };
 
 function formatSportLabel(value: string): string {
@@ -36,85 +31,38 @@ function formatSportLabel(value: string): string {
     .join(" ");
 }
 
-function buildSportSummaries(activities: ActivityListItem[]): SportSummary[] {
-  const sportMap = new Map<string, SportSummary>();
-
-  for (const activity of activities) {
-    const sport = activity.sport?.trim() || "unknown";
-    const current = sportMap.get(sport) ?? {
-      sport,
-      count: 0,
-      totalDistanceMeters: 0,
-      totalDurationSeconds: 0,
-    };
-
-    current.count += 1;
-    current.totalDistanceMeters += activity.distance_meters ?? 0;
-    current.totalDurationSeconds += activity.duration_seconds ?? 0;
-    sportMap.set(sport, current);
+function buildWindowSummaries(trends: AnalyticsTrends | null): WindowSummary[] {
+  if (!trends) {
+    return [
+      { label: "This week", activityCount: 0, sportSummaries: [] },
+      { label: "This month", activityCount: 0, sportSummaries: [] },
+      { label: "Last 6 months", activityCount: 0, sportSummaries: [] },
+      { label: "Last 12 months", activityCount: 0, sportSummaries: [] },
+    ];
   }
 
-  return Array.from(sportMap.values()).sort((left, right) => {
-    if (right.count !== left.count) {
-      return right.count - left.count;
-    }
-
-    return right.totalDistanceMeters - left.totalDistanceMeters;
-  });
-}
-
-function isWithinDays(startTime: string, days: number, now: Date): boolean {
-  const activityDate = new Date(startTime);
-  const windowStart = new Date(now);
-  windowStart.setHours(0, 0, 0, 0);
-  windowStart.setDate(windowStart.getDate() - days + 1);
-  return activityDate >= windowStart;
-}
-
-function isWithinCurrentMonth(startTime: string, now: Date): boolean {
-  const activityDate = new Date(startTime);
-  return (
-    activityDate.getFullYear() === now.getFullYear() &&
-    activityDate.getMonth() === now.getMonth()
-  );
-}
-
-function buildWindowSummaries(activities: ActivityListItem[]): WindowSummary[] {
-  const now = new Date();
-
-  const windows: Array<{ label: string; predicate: (activity: ActivityListItem) => boolean }> = [
-    {
-      label: "This week",
-      predicate: (activity) => isWithinDays(activity.start_time, 7, now),
-    },
-    {
-      label: "This month",
-      predicate: (activity) => isWithinCurrentMonth(activity.start_time, now),
-    },
-    {
-      label: "Last 6 months",
-      predicate: (activity) => isWithinDays(activity.start_time, 183, now),
-    },
-    {
-      label: "Last 12 months",
-      predicate: (activity) => isWithinDays(activity.start_time, 366, now),
-    },
+  const windows: TrendWindowSummary[] = [
+    trends.current_week,
+    trends.current_month,
+    trends.last_6_months,
+    trends.last_1_year,
   ];
 
-  return windows.map(({ label, predicate }) => {
-    const windowActivities = activities.filter(predicate);
-
-    return {
-      label,
-      activities: windowActivities,
-      sportSummaries: buildSportSummaries(windowActivities).slice(0, 4),
-    };
-  });
+  return windows.map((window) => ({
+    label: window.label
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase())
+      .replace("Current Week", "This week")
+      .replace("Current Month", "This month")
+      .replace("Last 6 Months", "Last 6 months")
+      .replace("Last 1 Year", "Last 12 months"),
+    activityCount: window.activity_count,
+    sportSummaries: window.sport_rollups.slice(0, 4),
+  }));
 }
 
 async function loadDashboardData(): Promise<{
   trends: AnalyticsTrends | null;
-  allActivities: ActivityListItem[];
   recentActivities: ActivityListItem[];
   recentActivityTotal: number;
   dailyMetrics: DailyMetricItem[];
@@ -131,7 +79,6 @@ async function loadDashboardData(): Promise<{
 
     return {
       trends,
-      allActivities: activitiesResponse.items,
       recentActivities: activitiesResponse.items.slice(0, 5),
       recentActivityTotal: activitiesResponse.total,
       dailyMetrics: metricsResponse.items,
@@ -141,7 +88,6 @@ async function loadDashboardData(): Promise<{
   } catch (error) {
     return {
       trends: null,
-      allActivities: [],
       recentActivities: [],
       recentActivityTotal: 0,
       dailyMetrics: [],
@@ -154,7 +100,6 @@ async function loadDashboardData(): Promise<{
 export default async function HomePage() {
   const {
     trends,
-    allActivities,
     recentActivities,
     recentActivityTotal,
     dailyMetrics,
@@ -162,7 +107,7 @@ export default async function HomePage() {
     loadError,
   } = await loadDashboardData();
   const restingHeartRate = trends?.resting_heart_rate_trend ?? [];
-  const windowSummaries = buildWindowSummaries(allActivities);
+  const windowSummaries = buildWindowSummaries(trends);
 
   return (
     <main className="shell">
@@ -186,11 +131,11 @@ export default async function HomePage() {
                       </div>
                       <div className="list-values">
                         <strong>
-                          {summary.totalDistanceMeters > 0
-                            ? formatDistance(summary.totalDistanceMeters)
-                            : `${summary.count}`}
+                          {summary.total_distance_meters > 0
+                            ? formatDistance(summary.total_distance_meters)
+                            : `${summary.activity_count}`}
                         </strong>
-                        <span>{formatDuration(summary.totalDurationSeconds)}</span>
+                        <span>{formatDuration(summary.total_duration_seconds)}</span>
                       </div>
                     </div>
                   ))}
@@ -199,8 +144,8 @@ export default async function HomePage() {
                 <p className="empty-state">No activities in this window yet.</p>
               )}
               <p className="stat-subtle">
-                {windowSummary.activities.length.toLocaleString()} total{" "}
-                {windowSummary.activities.length === 1 ? "activity" : "activities"}
+                {windowSummary.activityCount.toLocaleString()} total{" "}
+                {windowSummary.activityCount === 1 ? "activity" : "activities"}
               </p>
             </article>
           ))}

@@ -17,6 +17,15 @@ class TrendWindowSummary:
     activity_count: int
     total_distance_meters: float
     total_duration_seconds: float
+    sport_rollups: list["SportRollupSummary"]
+
+
+@dataclass(frozen=True)
+class SportRollupSummary:
+    sport: str
+    activity_count: int
+    total_distance_meters: float
+    total_duration_seconds: float
 
 
 @dataclass(frozen=True)
@@ -91,6 +100,46 @@ class AnalyticsQueryService:
             activity_count=int(activity_count or 0),
             total_distance_meters=float(total_distance or 0.0),
             total_duration_seconds=float(total_duration or 0.0),
+            sport_rollups=self._summarize_window_by_sport(start_at, end_at),
+        )
+
+    def _summarize_window_by_sport(
+        self,
+        start_at: datetime,
+        end_at: datetime,
+    ) -> list[SportRollupSummary]:
+        rows = self._session.execute(
+            select(
+                Activity.sport,
+                func.count(Activity.id),
+                func.coalesce(func.sum(Activity.distance_meters), 0.0),
+                func.coalesce(func.sum(Activity.duration_seconds), 0.0),
+            )
+            .where(
+                Activity.start_time >= start_at,
+                Activity.start_time <= end_at,
+            )
+            .group_by(Activity.sport)
+        ).all()
+
+        summaries = [
+            SportRollupSummary(
+                sport=(sport or "unknown").strip() or "unknown",
+                activity_count=int(activity_count or 0),
+                total_distance_meters=float(total_distance or 0.0),
+                total_duration_seconds=float(total_duration or 0.0),
+            )
+            for sport, activity_count, total_distance, total_duration in rows
+        ]
+
+        return sorted(
+            summaries,
+            key=lambda summary: (
+                -summary.activity_count,
+                -summary.total_distance_meters,
+                -summary.total_duration_seconds,
+                summary.sport,
+            ),
         )
 
     def _count_activities(self, start_date: date, end_date: date) -> int:

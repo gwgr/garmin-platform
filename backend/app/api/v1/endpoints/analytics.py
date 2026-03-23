@@ -12,6 +12,13 @@ from app.services import AnalyticsQueryService, ActivityTrendsResult
 router = APIRouter()
 
 
+class SportRollupSummaryResponse(BaseModel):
+    sport: str
+    activity_count: int
+    total_distance_meters: float
+    total_duration_seconds: float
+
+
 class TrendWindowSummaryResponse(BaseModel):
     label: str
     start_date: date
@@ -19,6 +26,7 @@ class TrendWindowSummaryResponse(BaseModel):
     activity_count: int
     total_distance_meters: float
     total_duration_seconds: float
+    sport_rollups: list[SportRollupSummaryResponse]
 
 
 class RecentActivityCountsResponse(BaseModel):
@@ -49,6 +57,15 @@ def _map_window_summary(window) -> TrendWindowSummaryResponse:
         activity_count=window.activity_count,
         total_distance_meters=window.total_distance_meters,
         total_duration_seconds=window.total_duration_seconds,
+        sport_rollups=[
+            SportRollupSummaryResponse(
+                sport=rollup.sport,
+                activity_count=rollup.activity_count,
+                total_distance_meters=rollup.total_distance_meters,
+                total_duration_seconds=rollup.total_duration_seconds,
+            )
+            for rollup in window.sport_rollups
+        ],
     )
 
 

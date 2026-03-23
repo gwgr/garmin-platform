@@ -890,6 +890,19 @@ Progress notes:
 - reduced placeholder/dev-oriented narrative text and toned down over-prominent technical metadata
 - simplified heading treatment and page structure before starting any Tailwind or component-library refactor
 
+### Task 85A [partial]
+Add backend-powered dashboard activity-type rollups for full-history time windows.
+
+Scope:
+- extend the analytics backend so dashboard summary windows can include per-sport rollups derived from the full activity dataset
+- stop relying on the latest `GET /activities` page to populate the `This week`, `This month`, `Last 6 months`, and `Last 12 months` dashboard cards
+- ensure long-window cards remain accurate once the account has more than `100` synced activities
+
+Current state:
+- the dashboard cards had been built in the frontend from the latest `100` activities fetched via `GET /api/v1/activities`
+- this caused the `Last 6 months` and `Last 12 months` cards to undercount once older activities fell beyond that page limit
+- work has now started to move these summaries onto backend analytics queries instead
+
 ### Task 86
 Find or create a consistent set of sport icons for use across the frontend.
 
