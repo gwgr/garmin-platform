@@ -1,7 +1,7 @@
 import Link from "next/link";
 
+import { LocalDate } from "../../../components/localized-time";
 import { getSyncStatus } from "../../../lib/api";
-import { formatDateLabel } from "../../../lib/formatting";
 
 export const dynamic = "force-dynamic";
 
@@ -36,15 +36,15 @@ export default async function SyncStatusPage() {
           <div className="detail-meta-grid">
             <div>
               <span className="metric-label">Last Attempt</span>
-              <p>{syncStatus.last_attempted_at ? formatDateLabel(syncStatus.last_attempted_at) : "--"}</p>
+              <p>{syncStatus.last_attempted_at ? <LocalDate value={syncStatus.last_attempted_at} /> : "--"}</p>
             </div>
             <div>
               <span className="metric-label">Last Success</span>
-              <p>{syncStatus.last_succeeded_at ? formatDateLabel(syncStatus.last_succeeded_at) : "--"}</p>
+              <p>{syncStatus.last_succeeded_at ? <LocalDate value={syncStatus.last_succeeded_at} /> : "--"}</p>
             </div>
             <div>
               <span className="metric-label">Last Synced Activity</span>
-              <p>{syncStatus.last_synced_at ? formatDateLabel(syncStatus.last_synced_at) : "--"}</p>
+              <p>{syncStatus.last_synced_at ? <LocalDate value={syncStatus.last_synced_at} /> : "--"}</p>
             </div>
             <div>
               <span className="metric-label">Last Source ID</span>

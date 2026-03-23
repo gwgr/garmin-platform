@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 import io
 import logging
 from pathlib import Path
@@ -191,13 +191,18 @@ class FitParserService:
 
     def _require_datetime(self, value: Any, fit_path: str | Path) -> datetime:
         if isinstance(value, datetime):
-            return value
+            return self._normalize_datetime(value)
         raise ValueError(f"Missing start_time in FIT file: {fit_path}")
 
     def _coerce_datetime(self, value: Any) -> datetime | None:
         if isinstance(value, datetime):
-            return value
+            return self._normalize_datetime(value)
         return None
+
+    def _normalize_datetime(self, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
 
     def _coerce_sport(self, value: Any) -> str:
         if value is None:

@@ -15,7 +15,7 @@ def test_parse_activity_summary_reads_expected_fixture_values() -> None:
 
     assert summary.name == "session"
     assert summary.sport == "walking"
-    assert summary.start_time.isoformat() == "2026-03-17T00:17:57"
+    assert summary.start_time.isoformat() == "2026-03-17T00:17:57+00:00"
     assert summary.duration_seconds == 2899.633
     assert summary.distance_meters == 3301.6
     assert summary.calories == 194
@@ -26,6 +26,8 @@ def test_parse_activity_laps_returns_expected_lap_metrics() -> None:
 
     assert len(laps) == 4
     assert laps[0].lap_index == 1
+    assert laps[0].start_time is not None
+    assert laps[0].start_time.isoformat() == "2026-03-17T00:17:57+00:00"
     assert laps[0].distance_meters == 1000.0
     assert laps[0].duration_seconds == 771.881
     assert laps[0].average_heart_rate == 64
@@ -44,7 +46,7 @@ def test_parse_activity_records_normalizes_coordinates_to_degrees() -> None:
 
     assert len(records) == 481
     assert len(records_with_coordinates) == 478
-    assert records[0].record_time.isoformat() == "2026-03-17T00:17:57"
+    assert records[0].record_time.isoformat() == "2026-03-17T00:17:57+00:00"
     assert records[0].heart_rate == 83
     assert records[0].latitude_degrees is None
     assert records[0].longitude_degrees is None

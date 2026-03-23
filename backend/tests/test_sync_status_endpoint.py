@@ -81,3 +81,5 @@ def test_sync_status_endpoint_returns_error_for_recent_failed_sync() -> None:
         assert payload["state"] == "error"
         assert payload["summary"] == "Garmin returned HTTP 429."
         assert payload["consecutive_failures"] == 2
+        assert payload["last_attempted_at"].endswith("Z")
+        assert payload["last_succeeded_at"].endswith("Z")

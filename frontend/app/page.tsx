@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { LocalDate } from "../components/localized-time";
 import {
   type ActivityListItem,
   type AnalyticsTrends,
@@ -10,7 +11,7 @@ import {
   getDailyMetrics,
   getSyncStatus,
 } from "../lib/api";
-import { formatDateLabel, formatDistance, formatDuration } from "../lib/formatting";
+import { formatDistance, formatDuration } from "../lib/formatting";
 
 export const dynamic = "force-dynamic";
 
@@ -226,7 +227,7 @@ export default async function HomePage() {
                       </Link>
                     </p>
                     <p className="list-meta">
-                      {activity.sport} · {formatDateLabel(activity.start_time)}
+                      {activity.sport} · <LocalDate value={activity.start_time} />
                     </p>
                   </div>
                   <div className="list-values">
@@ -267,7 +268,9 @@ export default async function HomePage() {
               {dailyMetrics.slice(0, 3).map((metric) => (
                 <article className="list-row" key={metric.id}>
                   <div>
-                    <p className="list-title">{formatDateLabel(metric.metric_date)}</p>
+                    <p className="list-title">
+                      <LocalDate value={metric.metric_date} />
+                    </p>
                     <p className="list-meta">
                       {metric.steps ? `${metric.steps.toLocaleString()} steps` : "No step data"}
                     </p>

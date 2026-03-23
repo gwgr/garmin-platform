@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ElevationChart, HeartRateChart, PaceChart } from "../../../components/charts";
+import { LocalDate, LocalDateTime } from "../../../components/localized-time";
 import { RouteMap } from "../../../components/maps";
 import { getActivityDetail } from "../../../lib/api";
-import { formatDateLabel, formatDistance, formatDuration } from "../../../lib/formatting";
+import { formatDistance, formatDuration } from "../../../lib/formatting";
 
 export const dynamic = "force-dynamic";
 
@@ -13,16 +14,6 @@ type ActivityDetailPageProps = {
     id: string;
   }>;
 };
-
-function formatDateTimeLabel(value: string): string {
-  return new Date(value).toLocaleString("en-AU", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
-}
 
 export default async function ActivityDetailPage({ params }: ActivityDetailPageProps) {
   const { id } = await params;
@@ -44,7 +35,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
             <div>
               <h2>{activity.name ?? "Imported activity"}</h2>
               <p className="lede">
-                {activity.sport} · {formatDateTimeLabel(activity.start_time)}
+                {activity.sport} · <LocalDateTime value={activity.start_time} />
               </p>
             </div>
             <div className="detail-links">
@@ -69,7 +60,9 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
               <p className="stat-value">
                 {activity.distance_meters ? formatDistance(activity.distance_meters) : "--"}
               </p>
-              <p className="stat-subtle">{formatDateLabel(activity.start_time)}</p>
+              <p className="stat-subtle">
+                <LocalDate value={activity.start_time} />
+              </p>
             </article>
 
             <article className="panel stat-card">
@@ -108,7 +101,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
                     <div>
                       <p className="list-title">Lap {lap.lap_index}</p>
                       <p className="list-meta">
-                        {lap.start_time ? formatDateTimeLabel(lap.start_time) : "No start time"}
+                        {lap.start_time ? <LocalDateTime value={lap.start_time} /> : "No start time"}
                       </p>
                     </div>
                     <div className="lap-metrics">
@@ -135,11 +128,15 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
               </div>
               <div>
                 <span className="metric-label">Created</span>
-                <p className="list-title">{formatDateTimeLabel(activity.created_at)}</p>
+                <p className="list-title">
+                  <LocalDateTime value={activity.created_at} />
+                </p>
               </div>
               <div>
                 <span className="metric-label">Updated</span>
-                <p className="list-title">{formatDateTimeLabel(activity.updated_at)}</p>
+                <p className="list-title">
+                  <LocalDateTime value={activity.updated_at} />
+                </p>
               </div>
               <div>
                 <span className="metric-label">Stored FIT File</span>
@@ -188,7 +185,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
                   <tbody>
                     {recordPreview.map((record) => (
                       <tr key={record.id}>
-                        <td>{formatDateTimeLabel(record.record_time)}</td>
+                        <td><LocalDateTime value={record.record_time} /></td>
                         <td>
                           {record.distance_meters ? formatDistance(record.distance_meters) : "--"}
                         </td>

@@ -455,7 +455,7 @@ Current state:
 - operator-facing sync status now exposes `Backfill offset` in both `python -m app.print_sync_status` and `GET /api/v1/sync/status`
 - verified locally with focused backend tests plus an Alembic upgrade through the new checkpoint-column migration
 
-### Task 49B `[todo]`
+### Task 49B `[partial]`
 Audit and fix Garmin activity timestamp semantics end-to-end.
 
 Scope:
@@ -467,7 +467,15 @@ Scope:
 Current context:
 - during VPS backfill validation, at least one real activity that occurred around `8:00 am` on `21 Mar 2026` rendered in the UI as lap times around `9:00 pm` on `20 Mar 2026`, and the detail-page `Created` metadata also looked incorrect
 - this likely indicates a remaining mismatch between Garmin/API parsing, persisted timestamps, and frontend display assumptions
-- no fix has been attempted yet; capture this as the next timestamp-focused follow-up after the backfill work
+- the first fix pass is now in place:
+  - FIT parser datetimes are normalized to UTC-aware values during ingest
+  - API datetime serialization now emits explicit UTC timestamps with `Z`
+  - frontend activity/dashboard/sync pages now format timestamps in a client component so browser-local time is used instead of the frontend container's server timezone
+- no database migration was required for this pass because the schema did not change
+- remaining work:
+  - verify known real activities now render on the correct local date/time in both local and VPS environments
+  - audit whether any remaining labels such as `Created` / `Updated` should reflect source-event time, ingest time, or storage metadata more explicitly
+  - test cross-timezone and DST edge cases before marking the task done
 
 ### Task 50 `[partial]`
 Create `infra/scripts/backup.sh`.

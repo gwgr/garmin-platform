@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_serializer
 from sqlalchemy.orm import Session
 
+from app.api.v1.serialization import normalize_datetime_for_json
 from app.db import get_db_session
 from app.models import Activity, ActivityLap, ActivityRecord
 from app.services import (
@@ -33,6 +34,10 @@ class ActivityListItem(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @field_serializer("start_time", "created_at", "updated_at", when_used="json")
+    def serialize_datetimes(self, value: datetime) -> str:
+        return normalize_datetime_for_json(value) or ""
+
 
 class ActivityListResponse(BaseModel):
     items: list[ActivityListItem]
@@ -53,6 +58,10 @@ class ActivityLapItem(BaseModel):
     max_heart_rate: int | None
     calories: int | None
 
+    @field_serializer("start_time", when_used="json")
+    def serialize_start_time(self, value: datetime | None) -> str | None:
+        return normalize_datetime_for_json(value)
+
 
 class ActivityRecordItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -69,6 +78,10 @@ class ActivityRecordItem(BaseModel):
     speed_mps: float | None
     power_watts: int | None
     temperature_celsius: float | None
+
+    @field_serializer("record_time", when_used="json")
+    def serialize_record_time(self, value: datetime) -> str:
+        return normalize_datetime_for_json(value) or ""
 
 
 class ActivityDetailResponse(BaseModel):
