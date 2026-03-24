@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LocalDate } from "../components/localized-time";
+import { SportLabel } from "../components/sport";
 import {
   type ActivityListItem,
   type AnalyticsTrends,
@@ -22,14 +23,6 @@ type WindowSummary = {
   activityCount: number;
   sportSummaries: SportRollupSummary[];
 };
-
-function formatSportLabel(value: string): string {
-  return value
-    .split(/[_\s]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(" ");
-}
 
 function buildWindowSummaries(trends: AnalyticsTrends | null): WindowSummary[] {
   if (!trends) {
@@ -127,7 +120,9 @@ export default async function HomePage() {
                   {windowSummary.sportSummaries.map((summary) => (
                     <div className="list-row" key={`${windowSummary.label}-${summary.sport}`}>
                       <div>
-                        <p className="list-title">{formatSportLabel(summary.sport)}</p>
+                        <p className="list-title">
+                          <SportLabel sport={summary.sport} />
+                        </p>
                       </div>
                       <div className="list-values">
                         <strong>
@@ -172,7 +167,8 @@ export default async function HomePage() {
                       </Link>
                     </p>
                     <p className="list-meta">
-                      {activity.sport} · <LocalDate value={activity.start_time} />
+                      <SportLabel className="sport-label-inline" sport={activity.sport} /> ·{" "}
+                      <LocalDate value={activity.start_time} />
                     </p>
                   </div>
                   <div className="list-values">

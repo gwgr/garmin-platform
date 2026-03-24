@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ElevationChart, HeartRateChart, PaceChart } from "../../../components/charts";
 import { LocalDate, LocalDateTime } from "../../../components/localized-time";
 import { RouteMap } from "../../../components/maps";
+import { SportBadge, SportLabel } from "../../../components/sport";
 import { getActivityDetail } from "../../../lib/api";
 import { formatDistance, formatDuration } from "../../../lib/formatting";
 
@@ -35,7 +36,8 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
             <div>
               <h2>{activity.name ?? "Imported activity"}</h2>
               <p className="lede">
-                {activity.sport} · <LocalDateTime value={activity.start_time} />
+                <SportLabel className="sport-label-inline" sport={activity.sport} /> ·{" "}
+                <LocalDateTime value={activity.start_time} />
               </p>
             </div>
             <div className="detail-links">
@@ -78,7 +80,9 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
               <p className="stat-value">
                 {activity.calories ? activity.calories.toLocaleString() : "--"}
               </p>
-              <p className="stat-subtle">{activity.sport}</p>
+              <div className="stat-subtle">
+                <SportBadge className="sport-badge-compact" sport={activity.sport} />
+              </div>
             </article>
           </div>
         </section>

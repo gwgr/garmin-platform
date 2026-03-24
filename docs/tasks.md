@@ -959,7 +959,7 @@ Current state:
   - the isolated frontend server running on `127.0.0.1:3010`
   - `PLAYWRIGHT_USE_EXTERNAL_SERVERS=1 ./node_modules/.bin/playwright test tests/screenshots.spec.ts --update-snapshots`
 
-### Task 80
+### Task 80 [done]
 Find or create a consistent set of sport icons for use across the frontend.
 
 Scope:
@@ -967,6 +967,26 @@ Scope:
 - create custom icons only where common libraries do not provide a good fit
 - replace repeated sport text labels with icons where they improve scanability without hurting clarity
 - define a fallback treatment for unknown or unsupported activity types
+
+Current state:
+- `frontend/components/sport.tsx` now provides repo-owned SVG sport icons and shared label/badge treatments
+- `frontend/lib/sports.ts` now centralizes:
+  - sport label formatting
+  - sport-to-icon mapping
+  - fallback handling for unknown sport values
+- the current icon set covers the main frontend activity types in the deterministic dataset and product surface:
+  - running
+  - cycling
+  - swimming
+  - hiking
+  - strength training
+- unknown or unsupported sports now fall back to a neutral star-style glyph plus a generic color treatment instead of raw unformatted text
+- the shared sport icon treatment is now applied across:
+  - dashboard trend rollups
+  - dashboard recent activity metadata
+  - activities list badges
+  - activity detail header and summary
+- Playwright screenshot baselines were refreshed after the icon rollout so the visual change is now covered by the screenshot suite
 
 ### Task 81
 Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.

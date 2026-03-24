@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LocalDate } from "../../components/localized-time";
+import { SportBadge } from "../../components/sport";
 import { type ActivityListItem, getActivities } from "../../lib/api";
 import { formatDistance, formatDuration } from "../../lib/formatting";
 
@@ -157,7 +158,7 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
                         {activity.name ?? "Imported activity"}
                       </Link>
                     </p>
-                    <span className="sport-badge">{activity.sport}</span>
+                    <SportBadge sport={activity.sport} />
                     </div>
                     <p className="list-meta">
                       <LocalDate value={activity.start_time} />
