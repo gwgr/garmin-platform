@@ -66,6 +66,7 @@ Backend startup now also validates database connectivity and required runtime di
 - Task list and current progress: `docs/tasks.md`
 - Local machine setup notes: `docs/imac_setup.md`
 - Frontend fixture dataset notes: `docs/frontend_fixture_dataset.md`
+- Playwright screenshot workflow: `docs/playwright_screenshots.md`
 
 ## Production Direction
 
@@ -214,6 +215,11 @@ docker compose up --build
 ```
 
 By default, local Compose now starts `postgres`, `backend`, and `frontend` only. The scheduled `worker` is opt-in so local UI work does not immediately begin Garmin sync activity.
+
+Frontend tooling note:
+- the local Playwright screenshot workflow has now been verified with host Node `22.x`
+- if you are doing frontend or screenshot work directly on the host rather than through Docker, keep the host Node version aligned with the frontend runtime documented in `frontend/Dockerfile`
+- see `docs/playwright_screenshots.md` for the verified screenshot workflow and the external-server fallback used during local verification
 
 Current local shell convenience setup:
 - helper functions can now be installed into `~/.zshrc` with:

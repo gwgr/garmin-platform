@@ -934,13 +934,30 @@ Current state:
   - total local activity count remained higher because the seed intentionally preserves non-fixture activity rows
 - later follow-up can still decide whether a more isolated frontend-only mock path is useful, but the deterministic DB/API seed path is now working and usable
 
-### Task 79
+### Task 79 [done]
 Add Playwright screenshot coverage for the main dashboard and activity pages.
 
 Scope:
 - add screenshot tests for the home dashboard, activities list, activity detail, and sync-status pages
 - use the deterministic fixture data from Task 78 or a repeatable local test setup
 - make the screenshots useful for catching layout regressions during frontend refactors and design-system work
+
+Current state:
+- frontend screenshot tests now exist in `frontend/tests/screenshots.spec.ts` for:
+  - dashboard
+  - activities list
+  - activity detail
+  - sync status
+- `frontend/playwright.config.ts` now sets up an isolated screenshot environment with:
+  - a deterministic mock API server for the main screenshot routes
+  - a native isolated Next server flow using separate frontend build artifacts under `.next-playwright/`
+- `docs/playwright_screenshots.md` now documents the intended workflow
+- `frontend/tests/__screenshots__/screenshots.spec.ts/` now contains baseline screenshots for the covered pages
+- the screenshot suite has now been verified locally with:
+  - Node 22 on the host machine
+  - the mock API server running on `127.0.0.1:8010`
+  - the isolated frontend server running on `127.0.0.1:3010`
+  - `PLAYWRIGHT_USE_EXTERNAL_SERVERS=1 ./node_modules/.bin/playwright test tests/screenshots.spec.ts --update-snapshots`
 
 ### Task 80
 Find or create a consistent set of sport icons for use across the frontend.

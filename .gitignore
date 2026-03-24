@@ -4,6 +4,10 @@ __pycache__/
 *.pyc
 node_modules/
 .next/
+.next-playwright/
+.playwright/
+test-results/
+playwright-report/
 dist/
 data/
 backups/
