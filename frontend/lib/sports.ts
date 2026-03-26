@@ -27,8 +27,10 @@ export function getSportMeta(value: string): SportMeta {
   switch (normalized) {
     case "running":
     case "trail_running":
+    case "track_running":
       return { key: normalized, label, tone: "running" };
     case "cycling":
+    case "gravel_cycling":
     case "road_biking":
     case "indoor_cycling":
     case "mountain_biking":
