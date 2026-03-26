@@ -75,3 +75,8 @@ PLAYWRIGHT_USE_EXTERNAL_SERVERS=1 ./node_modules/.bin/playwright test tests/scre
 - the screenshot tests intentionally avoid `networkidle` waits because the isolated Next dev server keeps background activity alive long enough to make those waits flaky
 - the screenshot suite is intentionally focused on the high-value main pages rather than every component
 - this is a frontend-regression tool, not a substitute for normal API/backend tests
+
+## Troubleshooting
+
+- if the local UI does not reflect a recent frontend source change, rebuild the local frontend container with `docker compose up -d --build frontend`
+- if Playwright starts failing locally before it can launch or parse args, refresh the frontend install with `cd frontend && npm ci`
