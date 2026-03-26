@@ -13,6 +13,7 @@ COMPOSE_PROJECT_DIR="${COMPOSE_PROJECT_DIR:-${REPO_ROOT}}"
 BACKUP_SOURCE="${BACKUP_SOURCE:-}"
 FORCE_RESTORE="${FORCE_RESTORE:-0}"
 VERIFY_RESTORE="${VERIFY_RESTORE:-1}"
+COMPOSE_ENV_FILE="${APP_ENV_FILE}"
 
 log() {
   printf '[restore] %s\n' "$*"
@@ -45,10 +46,10 @@ PY
 }
 
 run_compose() {
-  APP_ENV_FILE="${APP_ENV_FILE}" APP_DATA_DIR="${APP_DATA_DIR}" APP_UID="$(id -u)" APP_GID="$(id -g)" docker compose \
+  APP_ENV_FILE="${COMPOSE_ENV_FILE}" APP_DATA_DIR="${APP_DATA_DIR}" APP_UID="$(id -u)" APP_GID="$(id -g)" docker compose \
     --project-directory "${COMPOSE_PROJECT_DIR}" \
     -f "${COMPOSE_PROJECT_DIR}/${COMPOSE_FILE}" \
-    --env-file "${APP_ENV_FILE}" \
+    --env-file "${COMPOSE_ENV_FILE}" \
     "$@"
 }
 
@@ -72,11 +73,49 @@ if [[ ! -f "${APP_ENV_FILE}" ]]; then
 fi
 
 POSTGRES_USER="$(read_env_file_value POSTGRES_USER || true)"
+POSTGRES_PASSWORD="$(read_env_file_value POSTGRES_PASSWORD || true)"
 POSTGRES_DB="$(read_env_file_value POSTGRES_DB || true)"
+DATABASE_URL_VALUE="$(read_env_file_value DATABASE_URL || true)"
 
-if [[ -z "${POSTGRES_USER}" || -z "${POSTGRES_DB}" ]]; then
-  printf 'POSTGRES_USER and POSTGRES_DB must be set in %s\n' "${APP_ENV_FILE}" >&2
+if [[ -z "${POSTGRES_USER}" || -z "${POSTGRES_PASSWORD}" || -z "${POSTGRES_DB}" ]]; then
+  printf 'POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB must be set in %s\n' "${APP_ENV_FILE}" >&2
   exit 1
+fi
+
+if [[ "${DATABASE_URL_VALUE}" == *"@localhost:"* || "${DATABASE_URL_VALUE}" == *"@127.0.0.1:"* ]]; then
+  log "Preparing temporary Compose env with container-to-container DATABASE_URL"
+  COMPOSE_ENV_FILE="$(mktemp "${TMPDIR:-/tmp}/garmin-restore-env.XXXXXX")"
+  python3 - "${APP_ENV_FILE}" "${COMPOSE_ENV_FILE}" "${POSTGRES_USER}" "${POSTGRES_PASSWORD}" "${POSTGRES_DB}" <<'PY'
+from pathlib import Path
+from urllib.parse import quote
+import sys
+
+source_path = Path(sys.argv[1])
+target_path = Path(sys.argv[2])
+postgres_user, postgres_password, postgres_db = sys.argv[3:6]
+database_url = (
+    "postgresql+psycopg://"
+    f"{quote(postgres_user, safe='')}:{quote(postgres_password, safe='')}"
+    f"@postgres:5432/{quote(postgres_db, safe='')}"
+)
+
+lines = source_path.read_text().splitlines()
+rewritten = []
+replaced = False
+for line in lines:
+    if line.startswith("DATABASE_URL="):
+        rewritten.append(f"DATABASE_URL={database_url}")
+        replaced = True
+    else:
+        rewritten.append(line)
+
+if not replaced:
+    rewritten.append(f"DATABASE_URL={database_url}")
+
+target_path.write_text("\n".join(rewritten) + "\n")
+PY
+  chmod 600 "${COMPOSE_ENV_FILE}"
+  trap 'rm -f "${COMPOSE_ENV_FILE}"' EXIT
 fi
 
 if [[ "${FORCE_RESTORE}" != "1" ]]; then
@@ -130,6 +169,21 @@ for attempt in {1..15}; do
 
   if [[ "${attempt}" -eq 15 ]]; then
     log "PostgreSQL did not become healthy in time"
+    run_compose logs --tail=50 postgres
+    exit 1
+  fi
+
+  sleep 2
+done
+
+log "Waiting for target database creation"
+for attempt in {1..15}; do
+  if run_compose exec -T postgres sh -lc "psql -U \"\$POSTGRES_USER\" -d postgres -v target_db=\"\$POSTGRES_DB\" -Atc \"select 1 from pg_database where datname = :'target_db'\" | grep -qx 1" >/dev/null 2>&1; then
+    break
+  fi
+
+  if [[ "${attempt}" -eq 15 ]]; then
+    log "Target database did not become available in time"
     run_compose logs --tail=50 postgres
     exit 1
   fi

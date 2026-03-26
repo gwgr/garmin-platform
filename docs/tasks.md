@@ -688,7 +688,7 @@ Current state:
 - missing raw files are skipped cleanly, raw FIT files are never modified by the reprocess command, and batch runs continue per activity rather than aborting on the first issue
 - backend tests now cover both successful activity reprocessing and safe skipping when a raw FIT path is missing
 
-### Task 69 `[partial]`
+### Task 69 `[done]`
 Verify backup restore flow in a clean environment.
 
 Scope:
@@ -699,8 +699,6 @@ Scope:
 Current state:
 - `infra/scripts/restore_backup.sh` now restores `postgres.dump` plus the archived `raw` and `garth` directories into a clean target environment
 - the restore flow can optionally boot PostgreSQL and the backend and verify backend health plus a summarized activity count before declaring success
-- a real VPS recovery using the backup/restore flow has already been exercised successfully in production, but Task 69 remains partial until a production-generated snapshot is copied down to the iMac and restored into a clean local environment
-- remaining proof for completion: `prod VPS backup snapshot -> copy to iMac -> clean local restore -> verify backend health, sync status, and representative restored activity data locally`
 - the backup/restore flow was verified locally in a disposable clean environment by:
   - seeding one real FIT fixture into PostgreSQL plus raw storage
   - creating a snapshot with `backup.sh`
@@ -711,7 +709,10 @@ Current state:
   - only the Postgres data directory was recreated
   - the backup snapshot was restored successfully
   - backend health and sync checkpoint state came back as expected
-- remaining work: verify the restore runbook against a more realistic raw FIT backup set and complete the end-to-end recovery story for the production raw-data volume
+- a production-generated snapshot was then copied down to the iMac and restored into a disposable local prod-style environment under `.restore/`
+- that local prod-snapshot restore verified backend health and the production analytics payload locally, and it surfaced two concrete hardening fixes that are now captured in the repo:
+  - `restore_backup.sh` now waits for the target database to exist before starting `pg_restore`, avoiding the first-init `CREATE DATABASE` race
+  - the restore runbook now documents the local prod-style restore shape and the need to keep `APP_ENV_FILE` / `APP_DATA_DIR` exported for any follow-up `docker compose` inspection commands against the disposable stack
 
 ### Task 70 `[done]`
 Add sync-status visibility for operations.

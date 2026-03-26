@@ -257,10 +257,27 @@ Current restore-verification approach:
 - restore the Postgres dump plus raw/Garmin session archives
 - verify backend health and confirm activity data is present
 - bring `frontend` back separately afterward with `docker compose ... up -d frontend` or a normal steady-state `deploy.sh` run if you want the full stack back immediately
+- if the supplied env file points `DATABASE_URL` at `localhost` or `127.0.0.1`, `restore_backup.sh` now generates a temporary Compose-only env file that rewrites the database host to `postgres` so in-stack backend verification still works
 
 Recent VPS recovery note:
 - this backup/restore flow was used successfully to recover a VPS after regenerating simpler non-`$` secrets and recreating only the Postgres data directory
 - practical recommendation: prefer production secrets that do not contain `$` so Docker Compose interpolation cannot become part of the recovery/debug path
+
+Verified local restore of a production VPS snapshot on the iMac:
+
+```bash
+APP_ENV_FILE=/Users/gregrowntree/Documents/Dev/garmin-platform/.env \
+APP_DATA_DIR=/Users/gregrowntree/Documents/Dev/garmin-platform/.restore/prod-<timestamp> \
+COMPOSE_FILE=docker-compose.prod.yml \
+BACKUP_SOURCE=/Users/gregrowntree/Documents/Dev/garmin-platform/backups/prod-restore/<timestamp> \
+FORCE_RESTORE=1 \
+./infra/scripts/restore_backup.sh
+```
+
+Notes for local prod-style restore work:
+- keep `APP_ENV_FILE`, `APP_DATA_DIR`, and `COMPOSE_FILE` exported in the same shell if you want to run follow-up `docker compose` commands against the disposable restored stack
+- the restore script now waits for the target database to actually exist before attempting `pg_restore`, which avoids the first-init race where `pg_isready` passes before the image finishes `CREATE DATABASE`
+- the clean restore stack is meant for inspection and verification; your normal local `docker-compose.yml` environment can stay separate under its usual `postgres-data` directory
 
 Useful commands:
 
