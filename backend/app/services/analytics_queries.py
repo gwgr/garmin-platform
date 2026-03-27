@@ -44,7 +44,7 @@ class RestingHeartRatePoint:
 @dataclass(frozen=True)
 class ActivityTrendsResult:
     current_week: TrendWindowSummary
-    current_month: TrendWindowSummary
+    last_30_days: TrendWindowSummary
     last_6_months: TrendWindowSummary
     last_1_year: TrendWindowSummary
     recent_activity_counts: RecentActivityCounts
@@ -61,13 +61,13 @@ class AnalyticsQueryService:
         today = today or datetime.now(timezone.utc).date()
 
         week_start = today - timedelta(days=today.weekday())
-        month_start = today.replace(day=1)
+        last_30_days_start = today - timedelta(days=29)
         six_month_start = today - timedelta(days=182)
         year_start = today - timedelta(days=365)
 
         return ActivityTrendsResult(
             current_week=self._summarize_window("current_week", week_start, today),
-            current_month=self._summarize_window("current_month", month_start, today),
+            last_30_days=self._summarize_window("last_30_days", last_30_days_start, today),
             last_6_months=self._summarize_window("last_6_months", six_month_start, today),
             last_1_year=self._summarize_window("last_1_year", year_start, today),
             recent_activity_counts=RecentActivityCounts(

@@ -24,12 +24,14 @@ Current state:
 - the home page now functions as the first real dashboard view
 - the activity list page now consumes the backend list endpoint with server-rendered filters and pagination, and each row now shows localized start time plus denser summary metrics including average heart rate when record data is available
 - the activity detail page now consumes the backend detail endpoint for summary, laps, and record stream samples, with previous/next navigation and a quieter bottom-of-page session info treatment
-- the sync status page now exposes persisted checkpoint and run-status information
+- the sync status page now exposes persisted checkpoint and run-status information, with localized recent-activity timestamps and calmer summary-state styling
 - pace, heart rate, and elevation charts are now rendered on the activity detail page with interactive hover inspection
 - a Leaflet route map is now rendered on the activity detail page when usable GPS samples exist
 - stored Garmin record coordinates are now normalized so the route map can render correctly for imported activities
 - lap presentation on the activity detail page now uses comparative bar-style summaries instead of a plain stacked list
 - shared API utilities are now in place for activities, activity detail, daily metrics, and analytics trends
+- the dashboard period cards now support click-through into filtered activity-list views for the selected sport and window
+- the second dashboard period card now uses a rolling `Last 30 days` analytics window instead of calendar month-to-date
 - Tailwind CSS v4 now handles the primary layout and spacing system
 - shared cards, buttons, tabs, tables, and dialogs now come from the local `components/ui` primitive layer built in the `shadcn/ui` style on top of Radix
 - a shared responsive app shell now provides the primary header/navigation/content structure across dashboard, activities, activity detail, and sync status pages

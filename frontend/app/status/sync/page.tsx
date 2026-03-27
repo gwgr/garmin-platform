@@ -1,4 +1,4 @@
-import { LocalDate } from "../../../components/localized-time";
+import { LocalDateTime } from "../../../components/localized-time";
 import { PageShell } from "../../../components/page-shell";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent } from "../../../components/ui/card";
@@ -88,7 +88,7 @@ export default async function SyncStatusPage() {
         <Card>
           <CardContent className={panelContentClass}>
             <span className={panelLabelClass}>Current State</span>
-            <p className="m-0 flex items-center gap-3 text-[clamp(2rem,5vw,3.4rem)] capitalize [font-family:var(--font-metric-serif)] leading-[0.95] text-[var(--text)]">
+            <p className="m-0 flex items-center gap-3 text-[clamp(1.9rem,4.6vw,3rem)] font-semibold capitalize leading-[1.02] tracking-[-0.02em] text-[var(--text)]">
               <span className={`${statusDotClass} ${syncStateColor(syncStatus.state)}`} />
               {syncStatus.state}
             </p>
@@ -105,19 +105,27 @@ export default async function SyncStatusPage() {
               <div>
                 <span className={fieldLabelClass}>Last Attempt</span>
                 <p className={listTitleClass}>
-                  {syncStatus.last_attempted_at ? <LocalDate value={syncStatus.last_attempted_at} /> : "--"}
+                  {syncStatus.last_attempted_at ? (
+                    <LocalDateTime value={syncStatus.last_attempted_at} />
+                  ) : (
+                    "--"
+                  )}
                 </p>
               </div>
               <div>
                 <span className={fieldLabelClass}>Last Success</span>
                 <p className={listTitleClass}>
-                  {syncStatus.last_succeeded_at ? <LocalDate value={syncStatus.last_succeeded_at} /> : "--"}
+                  {syncStatus.last_succeeded_at ? (
+                    <LocalDateTime value={syncStatus.last_succeeded_at} />
+                  ) : (
+                    "--"
+                  )}
                 </p>
               </div>
               <div>
                 <span className={fieldLabelClass}>Last Synced Activity</span>
                 <p className={listTitleClass}>
-                  {syncStatus.last_synced_at ? <LocalDate value={syncStatus.last_synced_at} /> : "--"}
+                  {syncStatus.last_synced_at ? <LocalDateTime value={syncStatus.last_synced_at} /> : "--"}
                 </p>
               </div>
               <div>

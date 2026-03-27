@@ -97,7 +97,7 @@ export type RestingHeartRatePoint = {
 
 export type AnalyticsTrends = {
   current_week: TrendWindowSummary;
-  current_month: TrendWindowSummary;
+  last_30_days: TrendWindowSummary;
   last_6_months: TrendWindowSummary;
   last_1_year: TrendWindowSummary;
   recent_activity_counts: RecentActivityCounts;

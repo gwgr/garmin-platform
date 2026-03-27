@@ -95,7 +95,7 @@ def test_get_analytics_trends_returns_expected_summaries() -> None:
     try:
         result = AnalyticsQueryService(session).get_activity_trends(today=today)
         assert result.current_week.activity_count == 1
-        assert result.current_month.activity_count == 2
+        assert result.last_30_days.activity_count == 2
         assert result.last_6_months.activity_count == 3
         assert result.last_1_year.activity_count == 3
         assert result.recent_activity_counts.last_7_days == 1
@@ -109,7 +109,7 @@ def test_get_analytics_trends_returns_expected_summaries() -> None:
 
         assert response.status_code == 200
         assert payload["current_week"]["activity_count"] == 1
-        assert payload["current_month"]["activity_count"] == 2
+        assert payload["last_30_days"]["activity_count"] == 2
         assert payload["last_6_months"]["sport_rollups"][0]["sport"] == "walking"
         assert payload["last_6_months"]["sport_rollups"][0]["activity_count"] == 2
         assert payload["last_6_months"]["sport_rollups"][1]["sport"] == "running"

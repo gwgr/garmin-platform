@@ -28,7 +28,7 @@ def test_get_activity_trends_returns_zeroed_summaries_for_empty_data() -> None:
 
         assert result.current_week.activity_count == 0
         assert result.current_week.total_distance_meters == 0.0
-        assert result.current_month.total_duration_seconds == 0.0
+        assert result.last_30_days.total_duration_seconds == 0.0
         assert result.last_6_months.activity_count == 0
         assert result.last_1_year.activity_count == 0
         assert result.recent_activity_counts.last_7_days == 0
@@ -67,6 +67,7 @@ def test_get_activity_trends_limits_resting_heart_rate_points_to_latest_30_in_as
         result = AnalyticsQueryService(session).get_activity_trends(today=today)
 
         assert result.recent_activity_counts.last_7_days == 1
+        assert result.last_30_days.activity_count == 1
         assert len(result.resting_heart_rate_trend) == 30
         assert result.resting_heart_rate_trend[0].metric_date == date(2026, 2, 16)
         assert result.resting_heart_rate_trend[-1].metric_date == date(2026, 3, 17)

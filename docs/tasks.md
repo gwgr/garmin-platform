@@ -1101,14 +1101,18 @@ Current state:
 - each row now includes richer summary metrics, including derived pace or speed plus average heart rate where record data is available
 - exposing average heart rate required backend work as well as frontend layout updates: the activity list query now computes per-activity average heart rate from `activity_records`, and the activities API returns that value for the list page to render
 
-### Task 88
+### Task 88 [done]
 Clean up the sync status page presentation.
 
 Scope:
 - make the current state `Healthy` label use the same calmer sans-serif metric treatment as the other summary values
 - add localized times alongside the existing date stamps in the recent activity card
 
-### Task 89
+Current state:
+- the sync status page now renders the top-level state word such as `Healthy` in the calmer sans-serif treatment instead of the metric serif
+- the recent activity card now shows localized date-and-time values for last attempt, last success, and last synced activity timestamps
+
+### Task 89 [done]
 Allow dashboard sport rows to click through into filtered activity-list results.
 
 Scope:
@@ -1117,13 +1121,23 @@ Scope:
 - carry the correct date range for the originating dashboard card, for example `This Month` from the first day of the month through now
 - support the same behavior consistently across the dashboard time windows such as `This Week`, `This Month`, `Last 6 Months`, and `Last 12 Months`
 
-### Task 90
+Current state:
+- the sport rows inside the dashboard period cards now link into `/activities`
+- those links carry the selected `sport` plus the originating dashboard window's `start_date` and `end_date`
+- the click-through behavior now works consistently across the dashboard summary windows
+
+### Task 90 [done]
 Change the dashboard `This Month` period card to `Last 30 Days`.
 
 Scope:
 - rename the dashboard period label from `This Month` to `Last 30 Days`
 - switch the underlying date window from calendar-month-to-date to a rolling 30-day range
 - keep the displayed totals and any click-through filtering aligned with that rolling window
+
+Current state:
+- the dashboard now uses a real rolling `last_30_days` analytics window instead of the old calendar-month-to-date `current_month` window
+- the second dashboard period card is now labeled `Last 30 days`
+- the dashboard display and click-through filtering both use that same rolling 30-day range
 
 ### Task 91
 Research Garmin retrieval options for additional health and physiology data:

@@ -42,7 +42,7 @@ class RestingHeartRatePointResponse(BaseModel):
 
 class ActivityTrendsResponse(BaseModel):
     current_week: TrendWindowSummaryResponse
-    current_month: TrendWindowSummaryResponse
+    last_30_days: TrendWindowSummaryResponse
     last_6_months: TrendWindowSummaryResponse
     last_1_year: TrendWindowSummaryResponse
     recent_activity_counts: RecentActivityCountsResponse
@@ -76,7 +76,7 @@ def get_activity_trends(
     result: ActivityTrendsResult = AnalyticsQueryService(session).get_activity_trends()
     return ActivityTrendsResponse(
         current_week=_map_window_summary(result.current_week),
-        current_month=_map_window_summary(result.current_month),
+        last_30_days=_map_window_summary(result.last_30_days),
         last_6_months=_map_window_summary(result.last_6_months),
         last_1_year=_map_window_summary(result.last_1_year),
         recent_activity_counts=RecentActivityCountsResponse(

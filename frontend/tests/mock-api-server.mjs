@@ -229,9 +229,9 @@ const analyticsTrends = {
       { sport: "strength_training", activity_count: 1, total_distance_meters: 0, total_duration_seconds: 3000 },
     ],
   },
-  current_month: {
-    label: "current_month",
-    start_date: "2026-03-01",
+  last_30_days: {
+    label: "last_30_days",
+    start_date: "2026-02-22",
     end_date: "2026-03-23",
     activity_count: 9,
     total_distance_meters: 149350,

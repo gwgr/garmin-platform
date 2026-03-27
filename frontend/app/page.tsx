@@ -42,13 +42,15 @@ type WindowSummary = {
   label: string;
   activityCount: number;
   sportSummaries: SportRollupSummary[];
+  startDate?: string;
+  endDate?: string;
 };
 
 function buildWindowSummaries(trends: AnalyticsTrends | null): WindowSummary[] {
   if (!trends) {
     return [
       { label: "This week", activityCount: 0, sportSummaries: [] },
-      { label: "This month", activityCount: 0, sportSummaries: [] },
+      { label: "Last 30 days", activityCount: 0, sportSummaries: [] },
       { label: "Last 6 months", activityCount: 0, sportSummaries: [] },
       { label: "Last 12 months", activityCount: 0, sportSummaries: [] },
     ];
@@ -56,7 +58,7 @@ function buildWindowSummaries(trends: AnalyticsTrends | null): WindowSummary[] {
 
   const windows: TrendWindowSummary[] = [
     trends.current_week,
-    trends.current_month,
+    trends.last_30_days,
     trends.last_6_months,
     trends.last_1_year,
   ];
@@ -66,12 +68,36 @@ function buildWindowSummaries(trends: AnalyticsTrends | null): WindowSummary[] {
       .replace(/_/g, " ")
       .replace(/\b\w/g, (letter) => letter.toUpperCase())
       .replace("Current Week", "This week")
-      .replace("Current Month", "This month")
+      .replace("Last 30 Days", "Last 30 days")
       .replace("Last 6 Months", "Last 6 months")
       .replace("Last 1 Year", "Last 12 months"),
     activityCount: window.activity_count,
     sportSummaries: window.sport_rollups.slice(0, 4),
+    startDate: window.start_date,
+    endDate: window.end_date,
   }));
+}
+
+function buildActivityFilterHref({
+  sport,
+  startDate,
+  endDate,
+}: {
+  sport: string;
+  startDate?: string;
+  endDate?: string;
+}): string {
+  const params = new URLSearchParams();
+  params.set("sport", sport);
+
+  if (startDate) {
+    params.set("start_date", startDate);
+  }
+  if (endDate) {
+    params.set("end_date", endDate);
+  }
+
+  return `/activities?${params.toString()}`;
 }
 
 async function loadDashboardData(): Promise<{
@@ -187,7 +213,17 @@ export default async function HomePage() {
                         <div className={listRowClass} key={`${windowSummary.label}-${summary.sport}`}>
                           <div>
                             <p className={listTitleClass}>
-                              <SportLabel sport={summary.sport} />
+                              <Button asChild className="h-auto px-0 py-0 font-semibold" variant="link">
+                                <Link
+                                  href={buildActivityFilterHref({
+                                    sport: summary.sport,
+                                    startDate: windowSummary.startDate,
+                                    endDate: windowSummary.endDate,
+                                  })}
+                                >
+                                  <SportLabel sport={summary.sport} />
+                                </Link>
+                              </Button>
                             </p>
                           </div>
                           <div className={listValuesClass}>
