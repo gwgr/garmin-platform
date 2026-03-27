@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { LocalDate } from "../../components/localized-time";
+import { PageShell } from "../../components/page-shell";
 import { SportBadge } from "../../components/sport";
 import { type ActivityListItem, getActivities } from "../../lib/api";
 import { formatDistance, formatDuration } from "../../lib/formatting";
@@ -15,7 +16,6 @@ import {
   sectionClass,
   sectionHeaderRowClass,
   sectionTitleClass,
-  shellClass,
   warningClass,
 } from "../../lib/ui";
 import { Button } from "../../components/ui/button";
@@ -91,15 +91,12 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
   const hasNextPage = page < totalPages;
 
   return (
-    <main className={shellClass}>
+    <PageShell
+      description="Filter imported sessions by sport and date range, then drill into any activity detail."
+      eyebrow="Library"
+      title="Activities"
+    >
       <section className={sectionClass}>
-        <div className={sectionHeaderRowClass}>
-          <h2 className={sectionTitleClass}>Activities</h2>
-          <Button asChild variant="link">
-            <Link href="/">Back to dashboard</Link>
-          </Button>
-        </div>
-
         <div className="mt-7 grid gap-[18px] lg:grid-cols-[1.4fr_minmax(0,1fr)]">
           <Card>
             <CardContent className="grid gap-[18px] p-[22px]">
@@ -298,6 +295,6 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
           </CardContent>
         </Card>
       </section>
-    </main>
+    </PageShell>
   );
 }

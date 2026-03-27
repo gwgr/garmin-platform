@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { LocalDate } from "../../../components/localized-time";
+import { PageShell } from "../../../components/page-shell";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent } from "../../../components/ui/card";
 import {
@@ -21,9 +20,7 @@ import {
   panelLabelClass,
   sectionClass,
   sectionHeaderClass,
-  sectionHeaderRowClass,
   sectionTitleClass,
-  shellClass,
   statusDotClass,
   subtleClass,
   warningClass,
@@ -46,50 +43,45 @@ export default async function SyncStatusPage() {
   const syncStatus = await getSyncStatus();
 
   return (
-    <main className={shellClass}>
-      <section className={sectionClass}>
-        <div className={sectionHeaderRowClass}>
-          <h2 className={sectionTitleClass}>Sync Status</h2>
-          <div className="flex flex-wrap items-center gap-3">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="sm" variant="outline">State guide</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Sync state guide</DialogTitle>
-                  <DialogDescription>
-                    A quick operator-friendly summary of what each sync state means in practice.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="mt-4 grid gap-4 text-sm leading-6 text-[var(--muted)]">
-                  <div>
-                    <p className="m-0 font-semibold text-[var(--text)]">Healthy</p>
-                    <p className="m-0">Recent sync activity is succeeding and no immediate attention is needed.</p>
-                  </div>
-                  <div>
-                    <p className="m-0 font-semibold text-[var(--text)]">Warning</p>
-                    <p className="m-0">The sync is stale or incomplete and should be checked before it drifts further.</p>
-                  </div>
-                  <div>
-                    <p className="m-0 font-semibold text-[var(--text)]">Error</p>
-                    <p className="m-0">Recent runs are failing and the sync likely needs intervention.</p>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Close</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <Button asChild variant="link">
-              <Link href="/">Back to dashboard</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
+    <PageShell
+      actions={
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline">State guide</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Sync state guide</DialogTitle>
+              <DialogDescription>
+                A quick operator-friendly summary of what each sync state means in practice.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 grid gap-4 text-sm leading-6 text-[var(--muted)]">
+              <div>
+                <p className="m-0 font-semibold text-[var(--text)]">Healthy</p>
+                <p className="m-0">Recent sync activity is succeeding and no immediate attention is needed.</p>
+              </div>
+              <div>
+                <p className="m-0 font-semibold text-[var(--text)]">Warning</p>
+                <p className="m-0">The sync is stale or incomplete and should be checked before it drifts further.</p>
+              </div>
+              <div>
+                <p className="m-0 font-semibold text-[var(--text)]">Error</p>
+                <p className="m-0">Recent runs are failing and the sync likely needs intervention.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Close</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      }
+      description="Checkpoint freshness, recent sync outcomes, and operator-facing status in one place."
+      eyebrow="Operations"
+      title="Sync Status"
+    >
       <section className={`${sectionClass} grid gap-[18px] xl:grid-cols-2`}>
         <Card>
           <CardContent className="p-[22px]">
@@ -159,6 +151,6 @@ export default async function SyncStatusPage() {
           </CardContent>
         </Card>
       </section>
-    </main>
+    </PageShell>
   );
 }

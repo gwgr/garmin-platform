@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ElevationChart, HeartRateChart, PaceChart } from "../../../components/charts";
 import { LocalDate, LocalDateTime } from "../../../components/localized-time";
 import { RouteMap } from "../../../components/maps";
+import { PageShell } from "../../../components/page-shell";
 import { SportBadge, SportLabel } from "../../../components/sport";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent } from "../../../components/ui/card";
@@ -27,9 +28,7 @@ import {
   pageTitleClass,
   sectionClass,
   sectionHeaderClass,
-  sectionHeaderRowClass,
   sectionTitleClass,
-  shellClass,
   statValueClass,
   subtleClass,
   warningClass,
@@ -57,27 +56,22 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
     const recordPreview = records.slice(0, 120);
 
     return (
-      <main className={shellClass}>
-        <section className={sectionClass}>
-          <div className={sectionHeaderRowClass}>
-            <div>
-              <h2 className={pageTitleClass}>{activity.name ?? "Imported activity"}</h2>
-              <p className="mt-[18px] max-w-[56rem] text-[1.08rem] leading-[1.65] text-[var(--muted)]">
-                <SportLabel className="align-middle" sport={activity.sport} /> ·{" "}
-                <LocalDateTime value={activity.start_time} />
-              </p>
-            </div>
-            <div className="grid gap-[10px]">
-              <Button asChild variant="link">
-                <Link href="/">Back to dashboard</Link>
-              </Button>
-              <Button asChild variant="link">
-                <Link href="/activities">Back to activity list</Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
+      <PageShell
+        actions={
+          <Button asChild variant="outline">
+            <Link href="/activities">Back to activity list</Link>
+          </Button>
+        }
+        description={
+          <>
+            <SportLabel className="align-middle" sport={activity.sport} /> ·{" "}
+            <LocalDateTime value={activity.start_time} />
+          </>
+        }
+        eyebrow="Activity Detail"
+        title={activity.name ?? "Imported activity"}
+        titleClassName={pageTitleClass}
+      >
         <section className={sectionClass}>
           <div className={sectionHeaderClass}>
             <h2 className={sectionTitleClass}>Session Summary</h2>
@@ -270,7 +264,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
             </TabsContent>
           </Tabs>
         </section>
-      </main>
+      </PageShell>
     );
   } catch (error) {
     if (error instanceof Error && error.message.includes("404")) {
@@ -278,26 +272,26 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
     }
 
     return (
-      <main className={shellClass}>
+      <PageShell
+        actions={
+          <Button asChild variant="outline">
+            <Link href="/activities">Back to activity list</Link>
+          </Button>
+        }
+        eyebrow="Activity Detail"
+        title="Unable to load activity"
+        titleClassName={sectionTitleClass}
+      >
         <section className={sectionClass}>
           <Card>
             <CardContent className="p-[22px]">
-            <h2 className={sectionTitleClass}>Unable to load activity</h2>
-            <p className={warningClass}>
-              {error instanceof Error ? error.message : "An unexpected error occurred."}
-            </p>
-            <div className="mt-4 grid gap-[10px]">
-              <Button asChild variant="link">
-                <Link href="/">Back to dashboard</Link>
-              </Button>
-              <Button asChild variant="link">
-                <Link href="/activities">Back to activity list</Link>
-              </Button>
-            </div>
+              <p className={warningClass}>
+                {error instanceof Error ? error.message : "An unexpected error occurred."}
+              </p>
             </CardContent>
           </Card>
         </section>
-      </main>
+      </PageShell>
     );
   }
 }

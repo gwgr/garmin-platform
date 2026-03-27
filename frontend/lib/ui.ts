@@ -2,16 +2,15 @@ export function cn(...values: Array<string | false | null | undefined>): string 
   return values.filter(Boolean).join(" ");
 }
 
-export const shellClass =
-  "mx-auto w-full max-w-[1120px] px-4 pb-18 pt-14 sm:px-6 lg:px-8";
+export const shellClass = "mx-auto grid w-full max-w-[1120px] gap-7 lg:gap-8";
 export const sectionClass = "mb-7";
 export const sectionHeaderClass = "mb-[18px]";
 export const sectionHeaderRowClass =
   "mb-[18px] flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between";
 export const sectionTitleClass =
-  "m-0 [font-family:var(--font-display-sans)] text-[clamp(2rem,4vw,3rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-[var(--text)]";
+  "m-0 [font-family:var(--font-display-sans)] text-[clamp(1.28rem,2.2vw,1.85rem)] font-semibold leading-[1.12] tracking-[-0.02em] text-[var(--text)]";
 export const pageTitleClass =
-  "m-0 [font-family:var(--font-display-sans)] text-[clamp(2.6rem,5vw,4.4rem)] font-semibold leading-[0.96] tracking-[-0.03em] text-[var(--text)]";
+  "m-0 [font-family:var(--font-display-sans)] text-[clamp(1.85rem,3vw,2.45rem)] font-semibold leading-[1.04] tracking-[-0.02em] text-[var(--text)]";
 export const panelClass =
   "rounded-[24px] border border-[color:var(--line)] bg-[var(--paper)] p-[22px] shadow-[var(--shadow)] backdrop-blur-md";
 export const compactPanelClass =

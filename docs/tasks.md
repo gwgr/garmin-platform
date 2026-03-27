@@ -1004,7 +1004,7 @@ Current state:
 - the existing warm paper/glass visual direction was preserved while spacing, section headers, panels, buttons, and responsive grid behavior were standardized through Tailwind-based primitives
 - verified by rebuilding the local frontend stack and confirming `200` responses for `/`, `/activities`, and `/status/sync` against the restored real-data environment
 
-### Task 82
+### Task 82 [done]
 Adopt `shadcn/ui` components for core dashboard UI primitives.
 
 Scope:
@@ -1020,13 +1020,22 @@ Current state:
 - the activity detail page now uses shared tabs for chart vs record-sample views, and the sync status page uses a shared dialog for the state guide
 - verified by rebuilding the local Docker frontend/backend stack and confirming `200` responses for `/`, `/activities`, `/activities/101`, and `/status/sync` against the restored real-data environment
 
-### Task 83
+### Task 83 [done]
 Create a responsive dashboard shell and shared frontend page layout system.
 
 Scope:
 - add a reusable app shell with header/navigation/content regions
 - support desktop and mobile layouts cleanly
 - make dashboard, activities list, and activity detail pages share the same structural system
+
+Completed on 2026-03-27.
+
+Current state:
+- added a reusable top-level app shell in `frontend/components/app-shell.tsx` and a shared page-frame wrapper in `frontend/components/page-shell.tsx`
+- dashboard, activities list, activity detail, and sync status now share the same header/navigation/content structure through `frontend/app/layout.tsx`
+- the top navigation now handles desktop and mobile layouts cleanly while keeping the current page visible through active-state styling
+- page-level back-to-dashboard links were removed where the global shell already provides that navigation, while activity detail still keeps a local return path to the activity list
+- verified by rebuilding the local Docker frontend/backend stack and confirming `200` responses for `/`, `/activities`, `/activities/101`, and `/status/sync` against the restored real-data environment
 
 ### Task 84
 Standardize frontend typography and spacing across all pages.

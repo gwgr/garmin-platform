@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { PageShell } from "../components/page-shell";
 import { LocalDate } from "../components/localized-time";
 import { SportLabel } from "../components/sport";
 import {
@@ -27,7 +28,6 @@ import {
   sectionClass,
   sectionHeaderClass,
   sectionTitleClass,
-  shellClass,
   statusDotClass,
   subtleClass,
   warningClass,
@@ -133,13 +133,11 @@ export default async function HomePage() {
   const windowSummaries = buildWindowSummaries(trends);
 
   return (
-    <main className={shellClass}>
-      <section className={sectionClass}>
-        <div className={sectionHeaderClass}>
-          <h2 className={sectionTitleClass}>Training Overview</h2>
-        </div>
-      </section>
-
+    <PageShell
+      description="Rolling training windows, recent sessions, and lightweight health signals from the current sync."
+      eyebrow="Dashboard"
+      title="Training Overview"
+    >
       <section className={sectionClass}>
         <div className={fourUpGridClass}>
           {windowSummaries.map((windowSummary) => (
@@ -307,6 +305,6 @@ export default async function HomePage() {
           </Card>
         </section>
       ) : null}
-    </main>
+    </PageShell>
   );
 }
