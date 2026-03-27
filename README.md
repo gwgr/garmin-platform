@@ -20,13 +20,13 @@ The frontend now also includes shared typed API utilities for those endpoints, r
 
 The initial dashboard page is now wired to live backend data for trends, recent activities, and light health summaries.
 
-The frontend also now has a dedicated activity list page that mirrors the backend list endpoint with filtering and pagination.
+The frontend also now has a dedicated activity list page that mirrors the backend list endpoint with filtering and pagination, with denser row summaries that show localized start times plus sport-appropriate effort metrics such as pace, speed, and average heart rate.
 
-The activity detail page is now in place as well, showing summary data, lap breakdown, and record stream samples from the backend detail endpoint.
+The activity detail page is now in place as well, showing richer session summary cards, smarter lap comparisons, and record stream samples from the backend detail endpoint.
 
-The activity detail view now also includes pace, heart rate, and elevation charts derived from the stored record stream.
+The activity detail view now also includes interactive pace, heart rate, and elevation charts derived from the stored record stream, plus previous/next activity navigation within the activity history flow.
 
-The activity detail page now also includes a Leaflet-based route map when usable GPS samples are available.
+The activity detail page now also includes a Leaflet-based route map when usable GPS samples are available, with lower-priority session metadata moved into a quieter footer-style information card.
 
 The frontend now uses Tailwind CSS v4 as its primary layout and spacing system, with a small local `components/ui` primitive layer in the `shadcn/ui` style for shared cards, buttons, tabs, tables, and dialogs.
 

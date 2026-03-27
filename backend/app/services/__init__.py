@@ -7,6 +7,7 @@ from app.services.activity_reprocess import ActivityReprocessBatchResult, Activi
 from app.services.activity_queries import (
     ActivityDetailResult,
     ActivityListFilters,
+    ActivityListRow,
     ActivityListResult,
     ActivityQueryService,
 )
@@ -53,6 +54,7 @@ __all__ = [
     "ActivityReprocessService",
     "ActivityDetailResult",
     "ActivityListFilters",
+    "ActivityListRow",
     "ActivityListResult",
     "ActivityQueryService",
     "ActivityRecordIngestService",

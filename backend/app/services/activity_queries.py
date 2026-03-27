@@ -19,8 +19,14 @@ class ActivityListFilters:
 
 
 @dataclass(frozen=True)
+class ActivityListRow:
+    activity: Activity
+    average_heart_rate: float | None
+
+
+@dataclass(frozen=True)
 class ActivityListResult:
-    items: list[Activity]
+    items: list[ActivityListRow]
     total: int
     page: int
     page_size: int
@@ -45,7 +51,7 @@ class ActivityQueryService:
             select(func.count()).select_from(filtered_query.subquery())
         ) or 0
 
-        items = list(
+        activities = list(
             self._session.scalars(
                 filtered_query
                 .order_by(desc(Activity.start_time), desc(Activity.id))
@@ -53,6 +59,31 @@ class ActivityQueryService:
                 .limit(filters.page_size)
             )
         )
+
+        average_heart_rates: dict[int, float] = {}
+        if activities:
+            averages = self._session.execute(
+                select(
+                    ActivityRecord.activity_id,
+                    func.avg(ActivityRecord.heart_rate),
+                )
+                .where(ActivityRecord.activity_id.in_([activity.id for activity in activities]))
+                .where(ActivityRecord.heart_rate.is_not(None))
+                .group_by(ActivityRecord.activity_id)
+            ).all()
+            average_heart_rates = {
+                int(activity_id): float(average_heart_rate)
+                for activity_id, average_heart_rate in averages
+                if activity_id is not None and average_heart_rate is not None
+            }
+
+        items = [
+            ActivityListRow(
+                activity=activity,
+                average_heart_rate=average_heart_rates.get(activity.id),
+            )
+            for activity in activities
+        ]
 
         return ActivityListResult(
             items=items,

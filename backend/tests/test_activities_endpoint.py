@@ -87,6 +87,21 @@ def test_list_activities_sorts_desc_and_paginates() -> None:
             start_time=datetime(2026, 3, 17, 6, 0, tzinfo=timezone.utc),
             distance_meters=7000,
         )
+        latest_activity = session.query(Activity).filter_by(source_activity_id="activity-3").one()
+        session.add_all(
+            [
+                ActivityRecord(
+                    activity_id=latest_activity.id,
+                    record_time=datetime(2026, 3, 17, 6, 0, tzinfo=timezone.utc),
+                    heart_rate=140,
+                ),
+                ActivityRecord(
+                    activity_id=latest_activity.id,
+                    record_time=datetime(2026, 3, 17, 6, 1, tzinfo=timezone.utc),
+                    heart_rate=150,
+                ),
+            ]
+        )
         session.commit()
     finally:
         session.close()
@@ -103,6 +118,8 @@ def test_list_activities_sorts_desc_and_paginates() -> None:
             "activity-3",
             "activity-2",
         ]
+        assert payload["items"][0]["average_heart_rate"] == 145.0
+        assert payload["items"][1]["average_heart_rate"] is None
 
 
 def test_list_activities_filters_by_date_and_sport() -> None:

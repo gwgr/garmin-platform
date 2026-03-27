@@ -1087,7 +1087,21 @@ Current state:
 - lap presentation now uses a comparative horizontal-bar treatment, charts now support pointer-driven value inspection, and session metadata has moved into a quieter footer card
 - verified locally against the restored real-data environment in Docker, including successful route responses for `/activities/101` and follow-on activity detail pages
 
-### Task 87
+### Task 87 [done]
+Clean up the activity list page layout and row density.
+
+Scope:
+- remove the redundant `View details` action now that the activity name itself is the primary link
+- add the richer session summary metrics from Task 86 into each list row where the available data supports them
+- include the activity time alongside the existing date display
+- tighten the vertical spacing of result rows so the list feels denser and easier to scan
+
+Current state:
+- the list rows now use the activity title as the single primary link, show date plus localized start time, and sit in a tighter vertical rhythm
+- each row now includes richer summary metrics, including derived pace or speed plus average heart rate where record data is available
+- exposing average heart rate required backend work as well as frontend layout updates: the activity list query now computes per-activity average heart rate from `activity_records`, and the activities API returns that value for the list page to render
+
+### Task 88
 Implement device identification for activities.
 
 Scope:
@@ -1096,7 +1110,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 88
+### Task 89
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -1104,7 +1118,7 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 89
+### Task 90
 Add HTTPS-friendly private access for the VPS deployment.
 
 Scope:
@@ -1112,7 +1126,7 @@ Scope:
 - support private HTTPS access to the frontend and backend over the tailnet
 - keep the setup compatible with the existing Docker Compose deployment model
 
-### Task 90
+### Task 91
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -1120,7 +1134,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 91
+### Task 92
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -1128,10 +1142,10 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 92
+### Task 93
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 93
+### Task 94
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -1139,7 +1153,7 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 94
+### Task 95
 Expand FIT ingestion to capture more available lap and activity metrics.
 
 Scope:
@@ -1148,7 +1162,7 @@ Scope:
 - expose the newly stored metrics through activity APIs in a way that supports richer lap tables and deeper activity-detail analysis later
 - keep a clear separation between directly stored FIT values and metrics that should remain derived in the frontend or analytics layer
 
-### Task 95
+### Task 96
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -1156,13 +1170,13 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 96
+### Task 97
 Add downsampling or capped payload strategy for large activity stream responses.
 
-### Task 97
+### Task 98
 Verify that raw FIT files are never modified after download.
 
-### Task 98
+### Task 99
 Review database performance strategy for long-term `activity_records` growth.
 
 Scope:
@@ -1170,5 +1184,5 @@ Scope:
 - revisit the implementation-spec note about month-based partitioning
 - keep the solution aligned with expected single-user growth and query patterns
 
-### Task 99
+### Task 100
 Review all MVP acceptance criteria against `docs/prd.md`.

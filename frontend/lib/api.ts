@@ -17,6 +17,7 @@ export type ActivityListItem = {
   duration_seconds: number | null;
   distance_meters: number | null;
   calories: number | null;
+  average_heart_rate: number | null;
   raw_file_path: string | null;
   created_at: string;
   updated_at: string;

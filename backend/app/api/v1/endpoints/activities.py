@@ -12,6 +12,7 @@ from app.models import Activity, ActivityLap, ActivityRecord
 from app.services import (
     ActivityDetailResult,
     ActivityListFilters,
+    ActivityListRow,
     ActivityListResult,
     ActivityQueryService,
 )
@@ -30,6 +31,7 @@ class ActivityListItem(BaseModel):
     duration_seconds: float | None
     distance_meters: float | None
     calories: int | None
+    average_heart_rate: float | None = None
     raw_file_path: str | None
     created_at: datetime
     updated_at: datetime
@@ -90,8 +92,26 @@ class ActivityDetailResponse(BaseModel):
     records: list[ActivityRecordItem]
 
 
-def _map_items(items: list[Activity]) -> list[ActivityListItem]:
-    return [ActivityListItem.model_validate(activity) for activity in items]
+def _map_items(items: list[ActivityListRow]) -> list[ActivityListItem]:
+    return [
+        ActivityListItem.model_validate(
+            {
+                "id": item.activity.id,
+                "source_activity_id": item.activity.source_activity_id,
+                "name": item.activity.name,
+                "sport": item.activity.sport,
+                "start_time": item.activity.start_time,
+                "duration_seconds": item.activity.duration_seconds,
+                "distance_meters": item.activity.distance_meters,
+                "calories": item.activity.calories,
+                "average_heart_rate": item.average_heart_rate,
+                "raw_file_path": item.activity.raw_file_path,
+                "created_at": item.activity.created_at,
+                "updated_at": item.activity.updated_at,
+            }
+        )
+        for item in items
+    ]
 
 
 def _map_laps(laps: list[ActivityLap]) -> list[ActivityLapItem]:

@@ -1,11 +1,17 @@
 import Link from "next/link";
 
 import { InlineState } from "../../components/feedback";
-import { LocalDate } from "../../components/localized-time";
+import { LocalDateTime } from "../../components/localized-time";
 import { PageShell } from "../../components/page-shell";
 import { SportBadge } from "../../components/sport";
 import { type ActivityListItem, getActivities } from "../../lib/api";
-import { formatDistance, formatDuration } from "../../lib/formatting";
+import {
+  formatDistance,
+  formatDuration,
+  formatPaceMinutesPer100Meters,
+  formatPaceMinutesPerKilometer,
+  formatSpeedKilometersPerHour,
+} from "../../lib/formatting";
 import {
   cardLinkClass,
   disabledButtonClass,
@@ -59,6 +65,77 @@ function buildPageHref({
   }
 
   return `/activities?${params.toString()}`;
+}
+
+function getAverageSpeedKph(distanceMeters: number | null, durationSeconds: number | null): number | null {
+  if (!distanceMeters || !durationSeconds || distanceMeters <= 0 || durationSeconds <= 0) {
+    return null;
+  }
+
+  return (distanceMeters / durationSeconds) * 3.6;
+}
+
+function getAveragePaceMinutesPerKilometer(
+  distanceMeters: number | null,
+  durationSeconds: number | null,
+): number | null {
+  if (!distanceMeters || !durationSeconds || distanceMeters <= 0 || durationSeconds <= 0) {
+    return null;
+  }
+
+  return durationSeconds / 60 / (distanceMeters / 1000);
+}
+
+function getAveragePaceMinutesPer100Meters(
+  distanceMeters: number | null,
+  durationSeconds: number | null,
+): number | null {
+  if (!distanceMeters || !durationSeconds || distanceMeters <= 0 || durationSeconds <= 0) {
+    return null;
+  }
+
+  return durationSeconds / 60 / (distanceMeters / 100);
+}
+
+function isSwimmingSport(sport: string): boolean {
+  return sport.includes("swim");
+}
+
+function isCyclingSport(sport: string): boolean {
+  return sport.includes("cycling") || sport.includes("biking");
+}
+
+function getEffortMetric(activity: ActivityListItem): { label: string; value: string } {
+  if (isSwimmingSport(activity.sport)) {
+    const pace = getAveragePaceMinutesPer100Meters(
+      activity.distance_meters,
+      activity.duration_seconds,
+    );
+
+    return {
+      label: "Avg pace",
+      value: pace ? formatPaceMinutesPer100Meters(pace) : "--",
+    };
+  }
+
+  if (isCyclingSport(activity.sport)) {
+    const speed = getAverageSpeedKph(activity.distance_meters, activity.duration_seconds);
+
+    return {
+      label: "Avg speed",
+      value: speed ? formatSpeedKilometersPerHour(speed) : "--",
+    };
+  }
+
+  const pace = getAveragePaceMinutesPerKilometer(
+    activity.distance_meters,
+    activity.duration_seconds,
+  );
+
+  return {
+    label: "Avg pace",
+    value: pace ? formatPaceMinutesPerKilometer(pace) : "--",
+  };
 }
 
 export default async function ActivitiesPage({ searchParams }: ActivityListPageProps) {
@@ -185,54 +262,65 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
             ) : (
               <div className="grid">
                 {items.map((activity) => (
-                  <article
-                    className="grid gap-4 border-t border-[color:var(--line)] py-5 first:border-t-0 first:pt-0"
-                    key={activity.id}
-                  >
-                    <div>
-                      <div className="flex flex-wrap items-center gap-[10px]">
-                        <p className={listTitleClass}>
-                          <Link className={cardLinkClass} href={`/activities/${activity.id}`}>
-                            {activity.name ?? "Imported activity"}
-                          </Link>
-                        </p>
-                        <SportBadge sport={activity.sport} />
-                      </div>
-                      <p className={listMetaClass}>
-                        <LocalDate value={activity.start_time} />
-                      </p>
-                    </div>
+                  <article className="grid gap-3 border-t border-[color:var(--line)] py-4 first:border-t-0 first:pt-0" key={activity.id}>
+                    {(() => {
+                      const effort = getEffortMetric(activity);
 
-                    <div className="grid gap-4 md:grid-cols-3">
-                      <div>
-                        <span className={fieldLabelClass}>Distance</span>
-                        <strong className={summaryValueClass}>
-                          {activity.distance_meters
-                            ? formatDistance(activity.distance_meters)
-                            : "--"}
-                        </strong>
-                      </div>
-                      <div>
-                        <span className={fieldLabelClass}>Duration</span>
-                        <strong className={summaryValueClass}>
-                          {activity.duration_seconds
-                            ? formatDuration(activity.duration_seconds)
-                            : "--"}
-                        </strong>
-                      </div>
-                      <div>
-                        <span className={fieldLabelClass}>Calories</span>
-                        <strong className={summaryValueClass}>
-                          {activity.calories ? activity.calories.toLocaleString() : "--"}
-                        </strong>
-                      </div>
-                    </div>
+                      return (
+                        <>
+                          <div>
+                            <div className="flex flex-wrap items-center gap-[10px]">
+                              <p className={listTitleClass}>
+                                <Link className={cardLinkClass} href={`/activities/${activity.id}`}>
+                                  {activity.name ?? "Imported activity"}
+                                </Link>
+                              </p>
+                              <SportBadge sport={activity.sport} />
+                            </div>
+                            <p className={listMetaClass}>
+                              <LocalDateTime value={activity.start_time} />
+                            </p>
+                          </div>
 
-                    <div className="flex justify-start sm:justify-end">
-                      <Button asChild variant="link">
-                        <Link href={`/activities/${activity.id}`}>View details</Link>
-                      </Button>
-                    </div>
+                          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                            <div>
+                              <span className={fieldLabelClass}>Distance</span>
+                              <strong className={summaryValueClass}>
+                                {activity.distance_meters
+                                  ? formatDistance(activity.distance_meters)
+                                  : "--"}
+                              </strong>
+                            </div>
+                            <div>
+                              <span className={fieldLabelClass}>Duration</span>
+                              <strong className={summaryValueClass}>
+                                {activity.duration_seconds
+                                  ? formatDuration(activity.duration_seconds)
+                                  : "--"}
+                              </strong>
+                            </div>
+                            <div>
+                              <span className={fieldLabelClass}>{effort.label}</span>
+                              <strong className={summaryValueClass}>{effort.value}</strong>
+                            </div>
+                            <div>
+                              <span className={fieldLabelClass}>Avg HR</span>
+                              <strong className={summaryValueClass}>
+                                {activity.average_heart_rate
+                                  ? `${Math.round(activity.average_heart_rate)} bpm`
+                                  : "--"}
+                              </strong>
+                            </div>
+                            <div>
+                              <span className={fieldLabelClass}>Calories</span>
+                              <strong className={summaryValueClass}>
+                                {activity.calories ? activity.calories.toLocaleString() : "--"}
+                              </strong>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </article>
                 ))}
               </div>
