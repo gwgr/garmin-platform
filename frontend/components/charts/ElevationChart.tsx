@@ -13,17 +13,19 @@ export function ElevationChart({ records }: ElevationChartProps) {
         record.altitude_meters !== null,
     )
     .map((record, index) => ({
-      x: index,
+      x: record.elapsed_seconds ?? index,
       y: record.altitude_meters,
     }));
 
   return (
     <LineChartCard
       emptyMessage="Elevation chart needs altitude samples in the record stream."
+      xAxisLabel="Elapsed"
+      xValueKind="elapsed"
       points={points}
-      subtitle="Altitude samples pulled from the stored record stream."
       title="Elevation"
-      valueFormatter={(value) => `${value.toFixed(1)} m`}
+      yValueKind="meters"
+      yAxisLabel="Altitude"
     />
   );
 }

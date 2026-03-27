@@ -10,17 +10,19 @@ export function HeartRateChart({ records }: HeartRateChartProps) {
   const points = records
     .filter((record): record is ActivityRecord & { heart_rate: number } => Boolean(record.heart_rate))
     .map((record, index) => ({
-      x: index,
+      x: record.elapsed_seconds ?? index,
       y: record.heart_rate,
     }));
 
   return (
     <LineChartCard
       emptyMessage="Heart rate chart needs heart rate samples in the record stream."
+      xAxisLabel="Elapsed"
+      xValueKind="elapsed"
       points={points}
-      subtitle="Sampled from stored activity record rows."
       title="Heart Rate"
-      valueFormatter={(value) => `${Math.round(value)} bpm`}
+      yValueKind="bpm"
+      yAxisLabel="Heart rate"
     />
   );
 }

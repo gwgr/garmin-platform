@@ -106,7 +106,6 @@ export function RouteMap({ records }: RouteMapProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">Route Map</p>
-            <p className={listMetaClass}>Leaflet map based on stored activity record coordinates.</p>
           </div>
         </div>
 

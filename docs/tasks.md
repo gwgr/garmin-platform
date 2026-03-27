@@ -1069,7 +1069,7 @@ Current state:
 - activities list and activity detail pages now use the same shared state patterns for load failures, empty filter results, sparse lap/record data, and route-level loading placeholders
 - verified by rebuilding the local Docker frontend/backend stack and confirming `200` responses for `/`, `/activities`, `/activities/101`, and `/status/sync` against the restored real-data environment
 
-### Task 86
+### Task 86 [done]
 Tune up the activity detail page interactions and layout.
 
 Scope:
@@ -1078,6 +1078,14 @@ Scope:
 - move session info into a lower-priority horizontal card at the bottom of the page with a quieter, denser presentation
 - upgrade the charts to support pointer-driven inspection of individual data points, including visible x/y axis context
 - redesign lap presentation into a smarter comparative view, likely a per-lap horizontal bar treatment that can adapt to sport-specific metrics such as pace
+
+Completed on 2026-03-27.
+
+Current state:
+- the activity detail page now includes previous/next activity navigation alongside the existing back action
+- session summary cards now include derived pace or speed and average heart rate where the available activity data supports them
+- lap presentation now uses a comparative horizontal-bar treatment, charts now support pointer-driven value inspection, and session metadata has moved into a quieter footer card
+- verified locally against the restored real-data environment in Docker, including successful route responses for `/activities/101` and follow-on activity detail pages
 
 ### Task 87
 Implement device identification for activities.
@@ -1123,7 +1131,7 @@ Recommended direction:
 ### Task 92
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
-### Task 92
+### Task 93
 Implement ingestion for daily health metrics beyond the MVP set.
 
 Candidate metrics:
@@ -1131,7 +1139,16 @@ Candidate metrics:
 - richer sleep summary/detail
 - VO2 max
 
-### Task 93
+### Task 94
+Expand FIT ingestion to capture more available lap and activity metrics.
+
+Scope:
+- review which additional lap/session fields are present in real Garmin FIT files and worth persisting
+- extend parsing, schema, and ingestion for useful fields such as lap power, ascent/descent, cadence, stride, and related running dynamics where available
+- expose the newly stored metrics through activity APIs in a way that supports richer lap tables and deeper activity-detail analysis later
+- keep a clear separation between directly stored FIT values and metrics that should remain derived in the frontend or analytics layer
+
+### Task 95
 Implement ingestion for performance metrics.
 
 Candidate metrics:
@@ -1139,13 +1156,13 @@ Candidate metrics:
 - endurance score
 - related training-readiness style metrics if reliable
 
-### Task 94
+### Task 96
 Add downsampling or capped payload strategy for large activity stream responses.
 
-### Task 95
+### Task 97
 Verify that raw FIT files are never modified after download.
 
-### Task 96
+### Task 98
 Review database performance strategy for long-term `activity_records` growth.
 
 Scope:
@@ -1153,5 +1170,5 @@ Scope:
 - revisit the implementation-spec note about month-based partitioning
 - keep the solution aligned with expected single-user growth and query patterns
 
-### Task 97
+### Task 99
 Review all MVP acceptance criteria against `docs/prd.md`.
