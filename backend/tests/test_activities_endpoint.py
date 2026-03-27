@@ -22,16 +22,17 @@ def _seed_activity(
     sport: str,
     start_time: datetime,
     distance_meters: float,
-) -> None:
-    session.add(
-        Activity(
-            source_activity_id=source_activity_id,
-            name=f"{sport.title()} Session",
-            sport=sport,
-            start_time=start_time,
-            distance_meters=distance_meters,
-        )
+) -> Activity:
+    activity = Activity(
+        source_activity_id=source_activity_id,
+        name=f"{sport.title()} Session",
+        sport=sport,
+        start_time=start_time,
+        distance_meters=distance_meters,
     )
+    session.add(activity)
+    session.flush()
+    return activity
 
 
 def _build_test_session_factory() -> sessionmaker[Session]:
@@ -80,14 +81,13 @@ def test_list_activities_sorts_desc_and_paginates() -> None:
             start_time=datetime(2026, 3, 16, 6, 0, tzinfo=timezone.utc),
             distance_meters=3000,
         )
-        _seed_activity(
+        latest_activity = _seed_activity(
             session,
             source_activity_id="activity-3",
             sport="running",
             start_time=datetime(2026, 3, 17, 6, 0, tzinfo=timezone.utc),
             distance_meters=7000,
         )
-        latest_activity = session.query(Activity).filter_by(source_activity_id="activity-3").one()
         session.add_all(
             [
                 ActivityRecord(
