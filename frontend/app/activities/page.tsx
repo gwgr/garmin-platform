@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { InlineState } from "../../components/feedback";
 import { LocalDate } from "../../components/localized-time";
 import { PageShell } from "../../components/page-shell";
 import { SportBadge } from "../../components/sport";
@@ -8,7 +9,6 @@ import { formatDistance, formatDuration } from "../../lib/formatting";
 import {
   cardLinkClass,
   disabledButtonClass,
-  emptyStateClass,
   fieldLabelClass,
   filterGridClass,
   listMetaClass,
@@ -19,7 +19,6 @@ import {
   sectionHeaderRowClass,
   sectionTitleClass,
   summaryValueClass,
-  warningClass,
 } from "../../lib/ui";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
@@ -170,116 +169,120 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
 
         <Card>
           <CardContent className={panelContentClass}>
-          {loadError ? (
-            <p className={warningClass}>
-              The activity list could not be loaded: {loadError}
-            </p>
-          ) : items.length === 0 ? (
-            <p className={emptyStateClass}>
-              No activities matched those filters. Try a wider date range or clear the
-              sport filter.
-            </p>
-          ) : (
-            <div className="grid">
-              {items.map((activity) => (
-                <article className="grid gap-4 border-t border-[color:var(--line)] py-5 first:border-t-0 first:pt-0" key={activity.id}>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-[10px]">
-                      <p className={listTitleClass}>
-                        <Link className={cardLinkClass} href={`/activities/${activity.id}`}>
-                          {activity.name ?? "Imported activity"}
-                        </Link>
+            {loadError ? (
+              <InlineState
+                detail={loadError}
+                message="The activity list could not be loaded right now."
+                title="Activity Results"
+                tone="error"
+              />
+            ) : items.length === 0 ? (
+              <InlineState
+                detail="Try a wider date range or clear the sport filter."
+                message="No activities matched the current filters."
+                title="Activity Results"
+              />
+            ) : (
+              <div className="grid">
+                {items.map((activity) => (
+                  <article
+                    className="grid gap-4 border-t border-[color:var(--line)] py-5 first:border-t-0 first:pt-0"
+                    key={activity.id}
+                  >
+                    <div>
+                      <div className="flex flex-wrap items-center gap-[10px]">
+                        <p className={listTitleClass}>
+                          <Link className={cardLinkClass} href={`/activities/${activity.id}`}>
+                            {activity.name ?? "Imported activity"}
+                          </Link>
+                        </p>
+                        <SportBadge sport={activity.sport} />
+                      </div>
+                      <p className={listMetaClass}>
+                        <LocalDate value={activity.start_time} />
                       </p>
-                      <SportBadge sport={activity.sport} />
                     </div>
-                    <p className={listMetaClass}>
-                      <LocalDate value={activity.start_time} />
-                    </p>
-                  </div>
 
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <div>
-                      <span className={fieldLabelClass}>Distance</span>
-                      <strong className={summaryValueClass}>
-                        {activity.distance_meters
-                          ? formatDistance(activity.distance_meters)
-                          : "--"}
-                      </strong>
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div>
+                        <span className={fieldLabelClass}>Distance</span>
+                        <strong className={summaryValueClass}>
+                          {activity.distance_meters
+                            ? formatDistance(activity.distance_meters)
+                            : "--"}
+                        </strong>
+                      </div>
+                      <div>
+                        <span className={fieldLabelClass}>Duration</span>
+                        <strong className={summaryValueClass}>
+                          {activity.duration_seconds
+                            ? formatDuration(activity.duration_seconds)
+                            : "--"}
+                        </strong>
+                      </div>
+                      <div>
+                        <span className={fieldLabelClass}>Calories</span>
+                        <strong className={summaryValueClass}>
+                          {activity.calories ? activity.calories.toLocaleString() : "--"}
+                        </strong>
+                      </div>
                     </div>
-                    <div>
-                      <span className={fieldLabelClass}>Duration</span>
-                      <strong className={summaryValueClass}>
-                        {activity.duration_seconds
-                          ? formatDuration(activity.duration_seconds)
-                          : "--"}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className={fieldLabelClass}>Calories</span>
-                      <strong className={summaryValueClass}>
-                        {activity.calories ? activity.calories.toLocaleString() : "--"}
-                      </strong>
-                    </div>
-                  </div>
 
-                  <div className="flex justify-start sm:justify-end">
-                    <Button asChild variant="link">
-                      <Link href={`/activities/${activity.id}`}>View details</Link>
-                    </Button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
+                    <div className="flex justify-start sm:justify-end">
+                      <Button asChild variant="link">
+                        <Link href={`/activities/${activity.id}`}>View details</Link>
+                      </Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
 
-          {!loadError && total > 0 ? (
-            <div className="mt-[18px] flex flex-col gap-3 border-t border-[color:var(--line)] pt-[18px] sm:flex-row sm:items-center sm:justify-between">
-              {hasPreviousPage ? (
-                <Button
-                  asChild
-                  variant="outline"
-                >
-                  <Link
-                    href={buildPageHref({
-                      page: page - 1,
-                      sport,
-                      startDate,
-                      endDate,
-                    })}
-                  >
+            {!loadError && total > 0 ? (
+              <div className="mt-[18px] flex flex-col gap-3 border-t border-[color:var(--line)] pt-[18px] sm:flex-row sm:items-center sm:justify-between">
+                {hasPreviousPage ? (
+                  <Button asChild variant="outline">
+                    <Link
+                      href={buildPageHref({
+                        page: page - 1,
+                        sport,
+                        startDate,
+                        endDate,
+                      })}
+                    >
+                      Previous
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button className={disabledButtonClass} disabled variant="outline">
                     Previous
-                  </Link>
-                </Button>
-              ) : (
-                <Button className={disabledButtonClass} disabled variant="outline">
-                  Previous
-                </Button>
-              )}
+                  </Button>
+                )}
 
-              <p className={listMetaClass}>
-                Page {page} of {totalPages}
-              </p>
+                <p className={listMetaClass}>
+                  Page {page} of {totalPages}
+                </p>
 
-              {hasNextPage ? (
-                <Button asChild>
-                  <Link
-                    href={buildPageHref({
-                      page: page + 1,
-                      sport,
-                      startDate,
-                      endDate,
-                    })}
-                  >
+                {hasNextPage ? (
+                  <Button asChild>
+                    <Link
+                      href={buildPageHref({
+                        page: page + 1,
+                        sport,
+                        startDate,
+                        endDate,
+                      })}
+                    >
+                      Next
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button className={disabledButtonClass} disabled>
                     Next
-                  </Link>
-                </Button>
-              ) : (
-                <Button className={disabledButtonClass} disabled>
-                  Next
-                </Button>
-              )}
-            </div>
-          ) : null}
+                  </Button>
+                )}
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       </section>

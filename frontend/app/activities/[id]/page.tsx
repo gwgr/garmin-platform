@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ElevationChart, HeartRateChart, PaceChart } from "../../../components/charts";
+import { InlineNotice, InlineState, StatePanel } from "../../../components/feedback";
 import { LocalDate, LocalDateTime } from "../../../components/localized-time";
 import { RouteMap } from "../../../components/maps";
 import { PageShell } from "../../../components/page-shell";
@@ -21,7 +22,6 @@ import { getActivityDetail } from "../../../lib/api";
 import { formatDistance, formatDuration } from "../../../lib/formatting";
 import {
   detailMetaGridClass,
-  emptyStateClass,
   fieldLabelClass,
   listMetaClass,
   listTitleClass,
@@ -34,7 +34,6 @@ import {
   statSupportClass,
   statValueClass,
   summaryValueClass,
-  warningClass,
 } from "../../../lib/ui";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +56,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
     const detail = await getActivityDetail(activityId);
     const { activity, laps, records } = detail;
     const recordPreview = records.slice(0, 120);
+    const hasSparseData = laps.length === 0 || records.length === 0;
 
     return (
       <PageShell
@@ -75,6 +75,21 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
         title={activity.name ?? "Imported activity"}
         titleClassName={pageTitleClass}
       >
+        {hasSparseData ? (
+          <InlineNotice
+            detail={[
+              laps.length === 0 ? "Lap data is not available for this activity yet." : null,
+              records.length === 0
+                ? "Record samples are missing, so charts and route coverage may be limited."
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            title="Some activity data is still sparse"
+            tone="warning"
+          />
+        ) : null}
+
         <section className={sectionClass}>
           <div className={sectionHeaderClass}>
             <h2 className={sectionTitleClass}>Session Summary</h2>
@@ -153,7 +168,11 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
                   ))}
                 </div>
               ) : (
-                <p className={emptyStateClass}>Lap data is not available for this activity yet.</p>
+                <InlineState
+                  message="Lap data is not available for this activity yet."
+                  title="Laps"
+                  tone="warning"
+                />
               )}
             </CardContent>
           </Card>
@@ -250,9 +269,11 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
                       </Table>
                     </div>
                   ) : (
-                    <p className={emptyStateClass}>
-                      Record samples are not available for this activity yet.
-                    </p>
+                    <InlineState
+                      message="Record samples are not available for this activity yet."
+                      title="Record Samples"
+                      tone="warning"
+                    />
                   )}
                 </CardContent>
               </Card>
@@ -278,13 +299,12 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
         titleClassName={sectionTitleClass}
       >
         <section className={sectionClass}>
-          <Card>
-            <CardContent className={panelContentClass}>
-              <p className={warningClass}>
-                {error instanceof Error ? error.message : "An unexpected error occurred."}
-              </p>
-            </CardContent>
-          </Card>
+          <StatePanel
+            detail={error instanceof Error ? error.message : "An unexpected error occurred."}
+            message="This activity could not be loaded right now."
+            title="Activity Detail"
+            tone="error"
+          />
         </section>
       </PageShell>
     );

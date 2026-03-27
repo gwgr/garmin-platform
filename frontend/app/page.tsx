@@ -1,3 +1,4 @@
+import { InlineNotice, InlineState } from "../components/feedback";
 import Link from "next/link";
 
 import { PageShell } from "../components/page-shell";
@@ -31,7 +32,6 @@ import {
   sectionTitleClass,
   statusDotClass,
   subtleClass,
-  warningClass,
 } from "../lib/ui";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -80,34 +80,56 @@ async function loadDashboardData(): Promise<{
   recentActivityTotal: number;
   dailyMetrics: DailyMetricItem[];
   syncStatus: SyncStatus | null;
-  loadError: string | null;
+  loadIssues: string[];
 }> {
-  try {
-    const [trends, activitiesResponse, metricsResponse, syncStatus] = await Promise.all([
-      getAnalyticsTrends(),
-      getActivities({ page: 1, pageSize: 100 }),
-      getDailyMetrics({ page: 1, pageSize: 5 }),
-      getSyncStatus(),
-    ]);
+  const [trendsResult, activitiesResult, metricsResult, syncStatusResult] = await Promise.allSettled([
+    getAnalyticsTrends(),
+    getActivities({ page: 1, pageSize: 100 }),
+    getDailyMetrics({ page: 1, pageSize: 5 }),
+    getSyncStatus(),
+  ]);
 
-    return {
-      trends,
-      recentActivities: activitiesResponse.items.slice(0, 5),
-      recentActivityTotal: activitiesResponse.total,
-      dailyMetrics: metricsResponse.items,
-      syncStatus,
-      loadError: null,
-    };
-  } catch (error) {
-    return {
-      trends: null,
-      recentActivities: [],
-      recentActivityTotal: 0,
-      dailyMetrics: [],
-      syncStatus: null,
-      loadError: error instanceof Error ? error.message : "Unable to load dashboard data.",
-    };
+  const loadIssues: string[] = [];
+
+  const trends = trendsResult.status === "fulfilled" ? trendsResult.value : null;
+  if (trendsResult.status === "rejected") {
+    loadIssues.push(
+      `Trend analytics are unavailable${trendsResult.reason instanceof Error ? `: ${trendsResult.reason.message}` : "."}`,
+    );
   }
+
+  const recentActivities =
+    activitiesResult.status === "fulfilled" ? activitiesResult.value.items.slice(0, 5) : [];
+  const recentActivityTotal =
+    activitiesResult.status === "fulfilled" ? activitiesResult.value.total : 0;
+  if (activitiesResult.status === "rejected") {
+    loadIssues.push(
+      `Recent activities are unavailable${activitiesResult.reason instanceof Error ? `: ${activitiesResult.reason.message}` : "."}`,
+    );
+  }
+
+  const dailyMetrics = metricsResult.status === "fulfilled" ? metricsResult.value.items : [];
+  if (metricsResult.status === "rejected") {
+    loadIssues.push(
+      `Daily health metrics are unavailable${metricsResult.reason instanceof Error ? `: ${metricsResult.reason.message}` : "."}`,
+    );
+  }
+
+  const syncStatus = syncStatusResult.status === "fulfilled" ? syncStatusResult.value : null;
+  if (syncStatusResult.status === "rejected") {
+    loadIssues.push(
+      `Sync status is unavailable${syncStatusResult.reason instanceof Error ? `: ${syncStatusResult.reason.message}` : "."}`,
+    );
+  }
+
+  return {
+    trends,
+    recentActivities,
+    recentActivityTotal,
+    dailyMetrics,
+    syncStatus,
+    loadIssues,
+  };
 }
 
 function syncStateColor(state: string | undefined): string {
@@ -128,10 +150,15 @@ export default async function HomePage() {
     recentActivityTotal,
     dailyMetrics,
     syncStatus,
-    loadError,
+    loadIssues,
   } = await loadDashboardData();
   const restingHeartRate = trends?.resting_heart_rate_trend ?? [];
   const windowSummaries = buildWindowSummaries(trends);
+  const hasAnyData =
+    windowSummaries.some((windowSummary) => windowSummary.sportSummaries.length > 0) ||
+    recentActivities.length > 0 ||
+    dailyMetrics.length > 0 ||
+    syncStatus !== null;
 
   return (
     <PageShell
@@ -139,6 +166,14 @@ export default async function HomePage() {
       eyebrow="Dashboard"
       title="Training Overview"
     >
+      {loadIssues.length > 0 ? (
+        <InlineNotice
+          detail={loadIssues.join(" ")}
+          title={hasAnyData ? "Some dashboard data is missing" : "Dashboard data is currently unavailable"}
+          tone={hasAnyData ? "warning" : "error"}
+        />
+      ) : null}
+
       <section className={sectionClass}>
         <div className={fourUpGridClass}>
           {windowSummaries.map((windowSummary) => (
@@ -220,10 +255,14 @@ export default async function HomePage() {
                     </article>
                   ))}
                 </div>
+              ) : loadIssues.some((issue) => issue.startsWith("Recent activities")) ? (
+                <InlineState
+                  message="Recent activities could not be loaded right now."
+                  title="Recent Activities"
+                  tone="error"
+                />
               ) : (
-                <p className={emptyStateClass}>
-                  Recent sessions will appear here as activities are imported.
-                </p>
+                <p className={emptyStateClass}>Recent sessions will appear here as activities are imported.</p>
               )}
               <p className={`${subtleClass} pt-4`}>
                 {recentActivityTotal.toLocaleString()} total recent results available
@@ -268,10 +307,16 @@ export default async function HomePage() {
                     </article>
                   ))}
                 </div>
+              ) : loadIssues.some(
+                (issue) => issue.startsWith("Daily health metrics") || issue.startsWith("Trend analytics"),
+              ) ? (
+                <InlineState
+                  message="Health signals are sparse or temporarily unavailable."
+                  title="Health Snapshot"
+                  tone="warning"
+                />
               ) : (
-                <p className={emptyStateClass}>
-                  Daily health metrics will appear here as they are imported.
-                </p>
+                <p className={emptyStateClass}>Daily health metrics will appear here as they are imported.</p>
               )}
             </CardContent>
           </Card>
@@ -293,18 +338,6 @@ export default async function HomePage() {
         </Card>
       </section>
 
-      {loadError ? (
-        <section className={sectionClass}>
-          <Card>
-            <CardContent className={panelContentClass}>
-              <span className={panelLabelClass}>Data Availability</span>
-              <p className={warningClass}>
-                Dashboard data could not be loaded right now: {loadError}
-              </p>
-            </CardContent>
-          </Card>
-        </section>
-      ) : null}
     </PageShell>
   );
 }

@@ -1053,7 +1053,7 @@ Current state:
 - card content padding was normalized and large numeric text was reduced where needed so data-dense pages feel calmer without losing hierarchy
 - verified by rebuilding the local Docker frontend/backend stack and confirming `200` responses for `/`, `/activities`, `/activities/101`, and `/status/sync` against the restored real-data environment
 
-### Task 85
+### Task 85 [done]
 Standardize frontend loading, empty, error, and partial-data states.
 
 Scope:
@@ -1061,7 +1061,25 @@ Scope:
 - apply them consistently across dashboard, activities list, and activity detail pages
 - make frontend behavior clearer when backend data is missing, delayed, or partially populated
 
+Completed on 2026-03-27.
+
+Current state:
+- shared feedback components now live in `frontend/components/feedback.tsx`, covering full-page loading, inline notices, standalone state panels, and lighter inline empty/error blocks for in-card states
+- dashboard data loading now uses `Promise.allSettled()` so trends, recent activities, health metrics, and sync status can degrade independently while still surfacing a clear partial-data notice
+- activities list and activity detail pages now use the same shared state patterns for load failures, empty filter results, sparse lap/record data, and route-level loading placeholders
+- verified by rebuilding the local Docker frontend/backend stack and confirming `200` responses for `/`, `/activities`, `/activities/101`, and `/status/sync` against the restored real-data environment
+
 ### Task 86
+Tune up the activity detail page interactions and layout.
+
+Scope:
+- add previous and next activity navigation buttons around the existing `Back to activity list` action
+- expand the session summary with extra cards such as average pace and average heart rate where the source data supports them
+- move session info into a lower-priority horizontal card at the bottom of the page with a quieter, denser presentation
+- upgrade the charts to support pointer-driven inspection of individual data points, including visible x/y axis context
+- redesign lap presentation into a smarter comparative view, likely a per-lap horizontal bar treatment that can adapt to sport-specific metrics such as pace
+
+### Task 87
 Implement device identification for activities.
 
 Scope:
@@ -1070,7 +1088,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 87
+### Task 88
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -1078,7 +1096,7 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 88
+### Task 89
 Add HTTPS-friendly private access for the VPS deployment.
 
 Scope:
@@ -1086,7 +1104,7 @@ Scope:
 - support private HTTPS access to the frontend and backend over the tailnet
 - keep the setup compatible with the existing Docker Compose deployment model
 
-### Task 89
+### Task 90
 Research Garmin retrieval options for additional health and physiology data:
 - HRV
 - VO2 max
@@ -1094,7 +1112,7 @@ Research Garmin retrieval options for additional health and physiology data:
 - endurance-related metrics
 - richer sleep metrics
 
-### Task 90
+### Task 91
 Design Version 2 schema additions for specialized health data.
 
 Recommended direction:
@@ -1102,7 +1120,7 @@ Recommended direction:
 - add focused tables for physiology/performance and richer sleep data
 - include source timestamps and ingestion provenance
 
-### Task 91
+### Task 92
 Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
 
 ### Task 92
