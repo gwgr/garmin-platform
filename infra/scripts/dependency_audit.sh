@@ -8,7 +8,10 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 echo "[dependency-audit] Running backend Python dependency audit"
 (
   cd "${REPO_ROOT}"
-  uv run pip-audit
+  requirements_file="$(mktemp)"
+  trap 'rm -f "${requirements_file}"' EXIT
+  uv export --frozen --no-dev --format requirements-txt > "${requirements_file}"
+  uv run pip-audit -r "${requirements_file}"
 )
 
 echo "[dependency-audit] Running frontend npm dependency audit"

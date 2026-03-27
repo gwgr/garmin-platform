@@ -505,9 +505,11 @@ Security baseline to add:
 - treat these checks as a release gate where practical, while acknowledging they reduce risk rather than guaranteeing zero vulnerabilities
 
 Current dependency-audit workflow:
-- run `uv run pip-audit` from the repo root for backend Python dependencies
+- run `uv export --frozen --no-dev --format requirements-txt | uv run pip-audit -r /dev/stdin` from the repo root for backend/runtime Python dependencies
 - run `cd frontend && npm run audit` for frontend npm dependencies
 - use `./infra/scripts/dependency_audit.sh` as the combined command locally and as the intended command to reuse in future CI
+- the backend runtime dependency set now explicitly includes `requests>=2.33.0` to avoid the current `requests 2.32.5` advisory path
+- this keeps dev-only Python tooling packages such as `pytest` and `rich` out of the backend vulnerability gate while still leaving them visible in normal dependency maintenance
 
 Current Trivy workflow:
 - run `./infra/scripts/trivy_scan.sh` from the repo root

@@ -287,7 +287,7 @@ Useful commands:
 uv sync
 uv run pytest
 uv run ruff check .
-uv run pip-audit
+uv export --frozen --no-dev --format requirements-txt | uv run pip-audit -r /dev/stdin
 PYTHONPATH=backend ./.venv/bin/python -c "from fastapi.testclient import TestClient; from app.main import app; client = TestClient(app); print(client.get('/api/v1/health').json())"
 set -a && source .env && set +a
 PYTHONPATH=backend ./.venv/bin/alembic -c alembic.ini heads
@@ -311,7 +311,8 @@ Note:
 - the containerized frontend now uses `INTERNAL_API_BASE_URL=http://backend:8000/api/v1` for server-side requests while the browser continues using `NEXT_PUBLIC_API_BASE_URL`
 - set `GARTH_HOME` to a local-only directory such as `./data/garth` so Garmin session state stays out of git
 - set `LOG_LEVEL` in `.env` if you want quieter or more verbose backend logs
-- dependency vulnerability checks now use `uv run pip-audit` for Python and `cd frontend && npm run audit` for the frontend, with `./infra/scripts/dependency_audit.sh` as the combined command that future CI can reuse
+- dependency vulnerability checks now use an exported non-dev Python requirement set with `uv export --frozen --no-dev --format requirements-txt | uv run pip-audit -r /dev/stdin` for backend/runtime dependencies and `cd frontend && npm run audit` for the frontend, with `./infra/scripts/dependency_audit.sh` as the combined command that future CI can reuse
+- the backend runtime dependency set now pins `requests>=2.33.0` to avoid the current `requests 2.32.5` advisory path
 - Trivy scanning now uses `./infra/scripts/trivy_scan.sh`, which scans the repository filesystem for vulnerabilities, leaked secrets, and misconfiguration, then scans the built backend and frontend images
 - if `trivy` is not installed locally, `./infra/scripts/trivy_scan.sh` falls back to the official `aquasec/trivy` Docker image
 - the Trivy script now suppresses progress noise and focuses on `MEDIUM`, `HIGH`, and `CRITICAL` findings by default; override with `TRIVY_SEVERITIES=LOW,MEDIUM,HIGH,CRITICAL` if you want a broader report

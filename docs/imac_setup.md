@@ -116,7 +116,7 @@ To run tools inside the project environment:
 ```bash
 uv run pytest
 uv run ruff check .
-uv run pip-audit
+uv export --frozen --no-dev --format requirements-txt | uv run pip-audit -r /dev/stdin
 PYTHONPATH=backend ./.venv/bin/python -c "from fastapi.testclient import TestClient; from app.main import app; client = TestClient(app); print(client.get('/api/v1/health').json())"
 set -a && source .env && set +a
 ```
@@ -143,6 +143,10 @@ Current frontend dependency highlights:
 - `@radix-ui/react-dialog@1.1.15`
 - `@radix-ui/react-slot@1.2.4`
 - `@radix-ui/react-tabs@1.1.13`
+
+Current backend dependency audit note:
+- the Python audit now exports the frozen non-dev dependency set before running `pip-audit`, so runtime dependency findings are separated from dev-only tooling packages such as `pytest` and `rich`
+- the backend runtime dependency set now explicitly includes `requests>=2.33.0`
 
 Containerized local app workflow:
 - `docker compose up --build` starts `postgres`, `backend`, and `frontend`

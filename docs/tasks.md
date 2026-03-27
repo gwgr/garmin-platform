@@ -593,7 +593,7 @@ Scope:
 - document how to run both locally and in CI
 
 Current state:
-- `pip-audit` is now installed as a Python dev dependency and can be run with `uv run pip-audit`
+- `pip-audit` is now installed as a Python dev dependency and the runtime/backend audit flow now exports frozen non-dev requirements before scanning them
 - the frontend now exposes `npm run audit` as the standard `npm audit` wrapper
 - `infra/scripts/dependency_audit.sh` now runs both checks together from the repo root
 - README and deployment docs now describe the local command shape and note that the combined script is intended for reuse in CI
@@ -650,7 +650,7 @@ Add CI automation to run backend and frontend verification on GitHub.
 Scope:
 - run backend tests automatically on push and pull request
 - run frontend build verification automatically on push and pull request
-- run the repo-defined security checks from Task 62 in CI, including `uv run pip-audit`, `cd frontend && npm run audit`, or the combined `./infra/scripts/dependency_audit.sh`
+- run the repo-defined security checks from Task 62 in CI, including the exported non-dev `pip-audit` flow, `cd frontend && npm run audit`, or the combined `./infra/scripts/dependency_audit.sh`
 - run the repo-defined Trivy checks from Task 63 in CI once they exist
 - keep Task 64 separate as GitHub-native repository security automation rather than a normal CI job step
 - make CI the default place where regressions are caught before deployment
@@ -1102,29 +1102,28 @@ Current state:
 - exposing average heart rate required backend work as well as frontend layout updates: the activity list query now computes per-activity average heart rate from `activity_records`, and the activities API returns that value for the list page to render
 
 ### Task 88
-Implement device identification for activities.
+Clean up the sync status page presentation.
 
 Scope:
-- parse device metadata from FIT files or Garmin source data
-- populate the `devices` table
-- link activities to the recording device
-- expose device information in activity APIs
+- make the current state `Healthy` label use the same calmer sans-serif metric treatment as the other summary values
+- add localized times alongside the existing date stamps in the recent activity card
 
 ### Task 89
-Add optional weather enrichment for activities and analytics.
+Allow dashboard sport rows to click through into filtered activity-list results.
 
 Scope:
-- decide whether to fetch historical weather from a provider or derive it from exported Garmin data if available
-- store weather as separate enrichment data rather than mixing it into core activity ingestion
-- support future weather correlation views and analytics
+- make the sport rows inside the dashboard period cards clickable
+- route each click through to the activities list with the matching `sport` filter applied
+- carry the correct date range for the originating dashboard card, for example `This Month` from the first day of the month through now
+- support the same behavior consistently across the dashboard time windows such as `This Week`, `This Month`, `Last 6 Months`, and `Last 12 Months`
 
 ### Task 90
-Add HTTPS-friendly private access for the VPS deployment.
+Change the dashboard `This Month` period card to `Last 30 Days`.
 
 Scope:
-- choose between Tailscale Serve and a reverse proxy such as Caddy for TLS termination
-- support private HTTPS access to the frontend and backend over the tailnet
-- keep the setup compatible with the existing Docker Compose deployment model
+- rename the dashboard period label from `This Month` to `Last 30 Days`
+- switch the underlying date window from calendar-month-to-date to a rolling 30-day range
+- keep the displayed totals and any click-through filtering aligned with that rolling window
 
 ### Task 91
 Research Garmin retrieval options for additional health and physiology data:
@@ -1154,6 +1153,14 @@ Candidate metrics:
 - VO2 max
 
 ### Task 95
+Implement ingestion for performance metrics.
+
+Candidate metrics:
+- lactate threshold
+- endurance score
+- related training-readiness style metrics if reliable
+
+### Task 96
 Expand FIT ingestion to capture more available lap and activity metrics.
 
 Scope:
@@ -1162,21 +1169,38 @@ Scope:
 - expose the newly stored metrics through activity APIs in a way that supports richer lap tables and deeper activity-detail analysis later
 - keep a clear separation between directly stored FIT values and metrics that should remain derived in the frontend or analytics layer
 
-### Task 96
-Implement ingestion for performance metrics.
-
-Candidate metrics:
-- lactate threshold
-- endurance score
-- related training-readiness style metrics if reliable
-
 ### Task 97
-Add downsampling or capped payload strategy for large activity stream responses.
+Implement device identification for activities.
+
+Scope:
+- parse device metadata from FIT files or Garmin source data
+- populate the `devices` table
+- link activities to the recording device
+- expose device information in activity APIs
 
 ### Task 98
-Verify that raw FIT files are never modified after download.
+Add optional weather enrichment for activities and analytics.
+
+Scope:
+- decide whether to fetch historical weather from a provider or derive it from exported Garmin data if available
+- store weather as separate enrichment data rather than mixing it into core activity ingestion
+- support future weather correlation views and analytics
 
 ### Task 99
+Add HTTPS-friendly private access for the VPS deployment.
+
+Scope:
+- choose between Tailscale Serve and a reverse proxy such as Caddy for TLS termination
+- support private HTTPS access to the frontend and backend over the tailnet
+- keep the setup compatible with the existing Docker Compose deployment model
+
+### Task 100
+Add downsampling or capped payload strategy for large activity stream responses.
+
+### Task 101
+Verify that raw FIT files are never modified after download.
+
+### Task 102
 Review database performance strategy for long-term `activity_records` growth.
 
 Scope:
@@ -1184,5 +1208,5 @@ Scope:
 - revisit the implementation-spec note about month-based partitioning
 - keep the solution aligned with expected single-user growth and query patterns
 
-### Task 100
+### Task 103
 Review all MVP acceptance criteria against `docs/prd.md`.
