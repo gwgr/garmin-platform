@@ -1,4 +1,5 @@
-import { getSportMeta } from "../lib/sports";
+import { getSportMeta, type SportTone } from "../lib/sports";
+import { cn } from "../lib/ui";
 
 type SportIconProps = {
   sport: string;
@@ -12,11 +13,47 @@ type SportLabelProps = {
 type SportBadgeProps = {
   sport: string;
   className?: string;
+  compact?: boolean;
 };
 
-function joinClasses(...values: Array<string | undefined>): string {
-  return values.filter(Boolean).join(" ");
-}
+type ToneStyles = {
+  text: string;
+  shell: string;
+  badge: string;
+};
+
+const toneStyles: Record<SportTone, ToneStyles> = {
+  running: {
+    text: "text-[var(--sport-running)]",
+    shell: "bg-[var(--sport-running-soft)] text-[var(--sport-running)]",
+    badge: "bg-[var(--sport-running-soft)] text-[var(--sport-running)]",
+  },
+  cycling: {
+    text: "text-[var(--sport-cycling)]",
+    shell: "bg-[var(--sport-cycling-soft)] text-[var(--sport-cycling)]",
+    badge: "bg-[var(--sport-cycling-soft)] text-[var(--sport-cycling)]",
+  },
+  swimming: {
+    text: "text-[var(--sport-swimming)]",
+    shell: "bg-[var(--sport-swimming-soft)] text-[var(--sport-swimming)]",
+    badge: "bg-[var(--sport-swimming-soft)] text-[var(--sport-swimming)]",
+  },
+  hiking: {
+    text: "text-[var(--sport-hiking)]",
+    shell: "bg-[var(--sport-hiking-soft)] text-[var(--sport-hiking)]",
+    badge: "bg-[var(--sport-hiking-soft)] text-[var(--sport-hiking)]",
+  },
+  strength: {
+    text: "text-[var(--sport-strength)]",
+    shell: "bg-[var(--sport-strength-soft)] text-[var(--sport-strength)]",
+    badge: "bg-[var(--sport-strength-soft)] text-[var(--sport-strength)]",
+  },
+  default: {
+    text: "text-[var(--sport-default)]",
+    shell: "bg-[var(--sport-default-soft)] text-[var(--sport-default)]",
+    badge: "bg-[var(--sport-default-soft)] text-[var(--sport-default)]",
+  },
+};
 
 function SportGlyph({ sport }: SportIconProps) {
   const meta = getSportMeta(sport);
@@ -24,7 +61,7 @@ function SportGlyph({ sport }: SportIconProps) {
   switch (meta.tone) {
     case "running":
       return (
-        <svg aria-hidden="true" className="sport-glyph" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24">
           <circle cx="15.5" cy="4.5" r="2.4" fill="currentColor" />
           <path
             d="M10 8.2 13.8 7l2 1.8c.9.8 2.1 1.3 3.3 1.3h.9v2h-1.2c-1.7 0-3.4-.6-4.7-1.8l-1 3.3 2.6 2.4c.8.7 1.3 1.8 1.4 2.9l.2 2.1h-2.3l-.2-1.8a2.9 2.9 0 0 0-.9-1.8l-2.9-2.6-1.6 5.3H7l2.3-7.4 1.5-4.8-.3-.7-2.4 2.1H5.7v-2h1.6c.8 0 1.6-.3 2.2-.9L10 8.2Z"
@@ -34,7 +71,7 @@ function SportGlyph({ sport }: SportIconProps) {
       );
     case "cycling":
       return (
-        <svg aria-hidden="true" className="sport-glyph" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24">
           <circle cx="6.5" cy="17.5" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
           <circle cx="17.6" cy="17.5" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
           <circle cx="13.4" cy="5" r="1.8" fill="currentColor" />
@@ -47,7 +84,7 @@ function SportGlyph({ sport }: SportIconProps) {
       );
     case "swimming":
       return (
-        <svg aria-hidden="true" className="sport-glyph" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24">
           <circle cx="14.8" cy="6" r="2" fill="currentColor" />
           <path
             d="M9.8 10.3c1.4-1.2 2.7-2.3 4.8-2.3 1.3 0 2.5.5 3.6 1.4l-1.2 1.5c-.7-.6-1.5-.9-2.4-.9-1.4 0-2.2.6-3.4 1.6l-.6.5L9.8 10.3Z"
@@ -61,7 +98,7 @@ function SportGlyph({ sport }: SportIconProps) {
       );
     case "hiking":
       return (
-        <svg aria-hidden="true" className="sport-glyph" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24">
           <circle cx="14.2" cy="4.6" r="2.3" fill="currentColor" />
           <path
             d="m12.4 8 1.9 2.6 2.2 1.2-.9 1.7-2.7-1.4-1.2-1.6-1.5 3 1.9 2.2c.7.8 1 1.9.9 3l-.1 2.1h-2l.1-1.8c0-.6-.1-1.1-.5-1.5l-2.2-2.5-1.2 2.6H4.7l2.6-5.8L9.8 8h2.6Z"
@@ -72,7 +109,7 @@ function SportGlyph({ sport }: SportIconProps) {
       );
     case "strength":
       return (
-        <svg aria-hidden="true" className="sport-glyph" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24">
           <path
             d="M2.5 9.5h2v5h-2v-5Zm3.2-2.1h2.1v9.2H5.7V7.4Zm10.5 0h2.1v9.2h-2.1V7.4Zm3.3 2.1h2v5h-2v-5ZM7.1 10.5h9.8v3H7.1v-3Z"
             fill="currentColor"
@@ -81,7 +118,7 @@ function SportGlyph({ sport }: SportIconProps) {
       );
     default:
       return (
-        <svg aria-hidden="true" className="sport-glyph" viewBox="0 0 24 24">
+        <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24">
           <path
             d="m12 2.5 2.9 5.9 6.6 1-4.8 4.7 1.1 6.5-5.8-3.1-5.8 3.1 1.1-6.5-4.8-4.7 6.6-1L12 2.5Z"
             fill="currentColor"
@@ -93,10 +130,16 @@ function SportGlyph({ sport }: SportIconProps) {
 
 export function SportLabel({ sport, className }: SportLabelProps) {
   const meta = getSportMeta(sport);
+  const tone = toneStyles[meta.tone];
 
   return (
-    <span className={joinClasses("sport-label", `sport-tone-${meta.tone}`, className)}>
-      <span className="sport-icon-shell">
+    <span className={cn("inline-flex items-center gap-2 font-semibold", tone.text, className)}>
+      <span
+        className={cn(
+          "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
+          tone.shell,
+        )}
+      >
         <SportGlyph sport={sport} />
       </span>
       <span>{meta.label}</span>
@@ -104,12 +147,25 @@ export function SportLabel({ sport, className }: SportLabelProps) {
   );
 }
 
-export function SportBadge({ sport, className }: SportBadgeProps) {
+export function SportBadge({ sport, className, compact = false }: SportBadgeProps) {
   const meta = getSportMeta(sport);
+  const tone = toneStyles[meta.tone];
 
   return (
-    <span className={joinClasses("sport-badge", `sport-tone-${meta.tone}`, className)}>
-      <span className="sport-icon-shell">
+    <span
+      className={cn(
+        "inline-flex items-center gap-2 rounded-full font-semibold",
+        compact ? "px-2 py-1 text-[0.76rem]" : "px-[10px] py-[6px] text-[0.82rem]",
+        tone.badge,
+        className,
+      )}
+    >
+      <span
+        className={cn(
+          "inline-flex shrink-0 items-center justify-center rounded-full bg-white/55",
+          compact ? "h-[1.3rem] w-[1.3rem]" : "h-[1.45rem] w-[1.45rem]",
+        )}
+      >
         <SportGlyph sport={sport} />
       </span>
       <span>{meta.label}</span>

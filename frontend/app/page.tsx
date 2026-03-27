@@ -15,6 +15,27 @@ import {
   getSyncStatus,
 } from "../lib/api";
 import { formatDistance, formatDuration } from "../lib/formatting";
+import {
+  chartGridClass,
+  compactPanelClass,
+  emptyStateClass,
+  fourUpGridClass,
+  listMetaClass,
+  listRowClass,
+  listStackClass,
+  listTitleClass,
+  listValuesClass,
+  panelClass,
+  panelLabelClass,
+  sectionClass,
+  sectionHeaderClass,
+  sectionTitleClass,
+  shellClass,
+  statusDotClass,
+  subtleClass,
+  textLinkClass,
+  warningClass,
+} from "../lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -90,6 +111,17 @@ async function loadDashboardData(): Promise<{
   }
 }
 
+function syncStateColor(state: string | undefined): string {
+  switch (state) {
+    case "healthy":
+      return "bg-[#2d8a57]";
+    case "error":
+      return "bg-[#be3e2d]";
+    default:
+      return "bg-[#d28c1b]";
+  }
+}
+
 export default async function HomePage() {
   const {
     trends,
@@ -103,29 +135,29 @@ export default async function HomePage() {
   const windowSummaries = buildWindowSummaries(trends);
 
   return (
-    <main className="shell">
-      <section className="section">
-        <div className="section-header">
-          <h2>Training Overview</h2>
+    <main className={shellClass}>
+      <section className={sectionClass}>
+        <div className={sectionHeaderClass}>
+          <h2 className={sectionTitleClass}>Training Overview</h2>
         </div>
       </section>
 
-      <section className="section">
-        <div className="stat-grid four-up">
+      <section className={sectionClass}>
+        <div className={fourUpGridClass}>
           {windowSummaries.map((windowSummary) => (
-            <article className="panel stat-card" key={windowSummary.label}>
-              <span className="panel-label">{windowSummary.label}</span>
+            <article className={`${panelClass} flex min-h-[182px] flex-col justify-between`} key={windowSummary.label}>
+              <span className={panelLabelClass}>{windowSummary.label}</span>
               {windowSummary.sportSummaries.length > 0 ? (
-                <div className="list-stack">
+                <div className={listStackClass}>
                   {windowSummary.sportSummaries.map((summary) => (
-                    <div className="list-row" key={`${windowSummary.label}-${summary.sport}`}>
+                    <div className={listRowClass} key={`${windowSummary.label}-${summary.sport}`}>
                       <div>
-                        <p className="list-title">
+                        <p className={listTitleClass}>
                           <SportLabel sport={summary.sport} />
                         </p>
                       </div>
-                      <div className="list-values">
-                        <strong>
+                      <div className={listValuesClass}>
+                        <strong className="text-[var(--text)]">
                           {summary.total_distance_meters > 0
                             ? formatDistance(summary.total_distance_meters)
                             : `${summary.activity_count}`}
@@ -136,9 +168,9 @@ export default async function HomePage() {
                   ))}
                 </div>
               ) : (
-                <p className="empty-state">No activities in this window yet.</p>
+                <p className={emptyStateClass}>No activities in this window yet.</p>
               )}
-              <p className="stat-subtle">
+              <p className={subtleClass}>
                 {windowSummary.activityCount.toLocaleString()} total{" "}
                 {windowSummary.activityCount === 1 ? "activity" : "activities"}
               </p>
@@ -147,32 +179,32 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="section">
-        <div className="section-header">
-          <h2>Recent Activities and Health Snapshot</h2>
+      <section className={sectionClass}>
+        <div className={sectionHeaderClass}>
+          <h2 className={sectionTitleClass}>Recent Activities and Health Snapshot</h2>
         </div>
       </section>
 
-      <section className="section split">
-        <div className="panel">
-          <span className="panel-label">Recent Activities</span>
+      <section className={`${sectionClass} grid gap-[18px] xl:grid-cols-2`}>
+        <div className={panelClass}>
+          <span className={panelLabelClass}>Recent Activities</span>
           {recentActivities.length > 0 ? (
-            <div className="list-stack">
+            <div className={listStackClass}>
               {recentActivities.map((activity) => (
-                <article className="list-row" key={activity.id}>
+                <article className={listRowClass} key={activity.id}>
                   <div>
-                    <p className="list-title">
-                      <Link className="card-link" href={`/activities/${activity.id}`}>
+                    <p className={listTitleClass}>
+                      <Link className={textLinkClass} href={`/activities/${activity.id}`}>
                         {activity.name ?? "Imported activity"}
                       </Link>
                     </p>
-                    <p className="list-meta">
-                      <SportLabel className="sport-label-inline" sport={activity.sport} /> ·{" "}
+                    <p className={listMetaClass}>
+                      <SportLabel className="align-middle" sport={activity.sport} /> ·{" "}
                       <LocalDate value={activity.start_time} />
                     </p>
                   </div>
-                  <div className="list-values">
-                    <strong>
+                  <div className={listValuesClass}>
+                    <strong className="text-[var(--text)]">
                       {activity.distance_meters
                         ? formatDistance(activity.distance_meters)
                         : "--"}
@@ -187,37 +219,40 @@ export default async function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="empty-state">
+            <p className={emptyStateClass}>
               Recent sessions will appear here as activities are imported.
             </p>
           )}
+          <p className={`${subtleClass} pt-4`}>
+            {recentActivityTotal.toLocaleString()} total recent results available
+          </p>
         </div>
 
-        <div className="panel">
-          <span className="panel-label">Health Snapshot</span>
+        <div className={panelClass}>
+          <span className={panelLabelClass}>Health Snapshot</span>
           {restingHeartRate.length > 0 || dailyMetrics.length > 0 ? (
-            <div className="list-stack">
+            <div className={listStackClass}>
               {restingHeartRate.length > 0 ? (
-                <article className="health-callout">
-                  <p className="list-title">Resting HR Trend</p>
-                  <p className="list-meta">
+                <article className="flex flex-col gap-2 border-t-0 pb-2 text-[var(--muted)]">
+                  <p className={listTitleClass}>Resting HR Trend</p>
+                  <p className={listMetaClass}>
                     Latest: {restingHeartRate[restingHeartRate.length - 1]?.resting_heart_rate} bpm
                   </p>
                 </article>
               ) : null}
 
               {dailyMetrics.slice(0, 3).map((metric) => (
-                <article className="list-row" key={metric.id}>
+                <article className={listRowClass} key={metric.id}>
                   <div>
-                    <p className="list-title">
+                    <p className={listTitleClass}>
                       <LocalDate value={metric.metric_date} />
                     </p>
-                    <p className="list-meta">
+                    <p className={listMetaClass}>
                       {metric.steps ? `${metric.steps.toLocaleString()} steps` : "No step data"}
                     </p>
                   </div>
-                  <div className="list-values">
-                    <strong>
+                  <div className={listValuesClass}>
+                    <strong className="text-[var(--text)]">
                       {metric.resting_heart_rate ? `${metric.resting_heart_rate} bpm` : "--"}
                     </strong>
                     <span>
@@ -230,31 +265,31 @@ export default async function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="empty-state">
+            <p className={emptyStateClass}>
               Daily health metrics will appear here as they are imported.
             </p>
           )}
         </div>
       </section>
 
-      <section className="section">
-        <div className="panel compact-panel">
-          <span className="panel-label">Sync Status</span>
-          <p className="compact-status-line">
-            <span className={`status-dot status-${syncStatus?.state ?? "warning"}`} />{" "}
+      <section className={sectionClass}>
+        <div className={compactPanelClass}>
+          <span className={panelLabelClass}>Sync Status</span>
+          <p className="m-0 flex items-center gap-3 text-[0.96rem] capitalize text-[var(--muted)]">
+            <span className={`${statusDotClass} ${syncStateColor(syncStatus?.state)}`} />
             {syncStatus?.summary ?? "Sync status is unavailable right now."}
           </p>
-          <Link className="text-link compact-status-link" href="/status/sync">
+          <Link className={`${textLinkClass} mt-2 inline-block text-[0.95rem]`} href="/status/sync">
             View sync details
           </Link>
         </div>
       </section>
 
       {loadError ? (
-        <section className="section">
-          <div className="panel">
-            <span className="panel-label">Data Availability</span>
-            <p className="warning">
+        <section className={sectionClass}>
+          <div className={panelClass}>
+            <span className={panelLabelClass}>Data Availability</span>
+            <p className={warningClass}>
               Dashboard data could not be loaded right now: {loadError}
             </p>
           </div>

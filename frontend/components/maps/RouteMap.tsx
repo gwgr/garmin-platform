@@ -5,6 +5,11 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useId, useMemo, useRef } from "react";
 
 import type { ActivityRecord } from "../../lib/api";
+import {
+  emptyStateClass,
+  listMetaClass,
+  panelClass,
+} from "../../lib/ui";
 
 type RouteMapProps = {
   records: ActivityRecord[];
@@ -96,28 +101,28 @@ export function RouteMap({ records }: RouteMapProps) {
   }, [validCoordinatePoints]);
 
   return (
-    <article className="panel map-card">
-      <div className="chart-header">
+    <article className={`${panelClass} grid min-h-[360px] gap-4`}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="card-title">Route Map</p>
-          <p className="list-meta">Leaflet map based on stored activity record coordinates.</p>
+          <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">Route Map</p>
+          <p className={listMetaClass}>Leaflet map based on stored activity record coordinates.</p>
         </div>
       </div>
 
       {validCoordinatePoints.length >= 2 ? (
         <div
           aria-label="Activity route map"
-          className="route-map"
+          className="min-h-[280px] overflow-hidden rounded-[18px] border border-[color:var(--line)]"
           id={mapId}
           ref={containerRef}
         />
       ) : coordinatePoints.length >= 2 ? (
-        <p className="empty-state">
+        <p className={emptyStateClass}>
           Coordinate samples exist, but they do not look like usable latitude/longitude
           values yet. This likely means the parser still needs coordinate normalization.
         </p>
       ) : (
-        <p className="empty-state">
+        <p className={emptyStateClass}>
           This activity does not currently have enough GPS samples to draw a route map.
         </p>
       )}

@@ -1,3 +1,9 @@
+import {
+  emptyStateClass,
+  listMetaClass,
+  panelClass,
+} from "../../lib/ui";
+
 type ChartPoint = {
   x: number;
   y: number;
@@ -53,14 +59,14 @@ export function LineChartCard({
 
   if (points.length === 0) {
     return (
-      <article className="panel chart-card">
-        <div className="chart-header">
+      <article className={`${panelClass} grid gap-4`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="card-title">{title}</p>
-            <p className="list-meta">{subtitle}</p>
+            <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">{title}</p>
+            <p className={listMetaClass}>{subtitle}</p>
           </div>
         </div>
-        <p className="empty-state">{emptyMessage}</p>
+        <p className={emptyStateClass}>{emptyMessage}</p>
       </article>
     );
   }
@@ -71,13 +77,13 @@ export function LineChartCard({
   const path = buildPath(points);
 
   return (
-    <article className="panel chart-card">
-      <div className="chart-header">
+    <article className={`${panelClass} grid gap-4`}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="card-title">{title}</p>
-          <p className="list-meta">{subtitle}</p>
+          <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">{title}</p>
+          <p className={listMetaClass}>{subtitle}</p>
         </div>
-        <div className="chart-stats">
+        <div className="grid gap-1 text-left text-[0.88rem] text-[var(--muted)] sm:text-right">
           <span>Min {valueFormatter(minY)}</span>
           <span>Max {valueFormatter(maxY)}</span>
         </div>
@@ -85,7 +91,7 @@ export function LineChartCard({
 
       <svg
         aria-label={title}
-        className="chart-svg"
+        className="h-auto w-full"
         viewBox={`0 0 ${chartWidth} ${chartHeight}`}
         role="img"
       >

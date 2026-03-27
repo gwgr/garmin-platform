@@ -7,6 +7,25 @@ import { RouteMap } from "../../../components/maps";
 import { SportBadge, SportLabel } from "../../../components/sport";
 import { getActivityDetail } from "../../../lib/api";
 import { formatDistance, formatDuration } from "../../../lib/formatting";
+import {
+  chartGridClass,
+  detailMetaGridClass,
+  emptyStateClass,
+  listMetaClass,
+  listTitleClass,
+  panelClass,
+  panelLabelClass,
+  pageTitleClass,
+  sectionClass,
+  sectionHeaderClass,
+  sectionHeaderRowClass,
+  sectionTitleClass,
+  shellClass,
+  statValueClass,
+  subtleClass,
+  textLinkClass,
+  warningClass,
+} from "../../../lib/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -30,85 +49,88 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
     const recordPreview = records.slice(0, 120);
 
     return (
-      <main className="shell">
-        <section className="section">
-          <div className="section-header section-header-row">
+      <main className={shellClass}>
+        <section className={sectionClass}>
+          <div className={sectionHeaderRowClass}>
             <div>
-              <h2>{activity.name ?? "Imported activity"}</h2>
-              <p className="lede">
-                <SportLabel className="sport-label-inline" sport={activity.sport} /> ·{" "}
+              <h2 className={pageTitleClass}>{activity.name ?? "Imported activity"}</h2>
+              <p className="mt-[18px] max-w-[56rem] text-[1.08rem] leading-[1.65] text-[var(--muted)]">
+                <SportLabel className="align-middle" sport={activity.sport} /> ·{" "}
                 <LocalDateTime value={activity.start_time} />
               </p>
             </div>
-            <div className="detail-links">
-              <Link className="text-link" href="/">
+            <div className="grid gap-[10px]">
+              <Link className={textLinkClass} href="/">
                 Back to dashboard
               </Link>
-              <Link className="text-link" href="/activities">
+              <Link className={textLinkClass} href="/activities">
                 Back to activity list
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="section">
-          <div className="section-header">
-            <h2>Session Summary</h2>
+        <section className={sectionClass}>
+          <div className={sectionHeaderClass}>
+            <h2 className={sectionTitleClass}>Session Summary</h2>
           </div>
 
-          <div className="stat-grid">
-            <article className="panel stat-card">
-              <span className="panel-label">Distance</span>
-              <p className="stat-value">
+          <div className="grid gap-[18px] md:grid-cols-2 xl:grid-cols-3">
+            <article className={`${panelClass} flex min-h-[182px] flex-col justify-between`}>
+              <span className={panelLabelClass}>Distance</span>
+              <p className={statValueClass}>
                 {activity.distance_meters ? formatDistance(activity.distance_meters) : "--"}
               </p>
-              <p className="stat-subtle">
+              <p className={subtleClass}>
                 <LocalDate value={activity.start_time} />
               </p>
             </article>
 
-            <article className="panel stat-card">
-              <span className="panel-label">Duration</span>
-              <p className="stat-value">
+            <article className={`${panelClass} flex min-h-[182px] flex-col justify-between`}>
+              <span className={panelLabelClass}>Duration</span>
+              <p className={statValueClass}>
                 {activity.duration_seconds ? formatDuration(activity.duration_seconds) : "--"}
               </p>
-              <p className="stat-subtle">Recorded moving time</p>
+              <p className={subtleClass}>Recorded moving time</p>
             </article>
 
-            <article className="panel stat-card">
-              <span className="panel-label">Calories</span>
-              <p className="stat-value">
+            <article className={`${panelClass} flex min-h-[182px] flex-col justify-between`}>
+              <span className={panelLabelClass}>Calories</span>
+              <p className={statValueClass}>
                 {activity.calories ? activity.calories.toLocaleString() : "--"}
               </p>
-              <div className="stat-subtle">
-                <SportBadge className="sport-badge-compact" sport={activity.sport} />
+              <div className={subtleClass}>
+                <SportBadge compact sport={activity.sport} />
               </div>
             </article>
           </div>
         </section>
 
-        <section className="section">
-          <div className="section-header">
-            <h2>Route and Laps</h2>
+        <section className={sectionClass}>
+          <div className={sectionHeaderClass}>
+            <h2 className={sectionTitleClass}>Route and Laps</h2>
           </div>
         </section>
 
-        <section className="section split detail-split">
+        <section className={`${sectionClass} grid items-start gap-[18px] xl:grid-cols-2`}>
           <RouteMap records={records} />
 
-          <div className="panel">
-            <span className="panel-label">Laps</span>
+          <div className={panelClass}>
+            <span className={panelLabelClass}>Laps</span>
             {laps.length > 0 ? (
-              <div className="table-stack">
+              <div className="grid">
                 {laps.map((lap) => (
-                  <article className="lap-row" key={lap.id}>
+                  <article
+                    className="grid gap-3 border-t border-[color:var(--line)] py-4 first:border-t-0 first:pt-0"
+                    key={lap.id}
+                  >
                     <div>
-                      <p className="list-title">Lap {lap.lap_index}</p>
-                      <p className="list-meta">
+                      <p className={listTitleClass}>Lap {lap.lap_index}</p>
+                      <p className={listMetaClass}>
                         {lap.start_time ? <LocalDateTime value={lap.start_time} /> : "No start time"}
                       </p>
                     </div>
-                    <div className="lap-metrics">
+                    <div className="flex flex-wrap gap-3 text-[var(--muted)]">
                       <span>{lap.distance_meters ? formatDistance(lap.distance_meters) : "--"}</span>
                       <span>{lap.duration_seconds ? formatDuration(lap.duration_seconds) : "--"}</span>
                       <span>
@@ -119,86 +141,112 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
                 ))}
               </div>
             ) : (
-              <p className="empty-state">Lap data is not available for this activity yet.</p>
+              <p className={emptyStateClass}>Lap data is not available for this activity yet.</p>
             )}
           </div>
 
-          <div className="panel">
-            <span className="panel-label">Session Info</span>
-            <div className="detail-meta-grid">
+          <div className={panelClass}>
+            <span className={panelLabelClass}>Session Info</span>
+            <div className={detailMetaGridClass}>
               <div>
-                <span className="metric-label">Source ID</span>
-                <p className="list-title">{activity.source_activity_id}</p>
+                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
+                  Source ID
+                </span>
+                <p className={listTitleClass}>{activity.source_activity_id}</p>
               </div>
               <div>
-                <span className="metric-label">Created</span>
-                <p className="list-title">
+                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
+                  Created
+                </span>
+                <p className={listTitleClass}>
                   <LocalDateTime value={activity.created_at} />
                 </p>
               </div>
               <div>
-                <span className="metric-label">Updated</span>
-                <p className="list-title">
+                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
+                  Updated
+                </span>
+                <p className={listTitleClass}>
                   <LocalDateTime value={activity.updated_at} />
                 </p>
               </div>
               <div>
-                <span className="metric-label">Stored FIT File</span>
-                <p className="list-meta detail-path">{activity.raw_file_path ?? "Not available"}</p>
+                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
+                  Stored FIT File
+                </span>
+                <p className={`${listMetaClass} break-all`}>{activity.raw_file_path ?? "Not available"}</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="section">
-          <div className="section-header">
-            <h2>Charts</h2>
+        <section className={sectionClass}>
+          <div className={sectionHeaderClass}>
+            <h2 className={sectionTitleClass}>Charts</h2>
           </div>
 
-          <div className="chart-grid">
+          <div className={chartGridClass}>
             <PaceChart records={records} />
             <HeartRateChart records={records} />
             <ElevationChart records={records} />
           </div>
         </section>
 
-        <section className="section">
-          <div className="section-header section-header-row">
+        <section className={sectionClass}>
+          <div className={sectionHeaderRowClass}>
             <div>
-              <h2>Record Samples</h2>
+              <h2 className={sectionTitleClass}>Record Samples</h2>
             </div>
-            <p className="pagination-label">
+            <p className={listMetaClass}>
               Showing {recordPreview.length} of {records.length} samples
             </p>
           </div>
 
-          <div className="panel">
+          <div className={panelClass}>
             {recordPreview.length > 0 ? (
-              <div className="record-table-wrapper">
-                <table className="record-table">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-[0.95rem]">
                   <thead>
                     <tr>
-                      <th>Time</th>
-                      <th>Distance</th>
-                      <th>HR</th>
-                      <th>Cadence</th>
-                      <th>Altitude</th>
-                      <th>Speed</th>
+                      <th className="border-t-0 px-[10px] py-3 text-left text-[0.76rem] uppercase tracking-[0.08em] whitespace-nowrap text-[var(--muted)]">
+                        Time
+                      </th>
+                      <th className="border-t-0 px-[10px] py-3 text-left text-[0.76rem] uppercase tracking-[0.08em] whitespace-nowrap text-[var(--muted)]">
+                        Distance
+                      </th>
+                      <th className="border-t-0 px-[10px] py-3 text-left text-[0.76rem] uppercase tracking-[0.08em] whitespace-nowrap text-[var(--muted)]">
+                        HR
+                      </th>
+                      <th className="border-t-0 px-[10px] py-3 text-left text-[0.76rem] uppercase tracking-[0.08em] whitespace-nowrap text-[var(--muted)]">
+                        Cadence
+                      </th>
+                      <th className="border-t-0 px-[10px] py-3 text-left text-[0.76rem] uppercase tracking-[0.08em] whitespace-nowrap text-[var(--muted)]">
+                        Altitude
+                      </th>
+                      <th className="border-t-0 px-[10px] py-3 text-left text-[0.76rem] uppercase tracking-[0.08em] whitespace-nowrap text-[var(--muted)]">
+                        Speed
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {recordPreview.map((record) => (
                       <tr key={record.id}>
-                        <td><LocalDateTime value={record.record_time} /></td>
-                        <td>
+                        <td className="border-t border-[color:var(--line)] px-[10px] py-3 whitespace-nowrap">
+                          <LocalDateTime value={record.record_time} />
+                        </td>
+                        <td className="border-t border-[color:var(--line)] px-[10px] py-3 whitespace-nowrap">
                           {record.distance_meters ? formatDistance(record.distance_meters) : "--"}
                         </td>
-                        <td>{record.heart_rate ? `${record.heart_rate}` : "--"}</td>
-                        <td>{record.cadence ? `${record.cadence}` : "--"}</td>
-                        <td>
+                        <td className="border-t border-[color:var(--line)] px-[10px] py-3 whitespace-nowrap">
+                          {record.heart_rate ? `${record.heart_rate}` : "--"}
+                        </td>
+                        <td className="border-t border-[color:var(--line)] px-[10px] py-3 whitespace-nowrap">
+                          {record.cadence ? `${record.cadence}` : "--"}
+                        </td>
+                        <td className="border-t border-[color:var(--line)] px-[10px] py-3 whitespace-nowrap">
                           {record.altitude_meters ? `${record.altitude_meters.toFixed(1)} m` : "--"}
                         </td>
-                        <td>
+                        <td className="border-t border-[color:var(--line)] px-[10px] py-3 whitespace-nowrap">
                           {record.speed_mps ? `${record.speed_mps.toFixed(2)} m/s` : "--"}
                         </td>
                       </tr>
@@ -207,7 +255,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
                 </table>
               </div>
             ) : (
-              <p className="empty-state">
+              <p className={emptyStateClass}>
                 Record samples are not available for this activity yet.
               </p>
             )}
@@ -221,18 +269,18 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
     }
 
     return (
-      <main className="shell">
-        <section className="section">
-          <div className="panel">
-            <h2>Unable to load activity</h2>
-            <p className="warning">
+      <main className={shellClass}>
+        <section className={sectionClass}>
+          <div className={panelClass}>
+            <h2 className={sectionTitleClass}>Unable to load activity</h2>
+            <p className={warningClass}>
               {error instanceof Error ? error.message : "An unexpected error occurred."}
             </p>
-            <div className="detail-links">
-              <Link className="text-link" href="/">
+            <div className="mt-4 grid gap-[10px]">
+              <Link className={textLinkClass} href="/">
                 Back to dashboard
               </Link>
-              <Link className="text-link" href="/activities">
+              <Link className={textLinkClass} href="/activities">
                 Back to activity list
               </Link>
             </div>

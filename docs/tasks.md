@@ -989,13 +989,20 @@ Current state:
   - activity detail header and summary
 - Playwright screenshot baselines were refreshed after the icon rollout so the visual change is now covered by the screenshot suite
 
-### Task 81
+### Task 81 [done]
 Refactor the frontend to use Tailwind CSS for layout, spacing, and design tokens.
 
 Scope:
 - adopt Tailwind as the primary layout and spacing system
 - keep the existing visual direction while reducing ad hoc global CSS
 - standardize spacing, typography, and responsive breakpoints across pages
+
+Current state:
+- the frontend now uses Tailwind CSS v4 as the primary layout and spacing system via `frontend/app/globals.css` and `frontend/postcss.config.mjs`
+- the previous large ad hoc global stylesheet was reduced to shared tokens and base rules, while page and component layout moved into Tailwind utility classes
+- dashboard, activities list, activity detail, sync status, sport labels/badges, charts, and the route map card now share a lightweight utility layer in `frontend/lib/ui.ts`
+- the existing warm paper/glass visual direction was preserved while spacing, section headers, panels, buttons, and responsive grid behavior were standardized through Tailwind-based primitives
+- verified by rebuilding the local frontend stack and confirming `200` responses for `/`, `/activities`, and `/status/sync` against the restored real-data environment
 
 ### Task 82
 Adopt `shadcn/ui` components for core dashboard UI primitives.
