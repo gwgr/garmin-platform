@@ -53,8 +53,12 @@ Operational deployment note:
 
 ## 6. Technology Stack
 
-Backend: Python + FastAPI Database: PostgreSQL Frontend: Next.js Charts:
-ECharts Maps: Leaflet Workers: one-shot Python worker via `systemd` timer in production, scheduled Python loop for local/dev convenience
+Backend: Python + FastAPI
+Database: PostgreSQL
+Frontend: Next.js App Router + Tailwind CSS
+Charts: lightweight SVG chart components
+Maps: Leaflet
+Workers: one-shot Python worker via `systemd` timer in production, scheduled Python loop for local/dev convenience
 
 ## 7. Data Storage
 

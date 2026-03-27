@@ -136,6 +136,14 @@ npm install
 npm run dev
 ```
 
+Current frontend dependency highlights:
+- `next@15.5.13`
+- `tailwindcss@4.1.16`
+- `@tailwindcss/postcss@4.1.16`
+- `@radix-ui/react-dialog@1.1.15`
+- `@radix-ui/react-slot@1.2.4`
+- `@radix-ui/react-tabs@1.1.13`
+
 Containerized local app workflow:
 - `docker compose up --build` starts `postgres`, `backend`, and `frontend`
 - the scheduled `worker` is now opt-in for local development so Garmin sync does not begin automatically
@@ -212,16 +220,17 @@ Note:
 ### Frontend Tooling
 
 Installed and verified:
-- Homebrew `node`
+- Homebrew `node@22`
 - `npm`
 
 Observed versions:
-- Node `25.8.1`
-- npm `11.11.0`
+- Node `22.22.1`
+- npm `10.9.4`
 
 Why this matters:
 - enables running the Next.js frontend locally without depending only on Docker
-- supports `npm install`, `next dev`, and future frontend linting/type-checking tasks
+- matches the repo's Docker/frontend runtime more closely than the previous host Node 25 setup
+- supports `npm install`, `next dev`, Playwright screenshot runs, and future frontend linting/type-checking tasks
 
 ### Local Postgres via Docker Compose
 

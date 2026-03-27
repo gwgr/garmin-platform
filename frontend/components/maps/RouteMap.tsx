@@ -8,8 +8,8 @@ import type { ActivityRecord } from "../../lib/api";
 import {
   emptyStateClass,
   listMetaClass,
-  panelClass,
 } from "../../lib/ui";
+import { Card, CardContent } from "../ui/card";
 
 type RouteMapProps = {
   records: ActivityRecord[];
@@ -101,31 +101,33 @@ export function RouteMap({ records }: RouteMapProps) {
   }, [validCoordinatePoints]);
 
   return (
-    <article className={`${panelClass} grid min-h-[360px] gap-4`}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">Route Map</p>
-          <p className={listMetaClass}>Leaflet map based on stored activity record coordinates.</p>
+    <Card className="grid min-h-[360px] gap-4">
+      <CardContent className="grid gap-4 p-[22px]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">Route Map</p>
+            <p className={listMetaClass}>Leaflet map based on stored activity record coordinates.</p>
+          </div>
         </div>
-      </div>
 
-      {validCoordinatePoints.length >= 2 ? (
-        <div
-          aria-label="Activity route map"
-          className="min-h-[280px] overflow-hidden rounded-[18px] border border-[color:var(--line)]"
-          id={mapId}
-          ref={containerRef}
-        />
-      ) : coordinatePoints.length >= 2 ? (
-        <p className={emptyStateClass}>
-          Coordinate samples exist, but they do not look like usable latitude/longitude
-          values yet. This likely means the parser still needs coordinate normalization.
-        </p>
-      ) : (
-        <p className={emptyStateClass}>
-          This activity does not currently have enough GPS samples to draw a route map.
-        </p>
-      )}
-    </article>
+        {validCoordinatePoints.length >= 2 ? (
+          <div
+            aria-label="Activity route map"
+            className="min-h-[280px] overflow-hidden rounded-[18px] border border-[color:var(--line)]"
+            id={mapId}
+            ref={containerRef}
+          />
+        ) : coordinatePoints.length >= 2 ? (
+          <p className={emptyStateClass}>
+            Coordinate samples exist, but they do not look like usable latitude/longitude
+            values yet. This likely means the parser still needs coordinate normalization.
+          </p>
+        ) : (
+          <p className={emptyStateClass}>
+            This activity does not currently have enough GPS samples to draw a route map.
+          </p>
+        )}
+      </CardContent>
+    </Card>
   );
 }

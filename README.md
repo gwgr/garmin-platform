@@ -10,7 +10,7 @@ This repository is in early setup. The current local foundation includes:
 - local development and production Compose files
 - setup and planning docs in `docs/`
 
-The backend FastAPI project structure is now scaffolded, including environment-based settings management and SQLAlchemy session setup, and the backend Docker container now runs the real FastAPI app. The frontend now has an initial Next.js scaffold and landing page, with the dashboard and data pages still to come.
+The backend FastAPI project structure is now scaffolded, including environment-based settings management and SQLAlchemy session setup, and the backend Docker container now runs the real FastAPI app. The frontend now runs a real Next.js App Router UI with live dashboard, activity list, activity detail, and sync-status pages.
 
 The first API endpoint is now available at `GET /api/v1/health`.
 
@@ -27,6 +27,8 @@ The activity detail page is now in place as well, showing summary data, lap brea
 The activity detail view now also includes pace, heart rate, and elevation charts derived from the stored record stream.
 
 The activity detail page now also includes a Leaflet-based route map when usable GPS samples are available.
+
+The frontend now uses Tailwind CSS v4 as its primary layout and spacing system, with a small local `components/ui` primitive layer in the `shadcn/ui` style for shared cards, buttons, tabs, tables, and dialogs.
 
 The backend now also has a real sync worker entrypoint that can run the Garmin fetch/download/ingest pipeline outside the API server.
 

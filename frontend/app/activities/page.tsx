@@ -6,23 +6,20 @@ import { type ActivityListItem, getActivities } from "../../lib/api";
 import { formatDistance, formatDuration } from "../../lib/formatting";
 import {
   cardLinkClass,
-  detailMetaGridClass,
   disabledButtonClass,
   emptyStateClass,
   filterGridClass,
-  ghostButtonClass,
   listMetaClass,
   listTitleClass,
-  panelClass,
   panelLabelClass,
-  primaryButtonClass,
   sectionClass,
   sectionHeaderRowClass,
   sectionTitleClass,
   shellClass,
-  textLinkClass,
   warningClass,
 } from "../../lib/ui";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -98,71 +95,75 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
       <section className={sectionClass}>
         <div className={sectionHeaderRowClass}>
           <h2 className={sectionTitleClass}>Activities</h2>
-          <Link className={textLinkClass} href="/">
-            Back to dashboard
-          </Link>
+          <Button asChild variant="link">
+            <Link href="/">Back to dashboard</Link>
+          </Button>
         </div>
 
         <div className="mt-7 grid gap-[18px] lg:grid-cols-[1.4fr_minmax(0,1fr)]">
-          <form className={`${panelClass} grid gap-[18px]`} action="/activities" method="get">
-            <span className={panelLabelClass}>Filters</span>
+          <Card>
+            <CardContent className="grid gap-[18px] p-[22px]">
+              <form className="grid gap-[18px]" action="/activities" method="get">
+                <span className={panelLabelClass}>Filters</span>
 
-            <div className={filterGridClass}>
-              <label className="grid gap-2">
-                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                  Sport
-                </span>
-                <input
-                  className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
-                  defaultValue={sport}
-                  name="sport"
-                  placeholder="e.g. running"
-                  type="text"
-                />
-              </label>
+                <div className={filterGridClass}>
+                  <label className="grid gap-2">
+                    <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
+                      Sport
+                    </span>
+                    <input
+                      className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
+                      defaultValue={sport}
+                      name="sport"
+                      placeholder="e.g. running"
+                      type="text"
+                    />
+                  </label>
 
-              <label className="grid gap-2">
-                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                  Start date
-                </span>
-                <input
-                  className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
-                  defaultValue={startDate}
-                  name="start_date"
-                  type="date"
-                />
-              </label>
+                  <label className="grid gap-2">
+                    <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
+                      Start date
+                    </span>
+                    <input
+                      className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
+                      defaultValue={startDate}
+                      name="start_date"
+                      type="date"
+                    />
+                  </label>
 
-              <label className="grid gap-2">
-                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                  End date
-                </span>
-                <input
-                  className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
-                  defaultValue={endDate}
-                  name="end_date"
-                  type="date"
-                />
-              </label>
-            </div>
+                  <label className="grid gap-2">
+                    <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
+                      End date
+                    </span>
+                    <input
+                      className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
+                      defaultValue={endDate}
+                      name="end_date"
+                      type="date"
+                    />
+                  </label>
+                </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <button className={primaryButtonClass} type="submit">
-                Apply filters
-              </button>
-              <Link className={ghostButtonClass} href="/activities">
-                Reset
-              </Link>
-            </div>
-          </form>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <Button type="submit">Apply filters</Button>
+                  <Button asChild variant="outline">
+                    <Link href="/activities">Reset</Link>
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
 
-          <div className={panelClass}>
-            <span className={panelLabelClass}>Results Summary</span>
-            <p className={`${listTitleClass} text-[1.2rem]`}>{total.toLocaleString()} matching activities</p>
-            <p className={listMetaClass}>
-              Page {page} of {totalPages} · sorted by most recent session
-            </p>
-          </div>
+          <Card>
+            <CardContent className="p-[22px]">
+              <span className={panelLabelClass}>Results Summary</span>
+              <p className={`${listTitleClass} text-[1.2rem]`}>{total.toLocaleString()} matching activities</p>
+              <p className={listMetaClass}>
+                Page {page} of {totalPages} · sorted by most recent session
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -173,7 +174,8 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
           </div>
         </div>
 
-        <div className={panelClass}>
+        <Card>
+          <CardContent className="p-[22px]">
           {loadError ? (
             <p className={warningClass}>
               The activity list could not be loaded: {loadError}
@@ -236,9 +238,9 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
                   </div>
 
                   <div className="flex justify-start sm:justify-end">
-                    <Link className={textLinkClass} href={`/activities/${activity.id}`}>
-                      View details
-                    </Link>
+                    <Button asChild variant="link">
+                      <Link href={`/activities/${activity.id}`}>View details</Link>
+                    </Button>
                   </div>
                 </article>
               ))}
@@ -248,19 +250,25 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
           {!loadError && total > 0 ? (
             <div className="mt-[18px] flex flex-col gap-3 border-t border-[color:var(--line)] pt-[18px] sm:flex-row sm:items-center sm:justify-between">
               {hasPreviousPage ? (
-                <Link
-                  className={ghostButtonClass}
-                  href={buildPageHref({
-                    page: page - 1,
-                    sport,
-                    startDate,
-                    endDate,
-                  })}
+                <Button
+                  asChild
+                  variant="outline"
                 >
-                  Previous
-                </Link>
+                  <Link
+                    href={buildPageHref({
+                      page: page - 1,
+                      sport,
+                      startDate,
+                      endDate,
+                    })}
+                  >
+                    Previous
+                  </Link>
+                </Button>
               ) : (
-                <span className={`${ghostButtonClass} ${disabledButtonClass}`}>Previous</span>
+                <Button className={disabledButtonClass} disabled variant="outline">
+                  Previous
+                </Button>
               )}
 
               <p className={listMetaClass}>
@@ -268,23 +276,27 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
               </p>
 
               {hasNextPage ? (
-                <Link
-                  className={primaryButtonClass}
-                  href={buildPageHref({
-                    page: page + 1,
-                    sport,
-                    startDate,
-                    endDate,
-                  })}
-                >
-                  Next
-                </Link>
+                <Button asChild>
+                  <Link
+                    href={buildPageHref({
+                      page: page + 1,
+                      sport,
+                      startDate,
+                      endDate,
+                    })}
+                  >
+                    Next
+                  </Link>
+                </Button>
               ) : (
-                <span className={`${primaryButtonClass} ${disabledButtonClass}`}>Next</span>
+                <Button className={disabledButtonClass} disabled>
+                  Next
+                </Button>
               )}
             </div>
           ) : null}
-        </div>
+          </CardContent>
+        </Card>
       </section>
     </main>
   );

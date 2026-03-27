@@ -16,8 +16,6 @@ import {
 } from "../lib/api";
 import { formatDistance, formatDuration } from "../lib/formatting";
 import {
-  chartGridClass,
-  compactPanelClass,
   emptyStateClass,
   fourUpGridClass,
   listMetaClass,
@@ -25,7 +23,6 @@ import {
   listStackClass,
   listTitleClass,
   listValuesClass,
-  panelClass,
   panelLabelClass,
   sectionClass,
   sectionHeaderClass,
@@ -33,9 +30,10 @@ import {
   shellClass,
   statusDotClass,
   subtleClass,
-  textLinkClass,
   warningClass,
 } from "../lib/ui";
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -145,36 +143,40 @@ export default async function HomePage() {
       <section className={sectionClass}>
         <div className={fourUpGridClass}>
           {windowSummaries.map((windowSummary) => (
-            <article className={`${panelClass} flex min-h-[182px] flex-col justify-between`} key={windowSummary.label}>
-              <span className={panelLabelClass}>{windowSummary.label}</span>
-              {windowSummary.sportSummaries.length > 0 ? (
-                <div className={listStackClass}>
-                  {windowSummary.sportSummaries.map((summary) => (
-                    <div className={listRowClass} key={`${windowSummary.label}-${summary.sport}`}>
-                      <div>
-                        <p className={listTitleClass}>
-                          <SportLabel sport={summary.sport} />
-                        </p>
-                      </div>
-                      <div className={listValuesClass}>
-                        <strong className="text-[var(--text)]">
-                          {summary.total_distance_meters > 0
-                            ? formatDistance(summary.total_distance_meters)
-                            : `${summary.activity_count}`}
-                        </strong>
-                        <span>{formatDuration(summary.total_duration_seconds)}</span>
-                      </div>
+            <Card className="flex min-h-[182px] flex-col justify-between" key={windowSummary.label}>
+              <CardContent className="flex h-full flex-col justify-between p-[22px]">
+                <div>
+                  <span className={panelLabelClass}>{windowSummary.label}</span>
+                  {windowSummary.sportSummaries.length > 0 ? (
+                    <div className={listStackClass}>
+                      {windowSummary.sportSummaries.map((summary) => (
+                        <div className={listRowClass} key={`${windowSummary.label}-${summary.sport}`}>
+                          <div>
+                            <p className={listTitleClass}>
+                              <SportLabel sport={summary.sport} />
+                            </p>
+                          </div>
+                          <div className={listValuesClass}>
+                            <strong className="text-[var(--text)]">
+                              {summary.total_distance_meters > 0
+                                ? formatDistance(summary.total_distance_meters)
+                                : `${summary.activity_count}`}
+                            </strong>
+                            <span>{formatDuration(summary.total_duration_seconds)}</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    <p className={emptyStateClass}>No activities in this window yet.</p>
+                  )}
                 </div>
-              ) : (
-                <p className={emptyStateClass}>No activities in this window yet.</p>
-              )}
-              <p className={subtleClass}>
-                {windowSummary.activityCount.toLocaleString()} total{" "}
-                {windowSummary.activityCount === 1 ? "activity" : "activities"}
-              </p>
-            </article>
+                <p className={subtleClass}>
+                  {windowSummary.activityCount.toLocaleString()} total{" "}
+                  {windowSummary.activityCount === 1 ? "activity" : "activities"}
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </section>
@@ -186,113 +188,123 @@ export default async function HomePage() {
       </section>
 
       <section className={`${sectionClass} grid gap-[18px] xl:grid-cols-2`}>
-        <div className={panelClass}>
-          <span className={panelLabelClass}>Recent Activities</span>
-          {recentActivities.length > 0 ? (
-            <div className={listStackClass}>
-              {recentActivities.map((activity) => (
-                <article className={listRowClass} key={activity.id}>
-                  <div>
-                    <p className={listTitleClass}>
-                      <Link className={textLinkClass} href={`/activities/${activity.id}`}>
-                        {activity.name ?? "Imported activity"}
-                      </Link>
-                    </p>
-                    <p className={listMetaClass}>
-                      <SportLabel className="align-middle" sport={activity.sport} /> ·{" "}
-                      <LocalDate value={activity.start_time} />
-                    </p>
-                  </div>
-                  <div className={listValuesClass}>
-                    <strong className="text-[var(--text)]">
-                      {activity.distance_meters
-                        ? formatDistance(activity.distance_meters)
-                        : "--"}
-                    </strong>
-                    <span>
-                      {activity.duration_seconds
-                        ? formatDuration(activity.duration_seconds)
-                        : "--"}
-                    </span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className={emptyStateClass}>
-              Recent sessions will appear here as activities are imported.
+        <Card>
+          <CardContent className="p-[22px]">
+            <span className={panelLabelClass}>Recent Activities</span>
+            {recentActivities.length > 0 ? (
+              <div className={listStackClass}>
+                {recentActivities.map((activity) => (
+                  <article className={listRowClass} key={activity.id}>
+                    <div>
+                      <p className={listTitleClass}>
+                        <Button asChild className="h-auto px-0 py-0 font-semibold" variant="link">
+                          <Link href={`/activities/${activity.id}`}>
+                            {activity.name ?? "Imported activity"}
+                          </Link>
+                        </Button>
+                      </p>
+                      <p className={listMetaClass}>
+                        <SportLabel className="align-middle" sport={activity.sport} /> ·{" "}
+                        <LocalDate value={activity.start_time} />
+                      </p>
+                    </div>
+                    <div className={listValuesClass}>
+                      <strong className="text-[var(--text)]">
+                        {activity.distance_meters
+                          ? formatDistance(activity.distance_meters)
+                          : "--"}
+                      </strong>
+                      <span>
+                        {activity.duration_seconds
+                          ? formatDuration(activity.duration_seconds)
+                          : "--"}
+                      </span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className={emptyStateClass}>
+                Recent sessions will appear here as activities are imported.
+              </p>
+            )}
+            <p className={`${subtleClass} pt-4`}>
+              {recentActivityTotal.toLocaleString()} total recent results available
             </p>
-          )}
-          <p className={`${subtleClass} pt-4`}>
-            {recentActivityTotal.toLocaleString()} total recent results available
-          </p>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className={panelClass}>
-          <span className={panelLabelClass}>Health Snapshot</span>
-          {restingHeartRate.length > 0 || dailyMetrics.length > 0 ? (
-            <div className={listStackClass}>
-              {restingHeartRate.length > 0 ? (
-                <article className="flex flex-col gap-2 border-t-0 pb-2 text-[var(--muted)]">
-                  <p className={listTitleClass}>Resting HR Trend</p>
-                  <p className={listMetaClass}>
-                    Latest: {restingHeartRate[restingHeartRate.length - 1]?.resting_heart_rate} bpm
-                  </p>
-                </article>
-              ) : null}
-
-              {dailyMetrics.slice(0, 3).map((metric) => (
-                <article className={listRowClass} key={metric.id}>
-                  <div>
-                    <p className={listTitleClass}>
-                      <LocalDate value={metric.metric_date} />
-                    </p>
+        <Card>
+          <CardContent className="p-[22px]">
+            <span className={panelLabelClass}>Health Snapshot</span>
+            {restingHeartRate.length > 0 || dailyMetrics.length > 0 ? (
+              <div className={listStackClass}>
+                {restingHeartRate.length > 0 ? (
+                  <article className="flex flex-col gap-2 border-t-0 pb-2 text-[var(--muted)]">
+                    <p className={listTitleClass}>Resting HR Trend</p>
                     <p className={listMetaClass}>
-                      {metric.steps ? `${metric.steps.toLocaleString()} steps` : "No step data"}
+                      Latest: {restingHeartRate[restingHeartRate.length - 1]?.resting_heart_rate} bpm
                     </p>
-                  </div>
-                  <div className={listValuesClass}>
-                    <strong className="text-[var(--text)]">
-                      {metric.resting_heart_rate ? `${metric.resting_heart_rate} bpm` : "--"}
-                    </strong>
-                    <span>
-                      {metric.sleep_seconds
-                        ? formatDuration(metric.sleep_seconds)
-                        : "No sleep"}
-                    </span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className={emptyStateClass}>
-              Daily health metrics will appear here as they are imported.
-            </p>
-          )}
-        </div>
+                  </article>
+                ) : null}
+
+                {dailyMetrics.slice(0, 3).map((metric) => (
+                  <article className={listRowClass} key={metric.id}>
+                    <div>
+                      <p className={listTitleClass}>
+                        <LocalDate value={metric.metric_date} />
+                      </p>
+                      <p className={listMetaClass}>
+                        {metric.steps ? `${metric.steps.toLocaleString()} steps` : "No step data"}
+                      </p>
+                    </div>
+                    <div className={listValuesClass}>
+                      <strong className="text-[var(--text)]">
+                        {metric.resting_heart_rate ? `${metric.resting_heart_rate} bpm` : "--"}
+                      </strong>
+                      <span>
+                        {metric.sleep_seconds
+                          ? formatDuration(metric.sleep_seconds)
+                          : "No sleep"}
+                      </span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <p className={emptyStateClass}>
+                Daily health metrics will appear here as they are imported.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </section>
 
       <section className={sectionClass}>
-        <div className={compactPanelClass}>
-          <span className={panelLabelClass}>Sync Status</span>
-          <p className="m-0 flex items-center gap-3 text-[0.96rem] capitalize text-[var(--muted)]">
-            <span className={`${statusDotClass} ${syncStateColor(syncStatus?.state)}`} />
-            {syncStatus?.summary ?? "Sync status is unavailable right now."}
-          </p>
-          <Link className={`${textLinkClass} mt-2 inline-block text-[0.95rem]`} href="/status/sync">
-            View sync details
-          </Link>
-        </div>
+        <Card className="px-[22px] py-[18px]">
+          <CardContent className="p-0">
+            <span className={panelLabelClass}>Sync Status</span>
+            <p className="m-0 flex items-center gap-3 text-[0.96rem] capitalize text-[var(--muted)]">
+              <span className={`${statusDotClass} ${syncStateColor(syncStatus?.state)}`} />
+              {syncStatus?.summary ?? "Sync status is unavailable right now."}
+            </p>
+            <Button asChild className="mt-2 h-auto px-0 py-0 text-[0.95rem]" variant="link">
+              <Link href="/status/sync">View sync details</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </section>
 
       {loadError ? (
         <section className={sectionClass}>
-          <div className={panelClass}>
-            <span className={panelLabelClass}>Data Availability</span>
-            <p className={warningClass}>
-              Dashboard data could not be loaded right now: {loadError}
-            </p>
-          </div>
+          <Card>
+            <CardContent className="p-[22px]">
+              <span className={panelLabelClass}>Data Availability</span>
+              <p className={warningClass}>
+                Dashboard data could not be loaded right now: {loadError}
+              </p>
+            </CardContent>
+          </Card>
         </section>
       ) : null}
     </main>

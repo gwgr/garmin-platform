@@ -63,11 +63,15 @@ Operational/API note:
 
 ## Frontend
 
-Framework: Next.js
+Framework: Next.js App Router
 
-Key pages: Dashboard ActivityList ActivityDetail
+Key pages: Dashboard ActivityList ActivityDetail SyncStatus
 
-Charts: ECharts
+Styling/layout system:
+- Tailwind CSS v4 for layout, spacing, and design-token application
+- shared local UI primitives for cards, buttons, tabs, tables, and dialogs
+
+Charts: lightweight SVG chart components
 
 Maps: Leaflet or MapLibre
 
@@ -94,6 +98,7 @@ Integration tests: - full sync pipeline - activity ingestion
 
 Frontend/regression note:
 - add deterministic fixture data for frontend development and screenshot-based regression coverage
+- keep the local Playwright screenshot workflow aligned with the current frontend stack and host Node 22 runtime
 
 ## Deployment
 

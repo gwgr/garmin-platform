@@ -1,8 +1,8 @@
 import {
   emptyStateClass,
   listMetaClass,
-  panelClass,
 } from "../../lib/ui";
+import { Card, CardContent } from "../ui/card";
 
 type ChartPoint = {
   x: number;
@@ -59,15 +59,17 @@ export function LineChartCard({
 
   if (points.length === 0) {
     return (
-      <article className={`${panelClass} grid gap-4`}>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">{title}</p>
-            <p className={listMetaClass}>{subtitle}</p>
+      <Card className="grid gap-4">
+        <CardContent className="flex flex-col gap-4 p-[22px]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">{title}</p>
+              <p className={listMetaClass}>{subtitle}</p>
+            </div>
           </div>
-        </div>
-        <p className={emptyStateClass}>{emptyMessage}</p>
-      </article>
+          <p className={emptyStateClass}>{emptyMessage}</p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -77,40 +79,42 @@ export function LineChartCard({
   const path = buildPath(points);
 
   return (
-    <article className={`${panelClass} grid gap-4`}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">{title}</p>
-          <p className={listMetaClass}>{subtitle}</p>
+    <Card className="grid gap-4">
+      <CardContent className="grid gap-4 p-[22px]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="mb-2 text-[1.2rem] font-semibold text-[var(--text)]">{title}</p>
+            <p className={listMetaClass}>{subtitle}</p>
+          </div>
+          <div className="grid gap-1 text-left text-[0.88rem] text-[var(--muted)] sm:text-right">
+            <span>Min {valueFormatter(minY)}</span>
+            <span>Max {valueFormatter(maxY)}</span>
+          </div>
         </div>
-        <div className="grid gap-1 text-left text-[0.88rem] text-[var(--muted)] sm:text-right">
-          <span>Min {valueFormatter(minY)}</span>
-          <span>Max {valueFormatter(maxY)}</span>
-        </div>
-      </div>
 
-      <svg
-        aria-label={title}
-        className="h-auto w-full"
-        viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-        role="img"
-      >
-        <defs>
-          <linearGradient id={gradientId} x1="0%" x2="100%" y1="0%" y2="0%">
-            <stop offset="0%" stopColor="#1f6b5c" />
-            <stop offset="100%" stopColor="#bb7142" />
-          </linearGradient>
-        </defs>
-        <rect fill="rgba(255,255,255,0.35)" height={chartHeight} rx="20" width={chartWidth} />
-        <path
-          d={path}
-          fill="none"
-          stroke={`url(#${gradientId})`}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="4"
-        />
-      </svg>
-    </article>
+        <svg
+          aria-label={title}
+          className="h-auto w-full"
+          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+          role="img"
+        >
+          <defs>
+            <linearGradient id={gradientId} x1="0%" x2="100%" y1="0%" y2="0%">
+              <stop offset="0%" stopColor="#1f6b5c" />
+              <stop offset="100%" stopColor="#bb7142" />
+            </linearGradient>
+          </defs>
+          <rect fill="rgba(255,255,255,0.35)" height={chartHeight} rx="20" width={chartWidth} />
+          <path
+            d={path}
+            fill="none"
+            stroke={`url(#${gradientId})`}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="4"
+          />
+        </svg>
+      </CardContent>
+    </Card>
   );
 }

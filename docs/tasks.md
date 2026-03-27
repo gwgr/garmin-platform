@@ -1012,6 +1012,14 @@ Scope:
 - keep the component set intentionally small and aligned with the product’s visual language
 - avoid over-customized one-off components where standard primitives are a better fit
 
+Completed on 2026-03-27.
+
+Current state:
+- added a small local `components/ui` primitive set built in the `shadcn/ui` style, covering buttons, cards, tabs, tables, and dialogs
+- dashboard, activities list, activity detail, charts, route map, and sync status now use those shared primitives instead of page-local panel markup
+- the activity detail page now uses shared tabs for chart vs record-sample views, and the sync status page uses a shared dialog for the state guide
+- verified by rebuilding the local Docker frontend/backend stack and confirming `200` responses for `/`, `/activities`, `/activities/101`, and `/status/sync` against the restored real-data environment
+
 ### Task 83
 Create a responsive dashboard shell and shared frontend page layout system.
 
