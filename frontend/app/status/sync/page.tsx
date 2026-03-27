@@ -15,8 +15,10 @@ import {
 import { getSyncStatus } from "../../../lib/api";
 import {
   detailMetaGridClass,
+  fieldLabelClass,
   listMetaClass,
   listTitleClass,
+  panelContentClass,
   panelLabelClass,
   sectionClass,
   sectionHeaderClass,
@@ -84,7 +86,7 @@ export default async function SyncStatusPage() {
     >
       <section className={`${sectionClass} grid gap-[18px] xl:grid-cols-2`}>
         <Card>
-          <CardContent className="p-[22px]">
+          <CardContent className={panelContentClass}>
             <span className={panelLabelClass}>Current State</span>
             <p className="m-0 flex items-center gap-3 text-[clamp(2rem,5vw,3.4rem)] capitalize [font-family:var(--font-metric-serif)] leading-[0.95] text-[var(--text)]">
               <span className={`${statusDotClass} ${syncStateColor(syncStatus.state)}`} />
@@ -97,37 +99,29 @@ export default async function SyncStatusPage() {
         </Card>
 
         <Card>
-          <CardContent className="p-[22px]">
+          <CardContent className={panelContentClass}>
             <span className={panelLabelClass}>Recent Activity</span>
             <div className={detailMetaGridClass}>
               <div>
-                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                  Last Attempt
-                </span>
+                <span className={fieldLabelClass}>Last Attempt</span>
                 <p className={listTitleClass}>
                   {syncStatus.last_attempted_at ? <LocalDate value={syncStatus.last_attempted_at} /> : "--"}
                 </p>
               </div>
               <div>
-                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                  Last Success
-                </span>
+                <span className={fieldLabelClass}>Last Success</span>
                 <p className={listTitleClass}>
                   {syncStatus.last_succeeded_at ? <LocalDate value={syncStatus.last_succeeded_at} /> : "--"}
                 </p>
               </div>
               <div>
-                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                  Last Synced Activity
-                </span>
+                <span className={fieldLabelClass}>Last Synced Activity</span>
                 <p className={listTitleClass}>
                   {syncStatus.last_synced_at ? <LocalDate value={syncStatus.last_synced_at} /> : "--"}
                 </p>
               </div>
               <div>
-                <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                  Last Source ID
-                </span>
+                <span className={fieldLabelClass}>Last Source ID</span>
                 <p className={listTitleClass}>{syncStatus.last_source_id ?? "--"}</p>
               </div>
             </div>
@@ -140,7 +134,7 @@ export default async function SyncStatusPage() {
           <h2 className={sectionTitleClass}>Run Detail</h2>
         </div>
         <Card>
-          <CardContent className="p-[22px]">
+          <CardContent className={panelContentClass}>
             <p className={syncStatus.last_error_summary ? warningClass : listMetaClass}>
               {syncStatus.last_error_summary ?? "No recent error summary is recorded."}
             </p>

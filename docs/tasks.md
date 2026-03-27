@@ -1037,13 +1037,21 @@ Current state:
 - page-level back-to-dashboard links were removed where the global shell already provides that navigation, while activity detail still keeps a local return path to the activity list
 - verified by rebuilding the local Docker frontend/backend stack and confirming `200` responses for `/`, `/activities`, `/activities/101`, and `/status/sync` against the restored real-data environment
 
-### Task 84
+### Task 84 [done]
 Standardize frontend typography and spacing across all pages.
 
 Scope:
 - define consistent page spacing, section spacing, headings, body copy, and data-density rules
 - remove inconsistent sizing/layout patterns across dashboard and activity pages
 - ensure charts, cards, filters, and tables align to the same rhythm
+
+Completed on 2026-03-27.
+
+Current state:
+- shared typography and spacing tokens now live in `frontend/lib/ui.ts`, covering page titles, section headings, descriptions, field labels, summary values, card padding, and section rhythm
+- dashboard, activities list, activity detail, and sync status now use the same spacing cadence for headers, cards, filters, summaries, and detail grids
+- card content padding was normalized and large numeric text was reduced where needed so data-dense pages feel calmer without losing hierarchy
+- verified by rebuilding the local Docker frontend/backend stack and confirming `200` responses for `/`, `/activities`, `/activities/101`, and `/status/sync` against the restored real-data environment
 
 ### Task 85
 Standardize frontend loading, empty, error, and partial-data states.

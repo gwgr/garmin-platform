@@ -24,6 +24,7 @@ import {
   listStackClass,
   listTitleClass,
   listValuesClass,
+  panelContentClass,
   panelLabelClass,
   sectionClass,
   sectionHeaderClass,
@@ -141,8 +142,8 @@ export default async function HomePage() {
       <section className={sectionClass}>
         <div className={fourUpGridClass}>
           {windowSummaries.map((windowSummary) => (
-            <Card className="flex min-h-[182px] flex-col justify-between" key={windowSummary.label}>
-              <CardContent className="flex h-full flex-col justify-between p-[22px]">
+            <Card className="flex min-h-[20rem] flex-col justify-between xl:min-h-[22rem]" key={windowSummary.label}>
+              <CardContent className={`flex h-full flex-col justify-between ${panelContentClass}`}>
                 <div>
                   <span className={panelLabelClass}>{windowSummary.label}</span>
                   {windowSummary.sportSummaries.length > 0 ? (
@@ -183,103 +184,102 @@ export default async function HomePage() {
         <div className={sectionHeaderClass}>
           <h2 className={sectionTitleClass}>Recent Activities and Health Snapshot</h2>
         </div>
-      </section>
-
-      <section className={`${sectionClass} grid gap-[18px] xl:grid-cols-2`}>
-        <Card>
-          <CardContent className="p-[22px]">
-            <span className={panelLabelClass}>Recent Activities</span>
-            {recentActivities.length > 0 ? (
-              <div className={listStackClass}>
-                {recentActivities.map((activity) => (
-                  <article className={listRowClass} key={activity.id}>
-                    <div>
-                      <p className={listTitleClass}>
-                        <Button asChild className="h-auto px-0 py-0 font-semibold" variant="link">
-                          <Link href={`/activities/${activity.id}`}>
-                            {activity.name ?? "Imported activity"}
-                          </Link>
-                        </Button>
-                      </p>
-                      <p className={listMetaClass}>
-                        <SportLabel className="align-middle" sport={activity.sport} /> ·{" "}
-                        <LocalDate value={activity.start_time} />
-                      </p>
-                    </div>
-                    <div className={listValuesClass}>
-                      <strong className="text-[var(--text)]">
-                        {activity.distance_meters
-                          ? formatDistance(activity.distance_meters)
-                          : "--"}
-                      </strong>
-                      <span>
-                        {activity.duration_seconds
-                          ? formatDuration(activity.duration_seconds)
-                          : "--"}
-                      </span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p className={emptyStateClass}>
-                Recent sessions will appear here as activities are imported.
+        <div className="grid gap-5 xl:grid-cols-2">
+          <Card>
+            <CardContent className={panelContentClass}>
+              <span className={panelLabelClass}>Recent Activities</span>
+              {recentActivities.length > 0 ? (
+                <div className={listStackClass}>
+                  {recentActivities.map((activity) => (
+                    <article className={listRowClass} key={activity.id}>
+                      <div>
+                        <p className={listTitleClass}>
+                          <Button asChild className="h-auto px-0 py-0 font-semibold" variant="link">
+                            <Link href={`/activities/${activity.id}`}>
+                              {activity.name ?? "Imported activity"}
+                            </Link>
+                          </Button>
+                        </p>
+                        <p className={listMetaClass}>
+                          <SportLabel className="align-middle" sport={activity.sport} /> ·{" "}
+                          <LocalDate value={activity.start_time} />
+                        </p>
+                      </div>
+                      <div className={listValuesClass}>
+                        <strong className="text-[var(--text)]">
+                          {activity.distance_meters
+                            ? formatDistance(activity.distance_meters)
+                            : "--"}
+                        </strong>
+                        <span>
+                          {activity.duration_seconds
+                            ? formatDuration(activity.duration_seconds)
+                            : "--"}
+                        </span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className={emptyStateClass}>
+                  Recent sessions will appear here as activities are imported.
+                </p>
+              )}
+              <p className={`${subtleClass} pt-4`}>
+                {recentActivityTotal.toLocaleString()} total recent results available
               </p>
-            )}
-            <p className={`${subtleClass} pt-4`}>
-              {recentActivityTotal.toLocaleString()} total recent results available
-            </p>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="p-[22px]">
-            <span className={panelLabelClass}>Health Snapshot</span>
-            {restingHeartRate.length > 0 || dailyMetrics.length > 0 ? (
-              <div className={listStackClass}>
-                {restingHeartRate.length > 0 ? (
-                  <article className="flex flex-col gap-2 border-t-0 pb-2 text-[var(--muted)]">
-                    <p className={listTitleClass}>Resting HR Trend</p>
-                    <p className={listMetaClass}>
-                      Latest: {restingHeartRate[restingHeartRate.length - 1]?.resting_heart_rate} bpm
-                    </p>
-                  </article>
-                ) : null}
-
-                {dailyMetrics.slice(0, 3).map((metric) => (
-                  <article className={listRowClass} key={metric.id}>
-                    <div>
-                      <p className={listTitleClass}>
-                        <LocalDate value={metric.metric_date} />
-                      </p>
+          <Card>
+            <CardContent className={panelContentClass}>
+              <span className={panelLabelClass}>Health Snapshot</span>
+              {restingHeartRate.length > 0 || dailyMetrics.length > 0 ? (
+                <div className={listStackClass}>
+                  {restingHeartRate.length > 0 ? (
+                    <article className="flex flex-col gap-2 border-t-0 pb-2 text-[var(--muted)]">
+                      <p className={listTitleClass}>Resting HR Trend</p>
                       <p className={listMetaClass}>
-                        {metric.steps ? `${metric.steps.toLocaleString()} steps` : "No step data"}
+                        Latest: {restingHeartRate[restingHeartRate.length - 1]?.resting_heart_rate} bpm
                       </p>
-                    </div>
-                    <div className={listValuesClass}>
-                      <strong className="text-[var(--text)]">
-                        {metric.resting_heart_rate ? `${metric.resting_heart_rate} bpm` : "--"}
-                      </strong>
-                      <span>
-                        {metric.sleep_seconds
-                          ? formatDuration(metric.sleep_seconds)
-                          : "No sleep"}
-                      </span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p className={emptyStateClass}>
-                Daily health metrics will appear here as they are imported.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+                    </article>
+                  ) : null}
+
+                  {dailyMetrics.slice(0, 3).map((metric) => (
+                    <article className={listRowClass} key={metric.id}>
+                      <div>
+                        <p className={listTitleClass}>
+                          <LocalDate value={metric.metric_date} />
+                        </p>
+                        <p className={listMetaClass}>
+                          {metric.steps ? `${metric.steps.toLocaleString()} steps` : "No step data"}
+                        </p>
+                      </div>
+                      <div className={listValuesClass}>
+                        <strong className="text-[var(--text)]">
+                          {metric.resting_heart_rate ? `${metric.resting_heart_rate} bpm` : "--"}
+                        </strong>
+                        <span>
+                          {metric.sleep_seconds
+                            ? formatDuration(metric.sleep_seconds)
+                            : "No sleep"}
+                        </span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className={emptyStateClass}>
+                  Daily health metrics will appear here as they are imported.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </section>
 
       <section className={sectionClass}>
-        <Card className="px-[22px] py-[18px]">
+        <Card className="px-5 py-4 sm:px-6">
           <CardContent className="p-0">
             <span className={panelLabelClass}>Sync Status</span>
             <p className="m-0 flex items-center gap-3 text-[0.96rem] capitalize text-[var(--muted)]">
@@ -296,7 +296,7 @@ export default async function HomePage() {
       {loadError ? (
         <section className={sectionClass}>
           <Card>
-            <CardContent className="p-[22px]">
+            <CardContent className={panelContentClass}>
               <span className={panelLabelClass}>Data Availability</span>
               <p className={warningClass}>
                 Dashboard data could not be loaded right now: {loadError}

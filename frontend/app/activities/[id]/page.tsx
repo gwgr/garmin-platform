@@ -22,15 +22,18 @@ import { formatDistance, formatDuration } from "../../../lib/formatting";
 import {
   detailMetaGridClass,
   emptyStateClass,
+  fieldLabelClass,
   listMetaClass,
   listTitleClass,
+  panelContentClass,
   panelLabelClass,
   pageTitleClass,
   sectionClass,
   sectionHeaderClass,
   sectionTitleClass,
+  statSupportClass,
   statValueClass,
-  subtleClass,
+  summaryValueClass,
   warningClass,
 } from "../../../lib/ui";
 
@@ -79,34 +82,34 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
 
           <div className="grid gap-[18px] md:grid-cols-2 xl:grid-cols-3">
             <Card className="flex min-h-[182px] flex-col justify-between">
-              <CardContent className="flex h-full flex-col justify-between p-[22px]">
+              <CardContent className={`flex h-full flex-col justify-between ${panelContentClass}`}>
                 <span className={panelLabelClass}>Distance</span>
                 <p className={statValueClass}>
                   {activity.distance_meters ? formatDistance(activity.distance_meters) : "--"}
                 </p>
-                <p className={subtleClass}>
+                <p className={statSupportClass}>
                   <LocalDate value={activity.start_time} />
                 </p>
               </CardContent>
             </Card>
 
             <Card className="flex min-h-[182px] flex-col justify-between">
-              <CardContent className="flex h-full flex-col justify-between p-[22px]">
+              <CardContent className={`flex h-full flex-col justify-between ${panelContentClass}`}>
                 <span className={panelLabelClass}>Duration</span>
                 <p className={statValueClass}>
                   {activity.duration_seconds ? formatDuration(activity.duration_seconds) : "--"}
                 </p>
-                <p className={subtleClass}>Recorded moving time</p>
+                <p className={statSupportClass}>Recorded moving time</p>
               </CardContent>
             </Card>
 
             <Card className="flex min-h-[182px] flex-col justify-between">
-              <CardContent className="flex h-full flex-col justify-between p-[22px]">
+              <CardContent className={`flex h-full flex-col justify-between ${panelContentClass}`}>
                 <span className={panelLabelClass}>Calories</span>
                 <p className={statValueClass}>
                   {activity.calories ? activity.calories.toLocaleString() : "--"}
                 </p>
-                <div className={subtleClass}>
+                <div className={statSupportClass}>
                   <SportBadge compact sport={activity.sport} />
                 </div>
               </CardContent>
@@ -124,7 +127,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
           <RouteMap records={records} />
 
           <Card>
-            <CardContent className="p-[22px]">
+            <CardContent className={panelContentClass}>
               <span className={panelLabelClass}>Laps</span>
               {laps.length > 0 ? (
                 <div className="grid">
@@ -156,35 +159,27 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
           </Card>
 
           <Card>
-            <CardContent className="p-[22px]">
+            <CardContent className={panelContentClass}>
               <span className={panelLabelClass}>Session Info</span>
               <div className={detailMetaGridClass}>
                 <div>
-                  <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                    Source ID
-                  </span>
-                  <p className={listTitleClass}>{activity.source_activity_id}</p>
+                  <span className={fieldLabelClass}>Source ID</span>
+                  <p className={summaryValueClass}>{activity.source_activity_id}</p>
                 </div>
                 <div>
-                  <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                    Created
-                  </span>
-                  <p className={listTitleClass}>
+                  <span className={fieldLabelClass}>Created</span>
+                  <p className={summaryValueClass}>
                     <LocalDateTime value={activity.created_at} />
                   </p>
                 </div>
                 <div>
-                  <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                    Updated
-                  </span>
-                  <p className={listTitleClass}>
+                  <span className={fieldLabelClass}>Updated</span>
+                  <p className={summaryValueClass}>
                     <LocalDateTime value={activity.updated_at} />
                   </p>
                 </div>
                 <div>
-                  <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                    Stored FIT File
-                  </span>
+                  <span className={fieldLabelClass}>Stored FIT File</span>
                   <p className={`${listMetaClass} break-all`}>{activity.raw_file_path ?? "Not available"}</p>
                 </div>
               </div>
@@ -213,7 +208,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
 
             <TabsContent value="records">
               <Card>
-                <CardContent className="p-[22px]">
+                <CardContent className={panelContentClass}>
                   <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <span className={panelLabelClass}>Record Samples</span>
                     <p className={listMetaClass}>
@@ -284,7 +279,7 @@ export default async function ActivityDetailPage({ params }: ActivityDetailPageP
       >
         <section className={sectionClass}>
           <Card>
-            <CardContent className="p-[22px]">
+            <CardContent className={panelContentClass}>
               <p className={warningClass}>
                 {error instanceof Error ? error.message : "An unexpected error occurred."}
               </p>

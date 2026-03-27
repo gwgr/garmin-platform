@@ -9,13 +9,16 @@ import {
   cardLinkClass,
   disabledButtonClass,
   emptyStateClass,
+  fieldLabelClass,
   filterGridClass,
   listMetaClass,
   listTitleClass,
+  panelContentClass,
   panelLabelClass,
   sectionClass,
   sectionHeaderRowClass,
   sectionTitleClass,
+  summaryValueClass,
   warningClass,
 } from "../../lib/ui";
 import { Button } from "../../components/ui/button";
@@ -97,17 +100,15 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
       title="Activities"
     >
       <section className={sectionClass}>
-        <div className="mt-7 grid gap-[18px] lg:grid-cols-[1.4fr_minmax(0,1fr)]">
+        <div className="grid gap-5 lg:grid-cols-[1.4fr_minmax(0,1fr)]">
           <Card>
-            <CardContent className="grid gap-[18px] p-[22px]">
-              <form className="grid gap-[18px]" action="/activities" method="get">
+            <CardContent className={`grid gap-5 ${panelContentClass}`}>
+              <form className="grid gap-5" action="/activities" method="get">
                 <span className={panelLabelClass}>Filters</span>
 
                 <div className={filterGridClass}>
                   <label className="grid gap-2">
-                    <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                      Sport
-                    </span>
+                    <span className={fieldLabelClass}>Sport</span>
                     <input
                       className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
                       defaultValue={sport}
@@ -118,9 +119,7 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
                   </label>
 
                   <label className="grid gap-2">
-                    <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                      Start date
-                    </span>
+                    <span className={fieldLabelClass}>Start date</span>
                     <input
                       className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
                       defaultValue={startDate}
@@ -130,9 +129,7 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
                   </label>
 
                   <label className="grid gap-2">
-                    <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                      End date
-                    </span>
+                    <span className={fieldLabelClass}>End date</span>
                     <input
                       className="w-full rounded-xl border border-[color:var(--line)] bg-white/70 px-[14px] py-3 text-[var(--text)] outline-none focus:border-[rgba(31,107,92,0.5)] focus:ring-2 focus:ring-[rgba(31,107,92,0.2)]"
                       defaultValue={endDate}
@@ -153,9 +150,9 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
           </Card>
 
           <Card>
-            <CardContent className="p-[22px]">
+            <CardContent className={panelContentClass}>
               <span className={panelLabelClass}>Results Summary</span>
-              <p className={`${listTitleClass} text-[1.2rem]`}>{total.toLocaleString()} matching activities</p>
+              <p className={summaryValueClass}>{total.toLocaleString()} matching activities</p>
               <p className={listMetaClass}>
                 Page {page} of {totalPages} · sorted by most recent session
               </p>
@@ -172,7 +169,7 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
         </div>
 
         <Card>
-          <CardContent className="p-[22px]">
+          <CardContent className={panelContentClass}>
           {loadError ? (
             <p className={warningClass}>
               The activity list could not be loaded: {loadError}
@@ -185,10 +182,7 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
           ) : (
             <div className="grid">
               {items.map((activity) => (
-                <article
-                  className="grid gap-[18px] border-t border-[color:var(--line)] py-[18px] first:border-t-0 first:pt-0"
-                  key={activity.id}
-                >
+                <article className="grid gap-4 border-t border-[color:var(--line)] py-5 first:border-t-0 first:pt-0" key={activity.id}>
                   <div>
                     <div className="flex flex-wrap items-center gap-[10px]">
                       <p className={listTitleClass}>
@@ -205,30 +199,24 @@ export default async function ActivitiesPage({ searchParams }: ActivityListPageP
 
                   <div className="grid gap-4 md:grid-cols-3">
                     <div>
-                      <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                        Distance
-                      </span>
-                      <strong className="mt-1.5 block text-[1.05rem] text-[var(--text)]">
+                      <span className={fieldLabelClass}>Distance</span>
+                      <strong className={summaryValueClass}>
                         {activity.distance_meters
                           ? formatDistance(activity.distance_meters)
                           : "--"}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                        Duration
-                      </span>
-                      <strong className="mt-1.5 block text-[1.05rem] text-[var(--text)]">
+                      <span className={fieldLabelClass}>Duration</span>
+                      <strong className={summaryValueClass}>
                         {activity.duration_seconds
                           ? formatDuration(activity.duration_seconds)
                           : "--"}
                       </strong>
                     </div>
                     <div>
-                      <span className="text-[0.78rem] uppercase tracking-[0.08em] text-[var(--muted)]">
-                        Calories
-                      </span>
-                      <strong className="mt-1.5 block text-[1.05rem] text-[var(--text)]">
+                      <span className={fieldLabelClass}>Calories</span>
+                      <strong className={summaryValueClass}>
                         {activity.calories ? activity.calories.toLocaleString() : "--"}
                       </strong>
                     </div>

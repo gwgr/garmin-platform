@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { cn, pageTitleClass, sectionHeaderRowClass, shellClass } from "../lib/ui";
+import { cn, pageDescriptionClass, pageTitleClass, sectionHeaderRowClass, shellClass } from "../lib/ui";
 
 type PageShellProps = {
   title: ReactNode;
@@ -32,7 +32,7 @@ export function PageShell({
           <div className="max-w-[56rem]">
             <h1 className={cn(pageTitleClass, titleClassName)}>{title}</h1>
             {description ? (
-              <div className="mt-4 text-[1.02rem] leading-[1.7] text-[var(--muted)]">
+              <div className={cn("mt-4", pageDescriptionClass)}>
                 {description}
               </div>
             ) : null}

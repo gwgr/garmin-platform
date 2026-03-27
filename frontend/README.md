@@ -32,6 +32,7 @@ Current state:
 - Tailwind CSS v4 now handles the primary layout and spacing system
 - shared cards, buttons, tabs, tables, and dialogs now come from the local `components/ui` primitive layer built in the `shadcn/ui` style on top of Radix
 - a shared responsive app shell now provides the primary header/navigation/content structure across dashboard, activities, activity detail, and sync status pages
+- shared typography and spacing tokens in `lib/ui.ts` now keep page titles, section headings, card padding, labels, and summary values on the same visual rhythm
 - local verification can now use either Docker or the host Node/npm toolchain
 - the frontend is currently pinned to `next@15.5.13`, and the local build/audit check is clean
 - the charted activity detail flow has now been verified locally in the browser
