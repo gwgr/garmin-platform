@@ -107,6 +107,7 @@ Recommended VPS setup:
 - reverse proxy
 - environment variables stored on host
 - access restricted via Tailscale or authenticated HTTPS
+- when using direct Docker port publishing for the frontend, bind it to the VPS Tailscale IP rather than `0.0.0.0`; the current production Compose file supports this with `FRONTEND_BIND_IP=<tailscale-ip>` in `/opt/garmin-platform/.env`
 
 ---
 
@@ -182,6 +183,11 @@ Current services:
 - backend FastAPI container
 - frontend placeholder container
 - postgres
+
+Current production access note:
+- the frontend should be published only on the VPS Tailscale IP, for example `FRONTEND_BIND_IP=100.80.139.125`, so the app is not reachable on the public VPS interface
+- the backend should remain unpublished on host ports and only be reachable on the internal Compose network
+- deploys that change host publish settings should recreate the app containers so Docker actually reapplies the bind address
 
 Target services:
 - backend

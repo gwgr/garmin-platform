@@ -85,6 +85,8 @@ Current state:
 - the production Compose file now builds the hardened `prod` target from `frontend/Dockerfile` instead of reusing the local dev-oriented frontend image
 - the production frontend now serves the Next.js standalone output while the backend and Postgres continue to use the protected host env file and persistent data mounts
 - later security work confirmed that separating local and production targets materially reduces frontend vulnerability noise and makes it easier to harden the VPS runtime without harming the local dev workflow
+- follow-up production hardening also moved the frontend host publish from an unconditional `0.0.0.0:3000` bind to a configurable `FRONTEND_BIND_IP`, so the VPS can bind the UI directly to its Tailscale address instead of relying on Docker-plus-UFW behavior
+- the production deploy flow now force-recreates the app containers so host port binding changes actually take effect during a normal deploy; in hindsight this Tailscale-only bind should have been part of the original Task 7 production Compose design rather than a later security correction
 
 ---
 

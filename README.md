@@ -131,8 +131,9 @@ Production note:
 - after Garmin session state has been seeded successfully under `/opt/garmin-platform/data/garth`, remove `GARMIN_PASSWORD` from `/opt/garmin-platform/.env`
 - from then on, use `SKIP_GARMIN_BOOTSTRAP=1` for steady-state deploys
 - current private Tailscale access example: `http://prod-vps:3000` for the frontend
-- set `FRONTEND_BIND_IP` in `/opt/garmin-platform/.env` to the VPS Tailscale IPv4 address if you want Docker to publish the frontend only on Tailscale instead of all interfaces
+- set `FRONTEND_BIND_IP` in `/opt/garmin-platform/.env` to the VPS Tailscale IPv4 address so Docker publishes the frontend only on Tailscale instead of all interfaces
 - example: `FRONTEND_BIND_IP=100.80.139.125`
+- verify with `gp-ps` or `docker compose ... ps` that the frontend shows the Tailscale bind, for example `100.80.139.125:3000->3000/tcp`, and not `0.0.0.0:3000->3000/tcp`
 - the production backend API is no longer published on a host port; it is only reachable on the private Compose network by the frontend and operational `docker compose exec` commands
 - production backend health checks should now use an in-stack command such as `docker compose -f docker-compose.prod.yml --env-file /opt/garmin-platform/.env exec -T backend python -c "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5).read().decode())"`
 
