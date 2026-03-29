@@ -1142,31 +1142,62 @@ Current state:
 - the dashboard display and click-through filtering both use that same rolling 30-day range
 
 ### Task 91
-Research Garmin retrieval options for additional health and physiology data:
-- HRV
-- VO2 max
-- lactate threshold
-- endurance-related metrics
-- richer sleep metrics
+Research and validate Garmin retrieval options for additional health and physiology data.
+
+Scope:
+- verify which metrics are actually retrievable through the current Garmin integration path
+- assess availability, payload shape, update cadence, and account/device dependence for:
+  - HRV
+  - VO2 max
+  - lactate threshold
+  - endurance-related metrics
+  - richer sleep metrics
+- identify which sources are reliable enough for product use versus experimental only
+- capture representative raw payload examples for promising endpoints
+- document endpoint/access risk, data gaps, and recommended next steps for schema design
+
+Definition of done:
+- a short research note exists in the repo
+- each candidate metric is labeled as:
+  - available and recommended
+  - available but risky or partial
+  - not currently practical
+- the note identifies the raw source to preserve for Tasks 92 through 95
 
 ### Task 92
-Design Version 2 schema additions for specialized health data.
+Design Version 2 schema additions for validated health and physiology data.
 
-Recommended direction:
+Scope:
+- use the Task 91 research results to decide which metrics deserve normalized storage
 - keep `daily_metrics` for lightweight daily rollups
-- add focused tables for physiology/performance and richer sleep data
-- include source timestamps and ingestion provenance
+- add focused tables for physiology/performance, richer sleep data, Garmin score data, and training-readiness snapshots
+- include source timestamps, effective dates, provenance, and raw snapshot references
+- document which fields are canonical values versus optional Garmin-specific extras
+- explicitly distinguish calendar-date rollups from timestamped event/snapshot data such as training readiness
 
 ### Task 93
-Add raw JSON snapshot storage for Garmin health endpoints to support reprocessing.
+Add raw JSON snapshot storage for Garmin health and physiology endpoints to support reprocessing.
+
+Scope:
+- persist raw endpoint responses before normalization
+- store enough metadata to replay ingestion safely, including metric family, source date or window, fetch timestamp, and provenance
+- keep raw capture separate from normalized tables
+- support future reprocessing after parser, schema, or metric-mapping changes
 
 ### Task 94
-Implement ingestion for daily health metrics beyond the MVP set.
+Implement ingestion for daily and near-daily health metrics beyond the MVP set.
 
 Candidate metrics:
 - HRV
 - richer sleep summary/detail
-- VO2 max
+- VO2 max where it behaves like a current summary metric
+- Garmin score data where it behaves like day-level summary data
+
+Scope:
+- normalize validated daily-summary metrics from Task 91
+- populate the specialized Version 2 tables designed in Task 92
+- keep missing or device-dependent fields optional
+- preserve linkage back to raw JSON snapshots
 
 ### Task 95
 Implement ingestion for performance metrics.
@@ -1174,9 +1205,31 @@ Implement ingestion for performance metrics.
 Candidate metrics:
 - lactate threshold
 - endurance score
-- related training-readiness style metrics if reliable
+- hill score and related Garmin score fields if reliable
+- training readiness snapshots
+
+Scope:
+- ingest lower-frequency performance metrics separately from daily health rollups
+- model effective dates and update cadence explicitly
+- handle partial availability across devices and accounts without breaking ingestion
+- preserve linkage back to raw JSON snapshots
 
 ### Task 96
+Design how Version 2 health and physiology data should be displayed in the product.
+
+Scope:
+- decide which validated health metrics deserve dashboard-level visibility versus drill-down views
+- define the primary user questions these metrics should answer daily, weekly, and over longer training arcs
+- map each approved metric to an appropriate presentation pattern such as summary cards, trend charts, baselines, comparison states, or detail panels
+- avoid copying product patterns that depend on opaque scoring or unsupported data
+- produce a concrete UI/data contract that can guide later frontend implementation
+
+Definition of done:
+- a short product and UX note exists in the repo
+- the note identifies the first display surfaces to build for HRV, sleep, VO2 max, and performance metrics if available
+- the note distinguishes between MVP-worthy displays and later exploratory analytics
+
+### Task 97
 Expand FIT ingestion to capture more available lap and activity metrics.
 
 Scope:
@@ -1185,7 +1238,7 @@ Scope:
 - expose the newly stored metrics through activity APIs in a way that supports richer lap tables and deeper activity-detail analysis later
 - keep a clear separation between directly stored FIT values and metrics that should remain derived in the frontend or analytics layer
 
-### Task 97
+### Task 98
 Implement device identification for activities.
 
 Scope:
@@ -1194,7 +1247,7 @@ Scope:
 - link activities to the recording device
 - expose device information in activity APIs
 
-### Task 98
+### Task 99
 Add optional weather enrichment for activities and analytics.
 
 Scope:
@@ -1202,21 +1255,29 @@ Scope:
 - store weather as separate enrichment data rather than mixing it into core activity ingestion
 - support future weather correlation views and analytics
 
-### Task 99
-Add HTTPS-friendly private access for the VPS deployment.
+### Task 100
+Add private HTTPS access for the VPS deployment using Tailscale Serve.
 
 Scope:
-- choose between Tailscale Serve and a reverse proxy such as Caddy for TLS termination
-- support private HTTPS access to the frontend and backend over the tailnet
+- use Tailscale Serve as the default private HTTPS entrypoint for the frontend
+- stop depending on direct Tailscale-IP port publishing for normal access
+- bind the frontend to localhost or otherwise keep it off public interfaces
+- keep the backend private to the Docker Compose network unless a specific private API route is needed
 - keep the setup compatible with the existing Docker Compose deployment model
+- document the operational model, including verification and rollback steps
 
-### Task 100
-Add downsampling or capped payload strategy for large activity stream responses.
+Implementation notes:
+- preferred target: `https://<name>.<tailnet>.ts.net` for the frontend
+- avoid exposing raw Docker ports publicly
+- only introduce Caddy or another reverse proxy if Tailscale Serve proves insufficient for required routing
 
 ### Task 101
-Verify that raw FIT files are never modified after download.
+Add downsampling or capped payload strategy for large activity stream responses.
 
 ### Task 102
+Verify that raw FIT files are never modified after download.
+
+### Task 103
 Review database performance strategy for long-term `activity_records` growth.
 
 Scope:
@@ -1224,5 +1285,5 @@ Scope:
 - revisit the implementation-spec note about month-based partitioning
 - keep the solution aligned with expected single-user growth and query patterns
 
-### Task 103
+### Task 104
 Review all MVP acceptance criteria against `docs/prd.md`.
