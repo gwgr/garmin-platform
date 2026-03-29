@@ -234,7 +234,7 @@ EOF
 fi
 
 log "Starting application services"
-run_compose up -d backend frontend
+run_compose up -d --force-recreate backend frontend
 
 log "Applying database migrations"
 run_compose exec -T backend alembic -c alembic.ini upgrade head
