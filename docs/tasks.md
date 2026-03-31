@@ -1164,7 +1164,7 @@ Definition of done:
   - not currently practical
 - the note identifies the raw source to preserve for Tasks 92 through 95
 
-### Task 92
+### Task 92 `[done]`
 Design Version 2 schema additions for validated health and physiology data.
 
 Scope:
@@ -1174,6 +1174,11 @@ Scope:
 - include source timestamps, effective dates, provenance, and raw snapshot references
 - document which fields are canonical values versus optional Garmin-specific extras
 - explicitly distinguish calendar-date rollups from timestamped event/snapshot data such as training readiness
+
+Current state:
+- the schema design note now lives at `docs/task_92_schema_design.md`
+- `daily_metrics` remains the lightweight rollup table, while the proposed Version 2 additions are split into focused tables for HRV summaries/readings, Garmin daily scores, training-readiness snapshots, weight measurements, and profile-style performance snapshots
+- the design also keeps `sleep_sessions` as the canonical nightly sleep table but proposes extending it for richer summary-level sleep fields instead of creating a redundant second sleep-summary table
 
 ### Task 93
 Add raw JSON snapshot storage for Garmin health and physiology endpoints to support reprocessing.

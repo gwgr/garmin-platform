@@ -64,6 +64,7 @@ Backend startup now also validates database connectivity and required runtime di
 
 - Product requirements: `docs/prd.md`
 - Implementation notes: `docs/implementation.md`
+- Original MVP schema reference: `docs/original_schema.md`
 - Development and deployment workflow: `docs/dev_deployment.md`
 - Task list and current progress: `docs/tasks.md`
 - Local machine setup notes: `docs/imac_setup.md`
